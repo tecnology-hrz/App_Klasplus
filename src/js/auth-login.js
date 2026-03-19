@@ -183,6 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 sessionStorage.setItem('userName', userName);
                 sessionStorage.setItem('userDocument', userData.numeroDocumento || '');
                 sessionStorage.setItem('userPhone', userData.telefono || '');
+                sessionStorage.setItem('userPhoto', userData.fotoPerfil || '');
 
                 // Mostrar mensaje de éxito y redirigir
                 window.showSuccess(`Bienvenido ${userName}`, 'Inicio de sesión exitoso');
