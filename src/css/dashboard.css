@@ -1,0 +1,221 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0047B3;
+    min-height: 100vh;
+}
+
+.dashboard-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-header {
+    background: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-bottom: 4px solid #0047B3;
+    border-radius: 0 0 30px 30px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #0047B3;
+}
+
+.user-avatar-placeholder {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+    font-weight: 700;
+    border: 3px solid #0047B3;
+}
+
+.user-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #283593;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.notification-btn {
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    transition: transform 0.3s ease;
+}
+
+.notification-btn:hover {
+    transform: scale(1.1);
+}
+
+.notification-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #D32F2F;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.logout-btn {
+    background: #D32F2F;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logout-btn:hover {
+    background: #B71C1C;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+}
+
+.logout-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.dashboard-content {
+    flex: 1;
+    padding: 40px 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.dashboard-content h1 {
+    color: #283593;
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.dashboard-content p {
+    color: #666;
+    font-size: 18px;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        padding: 15px 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .user-avatar,
+    .user-avatar-placeholder {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+
+    .user-name {
+        font-size: 20px;
+    }
+
+    .header-actions {
+        gap: 15px;
+    }
+
+    .notification-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .logout-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .dashboard-content {
+        padding: 30px 20px;
+    }
+
+    .dashboard-content h1 {
+        font-size: 24px;
+    }
+
+    .dashboard-content p {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-profile {
+        gap: 10px;
+    }
+
+    .user-avatar,
+    .user-avatar-placeholder {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .user-name {
+        font-size: 18px;
+    }
+
+    .logout-btn span {
+        display: none;
+    }
+
+    .logout-btn {
+        padding: 10px;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        justify-content: center;
+    }
+}

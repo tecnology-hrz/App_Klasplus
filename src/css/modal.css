@@ -1,0 +1,140 @@
+/* Estilos para modales profesionales */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-container {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    animation: scaleIn 0.3s ease forwards;
+}
+
+@keyframes scaleIn {
+    to {
+        transform: scale(1);
+    }
+}
+
+.modal-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.modal-icon.error {
+    background: #FFEBEE;
+}
+
+.modal-icon.success {
+    background: #E8F5E9;
+}
+
+.modal-icon.warning {
+    background: #FFF3E0;
+}
+
+.modal-icon.info {
+    background: #E3F2FD;
+}
+
+.modal-icon svg {
+    width: 35px;
+    height: 35px;
+}
+
+.modal-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #283593;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.modal-message {
+    font-size: 16px;
+    color: #666;
+    text-align: center;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.modal-btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-btn.primary {
+    background: #1565C0;
+    color: white;
+}
+
+.modal-btn.primary:hover {
+    background: #0D47A1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
+}
+
+.modal-btn.secondary {
+    background: #E0E0E0;
+    color: #424242;
+}
+
+.modal-btn.secondary:hover {
+    background: #BDBDBD;
+}
+
+@media (max-width: 480px) {
+    .modal-container {
+        padding: 25px 20px;
+    }
+
+    .modal-title {
+        font-size: 20px;
+    }
+
+    .modal-message {
+        font-size: 15px;
+    }
+
+    .modal-btn {
+        padding: 10px 25px;
+        font-size: 15px;
+    }
+}
