@@ -72,12 +72,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.showSuccess(`Bienvenido de nuevo ${userData.nombreCompleto}`, 'Inicio de sesión exitoso');
                 }
 
-                // Guardar datos en sessionStorage
-                sessionStorage.setItem('userId', user.uid);
-                sessionStorage.setItem('userEmail', user.email);
-                sessionStorage.setItem('userRole', userData.tipoUsuario || 'estudiante');
-                sessionStorage.setItem('userName', userData.nombreCompleto || user.displayName);
-                sessionStorage.setItem('userPhoto', user.photoURL || '');
+                // Guardar datos en localStorage (sesión persistente)
+                localStorage.setItem('userId', user.uid);
+                localStorage.setItem('userEmail', user.email);
+                localStorage.setItem('userRole', userData.tipoUsuario || 'estudiante');
+                localStorage.setItem('userName', userData.nombreCompleto || user.displayName);
+                localStorage.setItem('userPhoto', user.photoURL || '');
 
                 // Redirigir según el rol
                 setTimeout(() => {
@@ -176,14 +176,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const userRole = userData.tipoUsuario || userData.rol || userData.tipo || 'estudiante';
                 const userName = userData.nombreCompleto || userData.nombre || 'Usuario';
 
-                // Guardar datos en sessionStorage
-                sessionStorage.setItem('userId', userId);
-                sessionStorage.setItem('userEmail', email);
-                sessionStorage.setItem('userRole', userRole);
-                sessionStorage.setItem('userName', userName);
-                sessionStorage.setItem('userDocument', userData.numeroDocumento || '');
-                sessionStorage.setItem('userPhone', userData.telefono || '');
-                sessionStorage.setItem('userPhoto', userData.fotoPerfil || '');
+                // Guardar datos en localStorage (sesión persistente)
+                localStorage.setItem('userId', userId);
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userRole', userRole);
+                localStorage.setItem('userName', userName);
+                localStorage.setItem('userDocument', userData.numeroDocumento || '');
+                localStorage.setItem('userPhone', userData.telefono || '');
+                localStorage.setItem('userPhoto', userData.fotoPerfil || '');
 
                 // Mostrar mensaje de éxito y redirigir
                 window.showSuccess(`Bienvenido ${userName}`, 'Inicio de sesión exitoso');

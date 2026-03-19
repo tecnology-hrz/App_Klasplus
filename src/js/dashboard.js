@@ -1,10 +1,10 @@
 // Dashboard común para todos los roles
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar si el usuario está autenticado
-    const userId = sessionStorage.getItem('userId');
-    const userName = sessionStorage.getItem('userName');
-    const userRole = sessionStorage.getItem('userRole');
-    const userPhoto = sessionStorage.getItem('userPhoto');
+    const userId = localStorage.getItem('userId');
+    const userName = localStorage.getItem('userName');
+    const userRole = localStorage.getItem('userRole');
+    const userPhoto = localStorage.getItem('userPhoto');
 
     if (!userId) {
         // Si no hay sesión, redirigir al login
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.showConfirm(
                 '¿Estás seguro que deseas cerrar sesión?',
                 function() {
-                    sessionStorage.clear();
+                    localStorage.clear();
                     window.location.href = 'login.html';
                 },
                 'Cerrar Sesión'
