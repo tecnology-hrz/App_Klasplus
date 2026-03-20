@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.showSuccess(`Bienvenido de nuevo ${userData.nombreCompleto}`, 'Inicio de sesión exitoso');
                 }
 
-                // Guardar datos en localStorage (sesión persistente)
+                // Guardar datos en localStorage (persistente)
                 localStorage.setItem('userId', user.uid);
                 localStorage.setItem('userEmail', user.email);
                 localStorage.setItem('userRole', userData.tipoUsuario || 'estudiante');
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const userRole = userData.tipoUsuario || userData.rol || userData.tipo || 'estudiante';
                 const userName = userData.nombreCompleto || userData.nombre || 'Usuario';
 
-                // Guardar datos en localStorage (sesión persistente)
+                // Guardar datos en localStorage (persistente)
                 localStorage.setItem('userId', userId);
                 localStorage.setItem('userEmail', email);
                 localStorage.setItem('userRole', userRole);
