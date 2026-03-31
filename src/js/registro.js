@@ -83,67 +83,67 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             // Validaciones
             if (!formData.nombres || formData.nombres.length < 2) {
-                alert('Por favor ingresa tus nombres (mínimo 2 caracteres)');
+                showError('Por favor ingresa tus nombres (mínimo 2 caracteres)', 'Campo requerido');
                 document.getElementById('nombres').focus();
                 return;
             }
 
             if (!formData.apellidos || formData.apellidos.length < 2) {
-                alert('Por favor ingresa tus apellidos (mínimo 2 caracteres)');
+                showError('Por favor ingresa tus apellidos (mínimo 2 caracteres)', 'Campo requerido');
                 document.getElementById('apellidos').focus();
                 return;
             }
 
             if (!formData.telefono || formData.telefono.length < 7) {
-                alert('Por favor ingresa un teléfono válido');
+                showError('Por favor ingresa un teléfono válido', 'Campo requerido');
                 document.getElementById('telefono').focus();
                 return;
             }
 
             if (!formData.tipoDocumento) {
-                alert('Por favor selecciona tu tipo de documento');
+                showError('Por favor selecciona tu tipo de documento', 'Campo requerido');
                 document.getElementById('tipoDocumento').focus();
                 return;
             }
 
             if (!formData.numeroDocumento || formData.numeroDocumento.length < 5) {
-                alert('Por favor ingresa un número de documento válido');
+                showError('Por favor ingresa un número de documento válido', 'Campo requerido');
                 document.getElementById('numeroDocumento').focus();
                 return;
             }
 
             if (!formData.sexo) {
-                alert('Por favor selecciona tu sexo');
+                showError('Por favor selecciona tu sexo', 'Campo requerido');
                 document.getElementById('sexo').focus();
                 return;
             }
 
             if (!formData.jornada) {
-                alert('Por favor selecciona tu jornada');
+                showError('Por favor selecciona tu jornada', 'Campo requerido');
                 document.getElementById('jornada').focus();
                 return;
             }
 
             if (!formData.institucionId) {
-                alert('Por favor selecciona tu institución');
+                showError('Por favor selecciona tu institución', 'Campo requerido');
                 institucionSelect.focus();
                 return;
             }
 
             if (!formData.email || !validateEmail(formData.email)) {
-                alert('Por favor ingresa un correo electrónico válido');
+                showError('Por favor ingresa un correo electrónico válido', 'Campo requerido');
                 document.getElementById('email').focus();
                 return;
             }
 
             if (!formData.password || formData.password.length < 6) {
-                alert('La contraseña debe tener al menos 6 caracteres');
+                showError('La contraseña debe tener al menos 6 caracteres', 'Contraseña débil');
                 document.getElementById('password').focus();
                 return;
             }
 
             if (!formData.autorizacion) {
-                alert('Debes autorizar el tratamiento de datos personales para continuar');
+                showWarning('Debes autorizar el tratamiento de datos personales para continuar', 'Autorización requerida');
                 document.getElementById('autorizacion').focus();
                 return;
             }
@@ -180,32 +180,40 @@ document.addEventListener('DOMContentLoaded', async function() {
                 });
 
                 console.log('Usuario registrado exitosamente:', user.uid);
-                alert('¡Cuenta creada exitosamente! Tu cuenta está pendiente de activación por parte de la institución. Redirigiendo al login...');
+                
+                showSuccess(
+                    'Tu cuenta ha sido creada exitosamente. Está pendiente de activación por parte de la institución. Serás redirigido al login en unos momentos.',
+                    '¡Registro Exitoso!'
+                );
                 
                 setTimeout(() => {
                     window.location.href = 'login.html';
-                }, 2000);
+                }, 3000);
 
             } catch (error) {
                 console.error('Error al registrar usuario:', error);
                 
-                let errorMessage = 'Error al crear la cuenta. ';
+                let errorMessage = '';
+                let errorTitle = 'Error al crear la cuenta';
                 
                 switch (error.code) {
                     case 'auth/email-already-in-use':
-                        errorMessage += 'Este correo electrónico ya está registrado.';
+                        errorMessage = 'Este correo electrónico ya está registrado. Por favor usa otro correo o inicia sesión.';
+                        errorTitle = 'Correo ya registrado';
                         break;
                     case 'auth/invalid-email':
-                        errorMessage += 'El correo electrónico no es válido.';
+                        errorMessage = 'El correo electrónico no es válido. Por favor verifica e intenta nuevamente.';
+                        errorTitle = 'Correo inválido';
                         break;
                     case 'auth/weak-password':
-                        errorMessage += 'La contraseña es muy débil.';
+                        errorMessage = 'La contraseña es muy débil. Debe tener al menos 6 caracteres.';
+                        errorTitle = 'Contraseña débil';
                         break;
                     default:
-                        errorMessage += error.message;
+                        errorMessage = error.message || 'Ocurrió un error inesperado. Por favor intenta nuevamente.';
                 }
                 
-                alert(errorMessage);
+                showError(errorMessage, errorTitle);
                 
                 // Rehabilitar el botón
                 submitBtn.disabled = false;

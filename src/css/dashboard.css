@@ -129,10 +129,110 @@ body {
 
 .dashboard-content {
     flex: 1;
-    padding: 40px 30px;
+    padding: 40px 30px 100px 30px; /* Espacio inferior para la barra de navegación */
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
+}
+
+/* Barra de navegación inferior */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 20px 20px 20px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 30px 30px 0 0;
+    z-index: 1000;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    color: #9E9E9E;
+}
+
+.nav-item.active {
+    color: #FF6B35;
+}
+
+.nav-item:not(.emergency):hover {
+    transform: translateY(-3px);
+}
+
+.nav-icon {
+    width: 28px;
+    height: 28px;
+    stroke: currentColor;
+}
+
+.nav-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: currentColor;
+}
+
+/* Botón de emergencia especial */
+.nav-item.emergency {
+    background: #FF0000;
+    border-radius: 50%;
+    width: 90px;
+    height: 90px;
+    padding: 0;
+    margin-top: -60px;
+    box-shadow: 0 12px 30px rgba(255, 0, 0, 0.5);
+    border: 8px solid white;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-item.emergency:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 35px rgba(255, 0, 0, 0.6);
+}
+
+.nav-item.emergency:active {
+    transform: scale(0.95);
+}
+
+.nav-icon-emergency {
+    width: 45px;
+    height: 45px;
+    stroke: white;
+    fill: none;
+    stroke-width: 2.5;
+}
+
+/* Animación de pulso para el botón de emergencia */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 12px 30px rgba(255, 0, 0, 0.5), 0 0 0 0 rgba(255, 0, 0, 0.7);
+    }
+    50% {
+        box-shadow: 0 12px 30px rgba(255, 0, 0, 0.5), 0 0 0 15px rgba(255, 0, 0, 0);
+    }
+    100% {
+        box-shadow: 0 12px 30px rgba(255, 0, 0, 0.5), 0 0 0 0 rgba(255, 0, 0, 0);
+    }
+}
+
+.nav-item.emergency {
+    animation: pulse 2s infinite;
 }
 
 .dashboard-content h1 {
@@ -179,7 +279,7 @@ body {
     }
 
     .dashboard-content {
-        padding: 30px 20px;
+        padding: 30px 20px 100px 20px;
     }
 
     .dashboard-content h1 {
@@ -188,6 +288,35 @@ body {
 
     .dashboard-content p {
         font-size: 16px;
+    }
+
+    .bottom-nav {
+        padding: 10px 15px 18px 15px;
+    }
+
+    .nav-item {
+        padding: 6px 10px;
+    }
+
+    .nav-icon {
+        width: 26px;
+        height: 26px;
+    }
+
+    .nav-label {
+        font-size: 11px;
+    }
+
+    .nav-item.emergency {
+        width: 80px;
+        height: 80px;
+        margin-top: -50px;
+        border-width: 7px;
+    }
+
+    .nav-icon-emergency {
+        width: 40px;
+        height: 40px;
     }
 }
 
@@ -217,5 +346,35 @@ body {
         width: 40px;
         height: 40px;
         justify-content: center;
+    }
+
+    .bottom-nav {
+        padding: 8px 10px 15px 10px;
+    }
+
+    .nav-item {
+        padding: 5px 8px;
+        gap: 4px;
+    }
+
+    .nav-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .nav-label {
+        font-size: 10px;
+    }
+
+    .nav-item.emergency {
+        width: 70px;
+        height: 70px;
+        margin-top: -45px;
+        border-width: 6px;
+    }
+
+    .nav-icon-emergency {
+        width: 35px;
+        height: 35px;
     }
 }
