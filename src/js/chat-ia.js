@@ -122,6 +122,35 @@ document.addEventListener('DOMContentLoaded', function() {
     let microphone = null;
     let animationId = null;
 
+    // Función para reproducir sonido
+    function playSound(frequency, duration, type = 'sine') {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.frequency.value = frequency;
+        oscillator.type = type;
+
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + duration);
+    }
+
+    // Sonido al presionar (beep corto)
+    function playStartSound() {
+        playSound(800, 0.1);
+    }
+
+    // Sonido al soltar (beep más grave)
+    function playStopSound() {
+        playSound(600, 0.15);
+    }
+
     // Función para animar las barras según el volumen
     function animateVoiceWave() {
         if (!analyser || !isRecording) return;
@@ -149,79 +178,90 @@ document.addEventListener('DOMContentLoaded', function() {
         animationId = requestAnimationFrame(animateVoiceWave);
     }
 
-    // Manejar botón de voz
-    voiceBtn.addEventListener('click', async function() {
-        if (isRecording) {
-            // Detener grabación
+    // Manejar botón de voz - Presionar para grabar, soltar para detener
+    voiceBtn.addEventListener('mousedown', async function(e) {
+        e.preventDefault();
+        
+        if (isRecording) return; // Evitar múltiples grabaciones
+        
+        // Reproducir sonido de inicio
+        playStartSound();
+        
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            // Configurar análisis de audio
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            microphone = audioContext.createMediaStreamSource(stream);
+            analyser.fftSize = 256;
+            microphone.connect(analyser);
+
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstart = () => {
+                isRecording = true;
+                voiceBtn.classList.add('recording');
+                document.getElementById('recordingIndicator').classList.add('active');
+                chatInput.placeholder = 'Escuchando...';
+                
+                // Iniciar animación de ondas
+                animateVoiceWave();
+            };
+
+            mediaRecorder.onstop = async () => {
+                isRecording = false;
+                voiceBtn.classList.remove('recording');
+                document.getElementById('recordingIndicator').classList.remove('active');
+                chatInput.placeholder = 'Procesando audio...';
+
+                // Detener el stream
+                stream.getTracks().forEach(track => track.stop());
+
+                // Crear blob de audio
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+
+                try {
+                    // Transcribir con Groq
+                    const transcript = await transcribeAudio(audioBlob);
+                    chatInput.value = transcript;
+                    chatInput.placeholder = 'Escribe un mensaje...';
+
+                    // Enviar mensaje automáticamente si hay texto
+                    if (transcript.trim() !== '') {
+                        sendMessage();
+                    }
+                } catch (error) {
+                    console.error('Error al transcribir:', error);
+                    chatInput.placeholder = 'Escribe un mensaje...';
+                    alert('Error al procesar el audio. Intenta de nuevo.');
+                }
+            };
+
+            mediaRecorder.start();
+        } catch (error) {
+            console.error('Error al acceder al micrófono:', error);
+            alert('No se pudo acceder al micrófono. Verifica los permisos.');
+        }
+    });
+
+    // Detener grabación al soltar el botón
+    document.addEventListener('mouseup', function() {
+        if (isRecording && mediaRecorder) {
+            // Reproducir sonido de fin
+            playStopSound();
+            
             mediaRecorder.stop();
             if (animationId) {
                 cancelAnimationFrame(animationId);
             }
             if (audioContext) {
                 audioContext.close();
-            }
-        } else {
-            // Iniciar grabación
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                
-                // Configurar análisis de audio
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                microphone = audioContext.createMediaStreamSource(stream);
-                analyser.fftSize = 256;
-                microphone.connect(analyser);
-
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-
-                mediaRecorder.ondataavailable = (event) => {
-                    audioChunks.push(event.data);
-                };
-
-                mediaRecorder.onstart = () => {
-                    isRecording = true;
-                    voiceBtn.classList.add('recording');
-                    document.getElementById('recordingIndicator').classList.add('active');
-                    chatInput.placeholder = 'Escuchando...';
-                    
-                    // Iniciar animación de ondas
-                    animateVoiceWave();
-                };
-
-                mediaRecorder.onstop = async () => {
-                    isRecording = false;
-                    voiceBtn.classList.remove('recording');
-                    document.getElementById('recordingIndicator').classList.remove('active');
-                    chatInput.placeholder = 'Procesando audio...';
-
-                    // Detener el stream
-                    stream.getTracks().forEach(track => track.stop());
-
-                    // Crear blob de audio
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-
-                    try {
-                        // Transcribir con Groq
-                        const transcript = await transcribeAudio(audioBlob);
-                        chatInput.value = transcript;
-                        chatInput.placeholder = 'Escribe un mensaje...';
-
-                        // Enviar mensaje automáticamente si hay texto
-                        if (transcript.trim() !== '') {
-                            sendMessage();
-                        }
-                    } catch (error) {
-                        console.error('Error al transcribir:', error);
-                        chatInput.placeholder = 'Escribe un mensaje...';
-                        alert('Error al procesar el audio. Intenta de nuevo.');
-                    }
-                };
-
-                mediaRecorder.start();
-            } catch (error) {
-                console.error('Error al acceder al micrófono:', error);
-                alert('No se pudo acceder al micrófono. Verifica los permisos.');
             }
         }
     });
