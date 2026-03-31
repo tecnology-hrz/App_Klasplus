@@ -22,9 +22,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-bottom: 4px solid #0047B3;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border-radius: 0 0 30px 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
 }
 
 .user-profile {
@@ -133,6 +137,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
+    margin-top: 120px; /* Espacio para el header fijo */
 }
 
 /* Barra de navegación inferior */
@@ -174,9 +179,7 @@ body {
 }
 
 .nav-icon {
-    width: 28px;
-    height: 28px;
-    stroke: currentColor;
+    font-size: 28px;
 }
 
 .nav-label {
@@ -211,11 +214,8 @@ body {
 }
 
 .nav-icon-emergency {
-    width: 45px;
-    height: 45px;
-    stroke: white;
-    fill: none;
-    stroke-width: 2.5;
+    font-size: 38px;
+    color: white;
 }
 
 /* Animación de pulso para el botón de emergencia */
@@ -239,13 +239,17 @@ body {
 .emergency-modal-container {
     background: white;
     border-radius: 30px;
-    padding: 40px 30px 100px 30px;
+    padding: 30px;
     max-width: 500px;
     width: 90%;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     transform: scale(0.9);
     animation: scaleIn 0.3s ease forwards;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
 }
 
 .emergency-close-btn {
@@ -275,7 +279,6 @@ body {
     gap: 25px;
     justify-content: center;
     align-items: center;
-    margin-top: 20px;
 }
 
 .emergency-option {
@@ -304,7 +307,7 @@ body {
 .emergency-arrows {
     position: absolute;
     bottom: -220px;
-    left: 50%;
+    left: 52%;
     transform: translateX(-50%);
     width: 120px;
     height: 120px;
@@ -376,6 +379,7 @@ body {
 
     .dashboard-content {
         padding: 30px 20px 100px 20px;
+        margin-top: 110px;
     }
 
     .dashboard-content h1 {
@@ -395,8 +399,7 @@ body {
     }
 
     .nav-icon {
-        width: 26px;
-        height: 26px;
+        font-size: 26px;
     }
 
     .nav-label {
@@ -411,12 +414,12 @@ body {
     }
 
     .nav-icon-emergency {
-        width: 40px;
-        height: 40px;
+        font-size: 34px;
     }
 
     .emergency-modal-container {
-        padding: 35px 25px 90px 25px;
+        padding: 25px;
+        min-height: 350px;
     }
 
     .emergency-option {
@@ -469,8 +472,7 @@ body {
     }
 
     .nav-icon {
-        width: 24px;
-        height: 24px;
+        font-size: 24px;
     }
 
     .nav-label {
@@ -485,13 +487,13 @@ body {
     }
 
     .nav-icon-emergency {
-        width: 35px;
-        height: 35px;
+        font-size: 30px;
     }
 
     .emergency-modal-container {
-        padding: 30px 20px 80px 20px;
+        padding: 20px;
         max-width: 95%;
+        min-height: 300px;
     }
 
     .emergency-options {

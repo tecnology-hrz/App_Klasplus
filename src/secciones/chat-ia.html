@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klasplus - Chat IA</title>
+    <link rel="stylesheet" href="../css/chat-ia.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Header del chat -->
+        <header class="chat-header">
+            <button class="back-btn" onclick="window.history.back()">
+                <i class="fa-solid fa-chevron-left"></i>
+                <span>Volver atrás</span>
+            </button>
+            
+            <button class="notification-btn">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notification-badge">1</span>
+            </button>
+        </header>
+
+        <!-- Área de mensajes -->
+        <main class="chat-messages" id="chatMessages">
+            <!-- Los mensajes aparecerán aquí -->
+        </main>
+
+        <!-- Input de mensaje -->
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <input 
+                    type="text" 
+                    class="chat-input" 
+                    id="chatInput"
+                    placeholder="Escribe un mensaje..."
+                    autocomplete="off"
+                >
+                <button class="voice-btn" id="voiceBtn">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <button class="send-btn" id="sendBtn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/chat-ia.js"></script>
+</body>
+</html>

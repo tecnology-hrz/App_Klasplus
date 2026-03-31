@@ -1,0 +1,316 @@
+/* Estilos para la sección de IA */
+.ia-content {
+    flex: 1;
+    padding: 20px 20px 100px 20px;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+    margin-top: 120px; /* Espacio para el header fijo */
+}
+
+.ia-header {
+    position: relative;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.ia-robot-container {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    z-index: 10;
+}
+
+.ia-robot {
+    width: 120px;
+    height: auto;
+}
+
+.ia-title {
+    color: white;
+    font-size: 32px;
+    font-weight: 700;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.ia-welcome-card {
+    background: white;
+    border-radius: 25px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.ia-welcome-text {
+    color: #424242;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.ia-help-section {
+    background: #E8F0FE;
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.ia-help-title {
+    color: #1565C0;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.ia-help-title span {
+    font-weight: 400;
+}
+
+.ia-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ia-suggestion-btn {
+    background: white;
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ia-suggestion-btn:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ia-suggestion-btn i:first-child {
+    color: #1565C0;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.ia-suggestion-btn span {
+    flex: 1;
+    text-align: left;
+    color: #424242;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.ia-suggestion-btn i:last-child {
+    color: #1565C0;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.ia-chat-btn {
+    width: 100%;
+    background: #1565C0;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 16px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
+}
+
+.ia-chat-btn:hover {
+    background: #0D47A1;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(21, 101, 192, 0.4);
+}
+
+.ia-chat-btn:active {
+    transform: translateY(0);
+}
+
+.ia-chat-btn i {
+    font-size: 20px;
+}
+
+.ia-training-section {
+    background: white;
+    border-radius: 25px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.ia-training-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.ia-training-header h2 {
+    color: #1565C0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.ia-more-btn {
+    background: none;
+    border: none;
+    color: #FF6B35;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.3s ease;
+}
+
+.ia-more-btn:hover {
+    transform: scale(1.2);
+}
+
+.ia-training-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.ia-training-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #F5F5F5;
+    border-radius: 15px;
+    padding: 12px;
+    transition: all 0.3s ease;
+}
+
+.ia-training-card:hover {
+    background: #EEEEEE;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.training-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.training-info {
+    flex: 1;
+}
+
+.training-info h3 {
+    color: #283593;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.training-status {
+    color: #757575;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-icon {
+    font-size: 14px;
+}
+
+.training-more-btn {
+    background: none;
+    border: none;
+    color: #FF6B35;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.training-more-btn:hover {
+    transform: scale(1.2);
+}
+
+@media (max-width: 768px) {
+    .ia-content {
+        padding: 15px 15px 100px 15px;
+        margin-top: 110px;
+    }
+
+    .ia-title {
+        font-size: 28px;
+    }
+
+    .ia-robot {
+        width: 100px;
+    }
+
+    .ia-robot-container {
+        right: 10px;
+    }
+
+    .ia-welcome-card {
+        padding: 20px;
+    }
+
+    .ia-help-section {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ia-title {
+        font-size: 24px;
+    }
+
+    .ia-robot {
+        width: 90px;
+    }
+
+    .ia-welcome-card {
+        padding: 18px;
+    }
+
+    .ia-welcome-text {
+        font-size: 15px;
+    }
+
+    .ia-help-title {
+        font-size: 15px;
+    }
+
+    .ia-suggestion-btn span {
+        font-size: 13px;
+    }
+
+    .training-image {
+        width: 70px;
+        height: 70px;
+    }
+
+    .training-info h3 {
+        font-size: 14px;
+    }
+
+    .training-status {
+        font-size: 12px;
+    }
+
+    .ia-content {
+        margin-top: 100px;
+    }
+}

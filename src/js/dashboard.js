@@ -152,24 +152,40 @@ document.addEventListener('DOMContentLoaded', function() {
         
         switch(seccion) {
             case 'inicio':
-                content.innerHTML = '<h1>Inicio</h1><p>Bienvenido al dashboard de Klasplus</p>';
+                // Redirigir al dashboard principal según el rol
+                const roleMap = {
+                    'estudiante': 'dashboard-estudiante.html',
+                    'profesor': 'dashboard-profesor.html',
+                    'admin': 'dashboard-admin.html',
+                    'coordinador': 'dashboard-coordinador.html',
+                    'institucion': 'dashboard-institucion.html'
+                };
+                const dashboardPage = roleMap[userRole.toLowerCase()] || 'dashboard-estudiante.html';
+                window.location.href = dashboardPage;
                 break;
             case 'brigada':
-                content.innerHTML = '<h1>Brigada</h1><p>Información sobre las brigadas de seguridad</p>';
+                if (content) {
+                    content.innerHTML = '<h1>Brigada</h1><p>Información sobre las brigadas de seguridad</p>';
+                }
                 break;
             case 'ia':
-                content.innerHTML = '<h1>Asistente IA</h1><p>Chatea con nuestro asistente inteligente</p>';
+                // Redirigir a la página de IA
+                window.location.href = 'dashboard-ia.html';
                 break;
             case 'perfil':
-                content.innerHTML = `
-                    <h1>Mi Perfil</h1>
-                    <p><strong>Nombre:</strong> ${userName}</p>
-                    <p><strong>Rol:</strong> ${userRole}</p>
-                    <p><strong>ID:</strong> ${userId}</p>
-                `;
+                if (content) {
+                    content.innerHTML = `
+                        <h1>Mi Perfil</h1>
+                        <p><strong>Nombre:</strong> ${userName}</p>
+                        <p><strong>Rol:</strong> ${userRole}</p>
+                        <p><strong>ID:</strong> ${userId}</p>
+                    `;
+                }
                 break;
             default:
-                content.innerHTML = '<h1>Sección no encontrada</h1>';
+                if (content) {
+                    content.innerHTML = '<h1>Sección no encontrada</h1>';
+                }
         }
     }
 });
