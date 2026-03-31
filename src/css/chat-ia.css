@@ -124,6 +124,8 @@ body {
 .message {
     margin-bottom: 20px;
     display: flex;
+    align-items: flex-end;
+    gap: 10px;
     animation: fadeIn 0.3s ease;
 }
 
@@ -144,6 +146,32 @@ body {
 
 .message.ia {
     justify-content: flex-start;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+}
+
+.message-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
 }
 
 .message-content {
@@ -232,6 +260,7 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+    position: relative;
 }
 
 .voice-btn:hover {
@@ -244,9 +273,95 @@ body {
     transform: scale(0.95);
 }
 
+.voice-btn.recording {
+    animation: pulse-recording 1.5s infinite;
+}
+
+@keyframes pulse-recording {
+    0% {
+        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3), 0 0 0 0 rgba(255, 0, 0, 0.7);
+    }
+    50% {
+        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3), 0 0 0 15px rgba(255, 0, 0, 0);
+    }
+    100% {
+        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3), 0 0 0 0 rgba(255, 0, 0, 0);
+    }
+}
+
 .voice-btn i {
     color: white;
     font-size: 22px;
+}
+
+.recording-indicator {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    background: white;
+    padding: 12px 20px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: none;
+    align-items: center;
+    gap: 10px;
+    min-width: 200px;
+}
+
+.recording-indicator.active {
+    display: flex;
+}
+
+.recording-wave {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+    height: 40px;
+}
+
+.recording-bar {
+    width: 4px;
+    background: #FF0000;
+    border-radius: 3px;
+    transition: height 0.08s ease;
+    align-self: center;
+}
+
+.recording-bar:nth-child(1) {
+    height: 8px;
+}
+
+.recording-bar:nth-child(2) {
+    height: 12px;
+}
+
+.recording-bar:nth-child(3) {
+    height: 16px;
+}
+
+.recording-bar.center-bar {
+    height: 20px;
+}
+
+.recording-bar:nth-child(5) {
+    height: 16px;
+}
+
+.recording-bar:nth-child(6) {
+    height: 12px;
+}
+
+.recording-bar:nth-child(7) {
+    height: 8px;
+}
+
+.recording-text {
+    color: #FF0000;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .send-btn {

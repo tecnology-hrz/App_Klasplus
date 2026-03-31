@@ -39,6 +39,18 @@
                 >
                 <button class="voice-btn" id="voiceBtn">
                     <i class="fa-solid fa-microphone"></i>
+                    <div class="recording-indicator" id="recordingIndicator">
+                        <div class="recording-wave">
+                            <div class="recording-bar"></div>
+                            <div class="recording-bar"></div>
+                            <div class="recording-bar"></div>
+                            <div class="recording-bar center-bar"></div>
+                            <div class="recording-bar"></div>
+                            <div class="recording-bar"></div>
+                            <div class="recording-bar"></div>
+                        </div>
+                        <span class="recording-text">Grabando...</span>
+                    </div>
                 </button>
                 <button class="send-btn" id="sendBtn">
                     <i class="fa-solid fa-paper-plane"></i>
@@ -47,6 +59,7 @@
         </div>
     </div>
 
+    <script src="../js/groq-config.js"></script>
     <script src="../js/chat-ia.js"></script>
 </body>
 </html>
