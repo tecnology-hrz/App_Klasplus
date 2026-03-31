@@ -19,32 +19,69 @@
 
             <!-- Formulario -->
             <form id="registroForm">
-                <div class="input-group">
-                    <div class="input-wrapper">
-                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <input type="text" class="input-field" id="nombre" placeholder="Nombre Completo" required>
+                <h2 class="section-title">Información Personal</h2>
+                
+                <div class="input-row">
+                    <div class="input-group half">
+                        <input type="text" class="input-field" id="nombres" placeholder="Nombres" required>
+                    </div>
+                    <div class="input-group half">
+                        <input type="text" class="input-field" id="apellidos" placeholder="Apellidos" required>
                     </div>
                 </div>
 
                 <div class="input-group">
-                    <div class="input-wrapper">
-                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M22 6L12 13L2 6" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <input type="email" class="input-field" id="email" placeholder="Correo Electrónico" required>
-                    </div>
+                    <input type="tel" class="input-field" id="telefono" placeholder="Teléfono/WhatsApp" required>
+                </div>
+
+                <div class="input-group">
+                    <select class="input-field select-field" id="tipoDocumento" required>
+                        <option value="">Selecciona tu tipo de documento</option>
+                        <option value="cedula_ciudadania">Cédula de ciudadanía</option>
+                        <option value="cedula_extranjeria">Cédula de extranjería</option>
+                        <option value="tarjeta_identidad">Tarjeta de identidad</option>
+                        <option value="cedula_identidad">Cédula de identidad</option>
+                        <option value="pasaporte">Pasaporte</option>
+                        <option value="pep">PEP</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" class="input-field" id="numeroDocumento" placeholder="Número de documento" required>
+                </div>
+
+                <div class="input-group">
+                    <select class="input-field select-field" id="sexo" required>
+                        <option value="">Selecciona tu sexo</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                        <option value="sin_especificar">Sin Especificar</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <select class="input-field select-field" id="jornada" required>
+                        <option value="">Selecciona tu jornada</option>
+                        <option value="manana">Mañana</option>
+                        <option value="tarde">Tarde</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <select class="input-field select-field" id="institucion" required>
+                        <option value="">Selecciona tu institución</option>
+                        <!-- Las instituciones se cargarán dinámicamente desde Firebase -->
+                    </select>
+                </div>
+
+                <h2 class="section-title">Información de Seguridad</h2>
+
+                <div class="input-group">
+                    <input type="email" class="input-field" id="email" placeholder="Correo Electrónico" required>
                 </div>
 
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19 11H5C3.89543 11 3 11.8954 3 13V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V13C21 11.8954 20.1046 11 19 11Z" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
                         <input type="password" class="input-field" id="password" placeholder="Contraseña" required>
                         <button type="button" class="toggle-password" id="togglePassword">
                             <svg class="eye-icon" id="eyeIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -60,23 +97,11 @@
                 </div>
 
                 <div class="input-group">
-                    <div class="input-wrapper">
-                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19 11H5C3.89543 11 3 11.8954 3 13V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V13C21 11.8954 20.1046 11 19 11Z" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <input type="password" class="input-field" id="confirmPassword" placeholder="Confirmar Contraseña" required>
-                        <button type="button" class="toggle-password" id="toggleConfirmPassword">
-                            <svg class="eye-icon" id="eyeIconConfirm" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <circle cx="12" cy="12" r="3" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <svg class="eye-icon hidden" id="eyeSlashIconConfirm" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M17.94 17.94C16.2306 19.243 14.1491 19.9649 12 20C5 20 1 12 1 12C2.24389 9.68192 3.96914 7.65663 6.06 6.06M9.9 4.24C10.5883 4.0789 11.2931 3.99836 12 4C19 4 23 12 23 12C22.393 13.1356 21.6691 14.2048 20.84 15.19M14.12 14.12C13.8454 14.4147 13.5141 14.6512 13.1462 14.8151C12.7782 14.9791 12.3809 15.0673 11.9781 15.0744C11.5753 15.0815 11.1752 15.0074 10.8016 14.8565C10.4281 14.7056 10.0887 14.4811 9.80385 14.1962C9.51897 13.9113 9.29439 13.5719 9.14351 13.1984C8.99262 12.8248 8.91853 12.4247 8.92563 12.0219C8.93274 11.6191 9.02091 11.2218 9.18488 10.8538C9.34884 10.4859 9.58525 10.1546 9.88 9.88" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <line x1="1" y1="1" x2="23" y2="23" stroke="#9FA8DA" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                    </div>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="autorizacion" required>
+                        <span class="checkmark"></span>
+                        <span class="checkbox-text">Autorizo Expresamente a Klasplus para utilizar mi información personal en trámite de esta petición. <a href="#" class="link-politicas">Políticas de tratamiento de datos personales</a></span>
+                    </label>
                 </div>
 
                 <button type="submit" class="registro-btn">Crear Cuenta</button>
@@ -85,15 +110,10 @@
                     ¿Ya tienes una cuenta?
                     <a href="login.html">Inicia Sesión</a>
                 </div>
-
-                <div class="terms-text">
-                    Al registrarte, aceptas nuestros<br>
-                    <a href="#">Términos y Condiciones</a>
-                </div>
             </form>
         </div>
     </div>
 
-    <script src="../js/registro.js"></script>
+    <script type="module" src="../js/registro.js"></script>
 </body>
 </html>

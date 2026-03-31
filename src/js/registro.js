@@ -1,16 +1,54 @@
 // Funcionalidad del formulario de registro
-document.addEventListener('DOMContentLoaded', function() {
+import { auth, db } from './firebase-config.js';
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+document.addEventListener('DOMContentLoaded', async function() {
     const registroForm = document.getElementById('registroForm');
-    const nombreInput = document.getElementById('nombre');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const confirmPasswordInput = document.getElementById('confirmPassword');
     const togglePassword = document.getElementById('togglePassword');
-    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const institucionSelect = document.getElementById('institucion');
+
+    // Cargar instituciones activas desde Firebase
+    await cargarInstituciones();
+
+    async function cargarInstituciones() {
+        try {
+            const q = query(
+                collection(db, "usuarios"), 
+                where("tipoUsuario", "==", "institucion"),
+                where("estado", "==", "activo")
+            );
+            
+            const querySnapshot = await getDocs(q);
+            
+            if (querySnapshot.empty) {
+                institucionSelect.innerHTML = '<option value="">No hay instituciones disponibles</option>';
+                return;
+            }
+
+            // Limpiar opciones existentes excepto la primera
+            institucionSelect.innerHTML = '<option value="">Selecciona tu institución</option>';
+            
+            querySnapshot.forEach((doc) => {
+                const institucion = doc.data();
+                const option = document.createElement('option');
+                option.value = doc.id; // UID de la institución
+                option.textContent = institucion.nombre || institucion.nombreCompleto || 'Sin nombre';
+                option.dataset.nombreInstitucion = institucion.nombre || institucion.nombreCompleto;
+                institucionSelect.appendChild(option);
+            });
+
+            console.log(`${querySnapshot.size} instituciones cargadas`);
+        } catch (error) {
+            console.error('Error al cargar instituciones:', error);
+            institucionSelect.innerHTML = '<option value="">Error al cargar instituciones</option>';
+        }
+    }
 
     // Toggle para mostrar/ocultar contraseña
     if (togglePassword) {
         togglePassword.addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
             
@@ -21,89 +59,158 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Toggle para mostrar/ocultar confirmar contraseña
-    if (toggleConfirmPassword) {
-        toggleConfirmPassword.addEventListener('click', function() {
-            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            confirmPasswordInput.setAttribute('type', type);
-            
-            const eyeIcon = this.querySelector('#eyeIconConfirm');
-            const eyeSlashIcon = this.querySelector('#eyeSlashIconConfirm');
-            eyeIcon.classList.toggle('hidden');
-            eyeSlashIcon.classList.toggle('hidden');
-        });
-    }
-
     // Validación del formulario
     if (registroForm) {
-        registroForm.addEventListener('submit', function(e) {
+        registroForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const nombre = nombreInput.value.trim();
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
-            const confirmPassword = confirmPasswordInput.value.trim();
+            // Obtener todos los valores del formulario
+            const institucionOption = institucionSelect.options[institucionSelect.selectedIndex];
+            const formData = {
+                nombres: document.getElementById('nombres').value.trim(),
+                apellidos: document.getElementById('apellidos').value.trim(),
+                telefono: document.getElementById('telefono').value.trim(),
+                tipoDocumento: document.getElementById('tipoDocumento').value,
+                numeroDocumento: document.getElementById('numeroDocumento').value.trim(),
+                sexo: document.getElementById('sexo').value,
+                jornada: document.getElementById('jornada').value,
+                institucionId: institucionSelect.value,
+                institucionNombre: institucionOption.dataset.nombreInstitucion || '',
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value.trim(),
+                autorizacion: document.getElementById('autorizacion').checked
+            };
 
-            // Validación de nombre
-            if (!nombre) {
-                alert('Por favor ingresa tu nombre completo');
-                nombreInput.focus();
+            // Validaciones
+            if (!formData.nombres || formData.nombres.length < 2) {
+                alert('Por favor ingresa tus nombres (mínimo 2 caracteres)');
+                document.getElementById('nombres').focus();
                 return;
             }
 
-            if (nombre.length < 3) {
-                alert('El nombre debe tener al menos 3 caracteres');
-                nombreInput.focus();
+            if (!formData.apellidos || formData.apellidos.length < 2) {
+                alert('Por favor ingresa tus apellidos (mínimo 2 caracteres)');
+                document.getElementById('apellidos').focus();
                 return;
             }
 
-            // Validación de email
-            if (!email) {
-                alert('Por favor ingresa tu correo electrónico');
-                emailInput.focus();
+            if (!formData.telefono || formData.telefono.length < 7) {
+                alert('Por favor ingresa un teléfono válido');
+                document.getElementById('telefono').focus();
                 return;
             }
 
-            if (!validateEmail(email)) {
+            if (!formData.tipoDocumento) {
+                alert('Por favor selecciona tu tipo de documento');
+                document.getElementById('tipoDocumento').focus();
+                return;
+            }
+
+            if (!formData.numeroDocumento || formData.numeroDocumento.length < 5) {
+                alert('Por favor ingresa un número de documento válido');
+                document.getElementById('numeroDocumento').focus();
+                return;
+            }
+
+            if (!formData.sexo) {
+                alert('Por favor selecciona tu sexo');
+                document.getElementById('sexo').focus();
+                return;
+            }
+
+            if (!formData.jornada) {
+                alert('Por favor selecciona tu jornada');
+                document.getElementById('jornada').focus();
+                return;
+            }
+
+            if (!formData.institucionId) {
+                alert('Por favor selecciona tu institución');
+                institucionSelect.focus();
+                return;
+            }
+
+            if (!formData.email || !validateEmail(formData.email)) {
                 alert('Por favor ingresa un correo electrónico válido');
-                emailInput.focus();
+                document.getElementById('email').focus();
                 return;
             }
 
-            // Validación de contraseña
-            if (!password) {
-                alert('Por favor ingresa una contraseña');
-                passwordInput.focus();
-                return;
-            }
-
-            if (password.length < 6) {
+            if (!formData.password || formData.password.length < 6) {
                 alert('La contraseña debe tener al menos 6 caracteres');
-                passwordInput.focus();
+                document.getElementById('password').focus();
                 return;
             }
 
-            // Validación de confirmación de contraseña
-            if (!confirmPassword) {
-                alert('Por favor confirma tu contraseña');
-                confirmPasswordInput.focus();
+            if (!formData.autorizacion) {
+                alert('Debes autorizar el tratamiento de datos personales para continuar');
+                document.getElementById('autorizacion').focus();
                 return;
             }
 
-            if (password !== confirmPassword) {
-                alert('Las contraseñas no coinciden');
-                confirmPasswordInput.focus();
-                return;
-            }
+            // Deshabilitar el botón de envío
+            const submitBtn = registroForm.querySelector('.registro-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creando cuenta...';
 
-            // Si todo está correcto, proceder con el registro
-            console.log('Registrando usuario:', { nombre, email });
-            alert('¡Cuenta creada exitosamente! Redirigiendo al login...');
-            
-            // Redirigir al login después de 1 segundo
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1000);
+            try {
+                // Crear usuario en Firebase Authentication
+                const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+                const user = userCredential.user;
+
+                // Guardar información adicional en Firestore con estado "desactivado"
+                await setDoc(doc(db, "usuarios", user.uid), {
+                    nombres: formData.nombres,
+                    apellidos: formData.apellidos,
+                    nombreCompleto: `${formData.nombres} ${formData.apellidos}`,
+                    telefono: formData.telefono,
+                    tipoDocumento: formData.tipoDocumento,
+                    numeroDocumento: formData.numeroDocumento,
+                    sexo: formData.sexo,
+                    genero: formData.sexo,
+                    jornada: formData.jornada,
+                    institucionId: formData.institucionId,
+                    institucionNombre: formData.institucionNombre,
+                    email: formData.email,
+                    autorizacionDatos: formData.autorizacion,
+                    estado: "desactivado", // Usuario creado como desactivado
+                    tipoUsuario: "estudiante", // Por defecto es estudiante
+                    fechaRegistro: new Date().toISOString(),
+                    uid: user.uid
+                });
+
+                console.log('Usuario registrado exitosamente:', user.uid);
+                alert('¡Cuenta creada exitosamente! Tu cuenta está pendiente de activación por parte de la institución. Redirigiendo al login...');
+                
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error al registrar usuario:', error);
+                
+                let errorMessage = 'Error al crear la cuenta. ';
+                
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage += 'Este correo electrónico ya está registrado.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage += 'El correo electrónico no es válido.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage += 'La contraseña es muy débil.';
+                        break;
+                    default:
+                        errorMessage += error.message;
+                }
+                
+                alert(errorMessage);
+                
+                // Rehabilitar el botón
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Crear Cuenta';
+            }
         });
     }
 
