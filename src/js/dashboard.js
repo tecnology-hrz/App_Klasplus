@@ -67,14 +67,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const section = this.getAttribute('data-section');
             
             if (section === 'emergencia') {
-                // Mostrar modal de emergencia
-                window.showConfirm(
-                    '¿Deseas activar el botón de emergencia? Se notificará a las autoridades y brigadas correspondientes.',
-                    function() {
-                        activarEmergencia();
-                    },
-                    '⚠️ Emergencia'
-                );
+                // Mostrar modal de emergencia directamente
+                activarEmergencia();
                 return;
             }
             
@@ -89,16 +83,69 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function activarEmergencia() {
-        // Aquí va la lógica para activar la emergencia
-        console.log('Emergencia activada');
-        window.showSuccess(
-            'Se ha notificado a las autoridades y brigadas. Mantén la calma y sigue las instrucciones.',
-            '🚨 Emergencia Activada'
-        );
-        
-        // Aquí puedes agregar la lógica para enviar la alerta a Firebase
-        // Por ejemplo: enviar notificación push, actualizar base de datos, etc.
+        // Mostrar modal personalizado con opciones de emergencia
+        mostrarModalEmergencia();
     }
+
+    function mostrarModalEmergencia() {
+        // Crear overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.zIndex = '10000';
+
+        // Crear contenedor del modal
+        const container = document.createElement('div');
+        container.className = 'emergency-modal-container';
+        container.innerHTML = `
+            <button class="emergency-close-btn" onclick="this.closest('.modal-overlay').remove()">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" fill="#FF0000"/>
+                    <path d="M15 9L9 15M9 9L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+            
+            <div class="emergency-options">
+                <button class="emergency-option" onclick="llamarEmergencia('125', 'Ambulancia')">
+                    <img src="../img/ambulancia_cel.png" alt="Ambulancia">
+                </button>
+                
+                <button class="emergency-option" onclick="llamarEmergencia('119', 'Bomberos')">
+                    <img src="../img/bomberos_cel.png" alt="Bomberos">
+                </button>
+            </div>
+            
+            <div class="emergency-arrows">
+                <img src="../img/flechas.png" alt="Flechas" class="arrows-animation">
+            </div>
+        `;
+
+        overlay.appendChild(container);
+        document.body.appendChild(overlay);
+
+        // No cerrar al hacer clic fuera - solo con el botón X
+    }
+
+    // Función global para llamar emergencia
+    window.llamarEmergencia = function(numero, servicio) {
+        console.log(`Llamando a ${servicio}: ${numero}`);
+        
+        // Abrir el marcador del teléfono con el número
+        window.location.href = `tel:${numero}`;
+        
+        // Cerrar el modal
+        const overlay = document.querySelector('.modal-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+        
+        // Mostrar confirmación
+        setTimeout(() => {
+            window.showSuccess(
+                `Se ha iniciado la llamada a ${servicio} (${numero})`,
+                '📞 Llamada de Emergencia'
+            );
+        }, 500);
+    };
 
     function cambiarSeccion(seccion) {
         const content = document.querySelector('.dashboard-content');
