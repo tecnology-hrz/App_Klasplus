@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const notificationBtn = document.getElementById('notificationBtn');
     if (notificationBtn) {
         notificationBtn.addEventListener('click', function() {
-            alert('Funcionalidad de notificaciones próximamente');
+            mostrarModalDesarrollo('Notificaciones', '<i class="fa-solid fa-bell"></i>');
         });
     }
 
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const tiendaBtn = document.getElementById('tiendaBtn');
     if (tiendaBtn) {
         tiendaBtn.addEventListener('click', function() {
-            alert('Funcionalidad de tienda próximamente');
+            mostrarModalDesarrollo('Tienda', '<i class="fa-solid fa-store"></i>');
         });
     }
 
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const zonasPeligroBtn = document.getElementById('zonasPeligroBtn');
     if (zonasPeligroBtn) {
         zonasPeligroBtn.addEventListener('click', function() {
-            alert('Funcionalidad de zonas de peligro próximamente');
+            mostrarModalDesarrollo('Zonas de Peligro', '<i class="fa-solid fa-triangle-exclamation"></i>');
         });
     }
 
@@ -185,6 +185,47 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }, 500);
     };
+
+    // Función para mostrar modal de sección en desarrollo
+    function mostrarModalDesarrollo(seccion, icono) {
+        // Crear overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.zIndex = '10000';
+
+        // Crear contenedor del modal
+        const container = document.createElement('div');
+        container.className = 'development-modal-container';
+        container.innerHTML = `
+            <button class="development-close-btn" onclick="this.closest('.modal-overlay').remove()">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" fill="#0047B3"/>
+                    <path d="M15 9L9 15M9 9L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+            
+            <div class="development-content">
+                <div class="development-icon">${icono}</div>
+                <h2 class="development-title">Sección en Desarrollo</h2>
+                <p class="development-message">La sección de <strong>${seccion}</strong> está actualmente en desarrollo.</p>
+                <p class="development-submessage">Pronto estará disponible con nuevas funcionalidades.</p>
+                <div class="development-tools">
+                    <div class="tool-icon"><i class="fa-solid fa-wrench"></i></div>
+                    <span class="tool-text">Función de Herramienta</span>
+                </div>
+            </div>
+        `;
+
+        overlay.appendChild(container);
+        document.body.appendChild(overlay);
+
+        // Cerrar al hacer clic fuera del modal
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                overlay.remove();
+            }
+        });
+    }
 
     function cambiarSeccion(seccion) {
         const content = document.querySelector('.dashboard-content');

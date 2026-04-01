@@ -54,13 +54,29 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollToBottom();
     }
 
+    // Función para procesar markdown básico (negritas y saltos de línea)
+    function processMarkdown(text) {
+        // Convertir **texto** a <strong>texto</strong>
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Convertir doble salto de línea a un espacio moderado
+        text = text.replace(/\n\n/g, '<br><div style="margin: 8px 0;"></div>');
+        
+        // Convertir salto de línea simple a <br>
+        text = text.replace(/\n/g, '<br>');
+        
+        return text;
+    }
+
     // Función para agregar mensaje de la IA
     function addIAMessage(text) {
+        const processedText = processMarkdown(text);
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message ia';
         messageDiv.innerHTML = `
+            <img src="../img/IA-1.png" alt="IA Assistant" class="message-avatar-ia">
             <div class="message-content">
-                ${text}
+                ${processedText}
                 <div class="message-time">${getCurrentTime()}</div>
             </div>
         `;
@@ -74,6 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
         typingDiv.className = 'message ia';
         typingDiv.id = 'typingIndicator';
         typingDiv.innerHTML = `
+            <img src="../img/IA-1.png" alt="IA Assistant" class="message-avatar-ia">
             <div class="typing-indicator">
                 <div class="typing-dot"></div>
                 <div class="typing-dot"></div>
@@ -294,6 +311,101 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Mensaje de bienvenida inicial (opcional)
-    // addIAMessage('¡Hola! Soy tu asistente de IA. ¿En qué puedo ayudarte hoy?');
+    // Mensaje de bienvenida inicial
+    addIAMessage('Hola, soy tu asistente de seguridad escolar. Estoy aquí para ayudarte con temas de **gestión de riesgo**, **brigadas de emergencia** y **protocolos de seguridad**.\n\n¿En qué puedo ayudarte hoy?');
+
+    // Botón de notificaciones
+    const notificationBtn = document.querySelector('.notification-btn');
+    if (notificationBtn) {
+        notificationBtn.addEventListener('click', function() {
+            mostrarModalDesarrollo('Notificaciones', '<i class="fa-solid fa-bell"></i>');
+        });
+    }
+
+    // Función para mostrar modal de sección en desarrollo
+    function mostrarModalDesarrollo(seccion, icono) {
+        // Crear overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        `;
+
+        // Crear contenedor del modal
+        const container = document.createElement('div');
+        container.className = 'development-modal-container';
+        container.style.cssText = `
+            background: white;
+            border-radius: 25px;
+            padding: 40px 30px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            animation: scaleIn 0.3s ease forwards;
+            position: relative;
+            text-align: center;
+        `;
+        
+        container.innerHTML = `
+            <button class="development-close-btn" onclick="this.closest('.modal-overlay').remove()" style="
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: 0;
+                width: 40px;
+                height: 40px;
+                transition: transform 0.3s ease;
+            ">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+                    <circle cx="12" cy="12" r="10" fill="#0047B3"/>
+                    <path d="M15 9L9 15M9 9L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+            
+            <div class="development-content" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <div class="development-icon" style="font-size: 60px; margin-bottom: 10px; color: #0047B3;">${icono}</div>
+                <h2 class="development-title" style="color: #0047B3; font-size: 28px; font-weight: 700; margin: 0;">Sección en Desarrollo</h2>
+                <p class="development-message" style="color: #333; font-size: 18px; margin: 0; line-height: 1.4;">La sección de <strong>${seccion}</strong> está actualmente en desarrollo.</p>
+                <p class="development-submessage" style="color: #666; font-size: 16px; margin: 0; line-height: 1.4;">Pronto estará disponible con nuevas funcionalidades.</p>
+                <div class="development-tools" style="display: flex; align-items: center; gap: 12px; background: #F0F7FF; padding: 15px 25px; border-radius: 15px; border: 2px solid #E3F2FD; margin-top: 10px;">
+                    <div class="tool-icon" style="font-size: 24px; color: #0047B3;"><i class="fa-solid fa-wrench"></i></div>
+                    <span class="tool-text" style="color: #0047B3; font-weight: 600; font-size: 16px;">Función de Herramienta</span>
+                </div>
+            </div>
+        `;
+
+        // Agregar animación CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes scaleIn {
+                to {
+                    transform: scale(1);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        overlay.appendChild(container);
+        document.body.appendChild(overlay);
+
+        // Cerrar al hacer clic fuera del modal
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                overlay.remove();
+            }
+        });
+    }
 });
