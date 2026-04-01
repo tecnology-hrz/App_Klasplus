@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klasplus - Registro Masivo de Estudiantes</title>
+    <link rel="stylesheet" href="../css/registro-masivo.css">
+</head>
+<body>
+    <div class="registro-masivo-container">
+        <!-- Logo -->
+        <div class="logo-container">
+            <img src="../../logo-text.webp" alt="Klasplus - Escuelas Seguras">
+        </div>
+
+        <!-- Tarjeta Principal -->
+        <div class="registro-masivo-card">
+            <h1 class="title-text">Registro Masivo de Estudiantes</h1>
+            <p class="subtitle-text">Carga múltiples estudiantes de forma rápida y eficiente</p>
+
+            <!-- Selección de Institución -->
+            <div class="institucion-section">
+                <h2 class="section-title">Selecciona la Institución</h2>
+                <div class="institucion-row">
+                    <div class="input-group">
+                        <select class="input-field select-field" id="institucionSelect" required>
+                            <option value="">Selecciona una institución</option>
+                            <!-- Las instituciones se cargarán dinámicamente -->
+                        </select>
+                    </div>
+                    <button class="btn btn-warning btn-nueva-institucion" id="mostrarFormInstitucion">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Nueva Institución
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formulario para crear institución (oculto por defecto) -->
+            <div class="crear-institucion-section" id="crearInstitucionSection" style="display: none;">
+                <h2 class="section-title">Crear Nueva Institución</h2>
+                
+                <h3 class="subsection-title">Información de la Institución</h3>
+                <div class="input-group">
+                    <input type="text" class="input-field" id="nombreInstitucion" placeholder="Nombre de la Institución" required>
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-group half">
+                        <input type="tel" class="input-field" id="telefonoInstitucion" placeholder="Número Telefónico" required>
+                    </div>
+                    <div class="input-group half">
+                        <input type="text" class="input-field" id="nitInstitucion" placeholder="NIT de la Institución" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" class="input-field" id="direccionInstitucion" placeholder="Dirección" required>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group half">
+                        <select class="input-field select-field" id="departamentoInstitucion" required>
+                            <option value="">Selecciona el Departamento</option>
+                        </select>
+                    </div>
+                    <div class="input-group half">
+                        <select class="input-field select-field" id="ciudadInstitucion" required disabled>
+                            <option value="">Primero selecciona un departamento</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3 class="subsection-title">Información de Seguridad</h3>
+                <div class="input-row">
+                    <div class="input-group half">
+                        <input type="email" class="input-field" id="emailInstitucion" placeholder="Correo Electrónico" required>
+                    </div>
+                    <div class="input-group half">
+                        <div class="input-wrapper">
+                            <input type="password" class="input-field" id="passwordInstitucion" placeholder="Contraseña" required>
+                            <button type="button" class="toggle-password" id="togglePasswordInstitucion">
+                                <svg class="eye-icon" id="eyeIconInstitucion" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="#0052CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="12" cy="12" r="3" stroke="#0052CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <svg class="eye-icon hidden" id="eyeSlashIconInstitucion" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17.94 17.94C16.2306 19.243 14.1491 19.9649 12 20C5 20 1 12 1 12C2.24389 9.68192 3.96914 7.65663 6.06 6.06M9.9 4.24C10.5883 4.0789 11.2931 3.99836 12 4C19 4 23 12 23 12C22.393 13.1356 21.6691 14.2048 20.84 15.19M14.12 14.12C13.8454 14.4147 13.5141 14.6512 13.1462 14.8151C12.7782 14.9791 12.3809 15.0673 11.9781 15.0744C11.5753 15.0815 11.1752 15.0074 10.8016 14.8565C10.4281 14.7056 10.0887 14.4811 9.80385 14.1962C9.51897 13.9113 9.29439 13.5719 9.14351 13.1984C8.99262 12.8248 8.91853 12.4247 8.92563 12.0219C8.93274 11.6191 9.02091 11.2218 9.18488 10.8538C9.34884 10.4859 9.58525 10.1546 9.88 9.88" stroke="#0052CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <line x1="1" y1="1" x2="23" y2="23" stroke="#0052CC" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-warning" id="guardarInstitucion">Guardar Institución</button>
+                    <button class="btn btn-cancel" id="cancelarInstitucion">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="actions-section">
+                <button class="btn btn-primary" id="descargarPlantilla">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Descargar Plantilla Excel
+                </button>
+
+                <button class="btn btn-secondary" id="cargarArchivo">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17 8L12 3L7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Cargar Archivo Excel
+                </button>
+                <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+            </div>
+
+            <!-- Tabla de Vista Previa -->
+            <div class="preview-section" id="previewSection" style="display: none;">
+                <h2 class="section-title">Vista Previa de Datos</h2>
+                <div class="table-container">
+                    <table id="previewTable">
+                        <thead>
+                            <tr>
+                                <th>Nombres</th>
+                                <th>Apellidos</th>
+                                <th>Teléfono</th>
+                                <th>Tipo Documento</th>
+                                <th>Número Documento</th>
+                                <th>Sexo</th>
+                                <th>Grado</th>
+                                <th>Jornada</th>
+                                <th>Email (Generado)</th>
+                                <th>Contraseña (Generada)</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTableBody">
+                            <!-- Los datos se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="preview-actions">
+                    <button class="btn btn-success" id="confirmarCarga">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Confirmar y Registrar Estudiantes
+                    </button>
+                    <button class="btn btn-cancel" id="cancelarCarga">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="stats-section" id="statsSection" style="display: none;">
+                <h2 class="section-title">Resultado de la Carga</h2>
+                <div class="stats-grid">
+                    <div class="stat-card success">
+                        <div class="stat-number" id="statExitosos">0</div>
+                        <div class="stat-label">Registros Exitosos</div>
+                    </div>
+                    <div class="stat-card error">
+                        <div class="stat-number" id="statErrores">0</div>
+                        <div class="stat-label">Errores</div>
+                    </div>
+                    <div class="stat-card total">
+                        <div class="stat-number" id="statTotal">0</div>
+                        <div class="stat-label">Total Procesados</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instrucciones -->
+            <div class="instrucciones-section">
+                <h3 class="instrucciones-title">Instrucciones de Uso</h3>
+                <ol class="instrucciones-list">
+                    <li>Selecciona la institución para la cual deseas registrar estudiantes</li>
+                    <li>Descarga la plantilla Excel haciendo clic en "Descargar Plantilla Excel"</li>
+                    <li>Completa la plantilla con los datos de los estudiantes</li>
+                    <li>Guarda el archivo y cárgalo usando el botón "Cargar Archivo Excel"</li>
+                    <li>Revisa la vista previa de los datos</li>
+                    <li>Confirma el registro para cargar los estudiantes a la base de datos</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <script type="module" src="../js/registro-masivo.js"></script>
+</body>
+</html>

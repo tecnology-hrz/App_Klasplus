@@ -52,14 +52,68 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
-            window.showConfirm(
-                '¿Estás seguro que deseas cerrar sesión?',
-                function() {
-                    localStorage.clear();
-                    window.location.href = 'login.html';
-                },
-                'Cerrar Sesión'
-            );
+            // Crear modal de confirmación
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.style.zIndex = '10000';
+            
+            const container = document.createElement('div');
+            container.className = 'development-modal-container';
+            container.style.maxWidth = '400px';
+            container.innerHTML = `
+                <div class="development-content">
+                    <div class="development-icon"><i class="fa-solid fa-power-off"></i></div>
+                    <h2 class="development-title">Cerrar Sesión</h2>
+                    <p class="development-message">¿Estás seguro de que deseas cerrar sesión?</p>
+                    <div style="display: flex; gap: 15px; margin-top: 20px; width: 100%;">
+                        <button class="cancelar-btn" style="
+                            flex: 1;
+                            padding: 12px 24px;
+                            border-radius: 12px;
+                            border: 2px solid #0047B3;
+                            background: white;
+                            color: #0047B3;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        ">Cancelar</button>
+                        <button class="confirmar-btn" style="
+                            flex: 1;
+                            padding: 12px 24px;
+                            border-radius: 12px;
+                            border: none;
+                            background: #FF0000;
+                            color: white;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        ">Cerrar Sesión</button>
+                    </div>
+                </div>
+            `;
+            
+            overlay.appendChild(container);
+            document.body.appendChild(overlay);
+            
+            // Botón cancelar
+            container.querySelector('.cancelar-btn').addEventListener('click', () => {
+                overlay.remove();
+            });
+            
+            // Botón confirmar
+            container.querySelector('.confirmar-btn').addEventListener('click', () => {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            });
+            
+            // Cerrar al hacer clic fuera
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            });
         });
     }
 
@@ -252,14 +306,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = 'dashboard-ia.html';
                 break;
             case 'perfil':
-                if (content) {
-                    content.innerHTML = `
-                        <h1>Mi Perfil</h1>
-                        <p><strong>Nombre:</strong> ${userName}</p>
-                        <p><strong>Rol:</strong> ${userRole}</p>
-                        <p><strong>ID:</strong> ${userId}</p>
-                    `;
-                }
+                // Redirigir a la página de perfil
+                window.location.href = 'dashboard-perfil.html';
                 break;
             default:
                 if (content) {

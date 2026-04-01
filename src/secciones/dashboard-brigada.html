@@ -37,6 +37,77 @@
         </header>
 
         <main class="dashboard-content">
+            <!-- Sección de Tareas Pendientes -->
+            <div class="brigada-section">
+                <h2 class="section-title">Tareas Pendientes</h2>
+                
+                <div class="main-card">
+                    <div class="tasks-container">
+                        <!-- Tarea 1: Tomar fotos -->
+                        <div class="task-card">
+                            <div class="task-icon camera">
+                                <i class="fa-solid fa-camera"></i>
+                            </div>
+                            <div class="task-content">
+                                <h3 class="task-title">Tomar fotos de zonas peligrosas</h3>
+                                <div class="task-progress">
+                                    <span class="progress-text">1 de 5 fotos tomadas</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 20%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="task-btn" onclick="continuarTarea('fotos')">Completar</button>
+                        </div>
+
+                        <!-- Tarea 2: Cuestionario -->
+                        <div class="task-card">
+                            <div class="task-icon warning">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div class="task-content">
+                                <h3 class="task-title">¿Cuáles son los puntos de mayor riesgo en la institución?</h3>
+                                <div class="task-progress">
+                                    <span class="progress-text">Pendiente</span>
+                                </div>
+                            </div>
+                            <button class="task-btn" onclick="continuarTarea('cuestionario')">Contestar</button>
+                        </div>
+
+                        <!-- Tarea 3: Inspección de escaleras -->
+                        <div class="task-card">
+                            <div class="task-icon stairs">
+                                <i class="fa-solid fa-stairs"></i>
+                            </div>
+                            <div class="task-content">
+                                <h3 class="task-title">Inspeccionar estado de escaleras</h3>
+                                <div class="task-progress">
+                                    <span class="progress-text">0 de 3 escaleras revisadas</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="task-btn" onclick="continuarTarea('escaleras')">Continuar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Estudiantes Brigadistas -->
+            <div class="brigada-section" style="margin-top: 25px;">
+                <h2 class="section-title">Estudiantes Brigadistas</h2>
+                
+                <div class="main-card">
+                    <div id="brigadistasContainer" class="brigadistas-container">
+                        <!-- Los estudiantes se cargarán dinámicamente -->
+                        <div class="loading-message">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            <span>Cargando brigadistas...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <!-- Barra de navegación inferior -->

@@ -1,0 +1,770 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(180deg, #0047B3 0%, #003D99 100%);
+    min-height: 100vh;
+}
+
+.perfil-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 100px;
+}
+
+/* Header */
+.perfil-header {
+    background: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 0 0 30px 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #0047B3;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+
+.back-btn:hover {
+    background: #F0F7FF;
+    transform: translateX(-3px);
+}
+
+.back-btn i {
+    font-size: 20px;
+}
+
+.notification-btn {
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    transition: transform 0.3s ease;
+}
+
+.notification-btn:hover {
+    transform: scale(1.1);
+}
+
+.notification-icon {
+    width: 32px;
+    height: 32px;
+}
+
+/* Contenido principal */
+.perfil-content {
+    flex: 1;
+    padding: 20px 30px 100px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    margin-top: 100px;
+}
+
+/* Sección de foto de perfil */
+.profile-photo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.profile-photo-wrapper {
+    position: relative;
+}
+
+.profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid white;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.profile-photo-placeholder {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 60px;
+    border: 5px solid white;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.profile-name {
+    color: white;
+    font-size: 26px;
+    font-weight: 700;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Opciones del perfil */
+.profile-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.profile-option {
+    background: white;
+    border: none;
+    border-radius: 20px;
+    padding: 20px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profile-option:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.profile-option:active {
+    transform: translateY(-1px);
+}
+
+.option-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.option-icon.edit {
+    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+}
+
+.option-icon.stats {
+    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+}
+
+.option-icon.notifications {
+    background: linear-gradient(135deg, #FF0000 0%, #D32F2F 100%);
+}
+
+.option-icon.config {
+    background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+}
+
+.option-icon.logout-icon {
+    background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);
+}
+
+.option-text {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    text-align: left;
+}
+
+.option-arrow {
+    font-size: 20px;
+    color: #999;
+}
+
+.notification-count {
+    background: #FF0000;
+    color: white;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.profile-option.logout:hover {
+    background: #FFF5F5;
+}
+
+/* Barra de navegación inferior */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 20px 20px 20px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 30px 30px 0 0;
+    z-index: 1000;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    color: #9E9E9E;
+}
+
+.nav-item.active {
+    color: #FF6B35;
+}
+
+.nav-item:not(.emergency):hover {
+    transform: translateY(-3px);
+}
+
+.nav-icon {
+    font-size: 28px;
+}
+
+.nav-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: currentColor;
+}
+
+/* Botón de emergencia */
+.nav-item.emergency {
+    background: #FF0000;
+    border-radius: 50%;
+    width: 90px;
+    height: 90px;
+    padding: 0;
+    margin-top: -60px;
+    box-shadow: 0 12px 30px rgba(255, 0, 0, 0.5);
+    border: 8px solid white;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-item.emergency:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 35px rgba(255, 0, 0, 0.6);
+}
+
+.nav-icon-emergency {
+    font-size: 38px;
+    color: white;
+}
+
+/* Animación de pulso */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 12px 30px rgba(255, 0, 0, 0.5), 0 0 0 0 rgba(255, 0, 0, 0.7);
+    }
+    50% {
+        box-shadow: 0 12px 30px rgba(255, 0, 0, 0.5), 0 0 0 15px rgba(255, 0, 0, 0);
+    }
+    100% {
+        box-shadow: 0 12px 30px rgba(255, 0, 0, 0.5), 0 0 0 0 rgba(255, 0, 0, 0);
+    }
+}
+
+.nav-item.emergency {
+    animation: pulse 2s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .perfil-header {
+        padding: 15px 20px;
+    }
+
+    .back-btn {
+        font-size: 16px;
+    }
+
+    .notification-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .profile-photo,
+    .profile-photo-placeholder {
+        width: 130px;
+        height: 130px;
+        font-size: 50px;
+    }
+
+    .profile-name {
+        font-size: 24px;
+    }
+
+    .perfil-content {
+        padding: 20px 20px 100px 20px;
+        margin-top: 95px;
+    }
+
+    .profile-option {
+        padding: 18px 20px;
+    }
+
+    .option-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 22px;
+    }
+
+    .option-text {
+        font-size: 17px;
+    }
+
+    .bottom-nav {
+        padding: 10px 15px 18px 15px;
+    }
+
+    .nav-item {
+        padding: 6px 10px;
+    }
+
+    .nav-icon {
+        font-size: 26px;
+    }
+
+    .nav-label {
+        font-size: 11px;
+    }
+
+    .nav-item.emergency {
+        width: 80px;
+        height: 80px;
+        margin-top: -50px;
+        border-width: 7px;
+    }
+
+    .nav-icon-emergency {
+        font-size: 34px;
+    }
+}
+
+@media (max-width: 480px) {
+    .perfil-header {
+        padding: 15px 20px;
+    }
+
+    .back-btn {
+        font-size: 15px;
+    }
+
+    .back-btn span {
+        display: none;
+    }
+
+    .notification-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .profile-photo,
+    .profile-photo-placeholder {
+        width: 120px;
+        height: 120px;
+        font-size: 45px;
+    }
+
+    .profile-name {
+        font-size: 22px;
+    }
+
+    .perfil-content {
+        padding: 20px 20px 100px 20px;
+        margin-top: 95px;
+    }
+
+    .profile-options {
+        gap: 12px;
+    }
+
+    .profile-option {
+        padding: 16px 18px;
+        gap: 12px;
+    }
+
+    .option-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+    }
+
+    .option-text {
+        font-size: 16px;
+    }
+
+    .option-arrow {
+        font-size: 18px;
+    }
+
+    .bottom-nav {
+        padding: 8px 10px 15px 10px;
+    }
+
+    .nav-item {
+        padding: 5px 8px;
+        gap: 4px;
+    }
+
+    .nav-icon {
+        font-size: 24px;
+    }
+
+    .nav-label {
+        font-size: 10px;
+    }
+
+    .nav-item.emergency {
+        width: 70px;
+        height: 70px;
+        margin-top: -45px;
+        border-width: 6px;
+    }
+
+    .nav-icon-emergency {
+        font-size: 30px;
+    }
+}
+
+
+/* Modal de emergencia */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.emergency-modal-container {
+    background: white;
+    border-radius: 30px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    animation: scaleIn 0.3s ease forwards;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+@keyframes scaleIn {
+    to {
+        transform: scale(1);
+    }
+}
+
+.emergency-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: 45px;
+    height: 45px;
+    transition: transform 0.3s ease;
+}
+
+.emergency-close-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+}
+
+.emergency-close-btn svg {
+    width: 100%;
+    height: 100%;
+}
+
+.emergency-options {
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+    align-items: center;
+}
+
+.emergency-option {
+    background: #F5F5F5;
+    border: 2px solid #D0D0D0;
+    border-radius: 20px;
+    padding: 20px;
+    cursor: pointer;
+    transition: none;
+    width: 240px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.emergency-option:active {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: translateY(1px);
+}
+
+.emergency-option img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.emergency-arrows {
+    position: absolute;
+    bottom: -220px;
+    left: 52%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.arrows-animation {
+    width: 100%;
+    height: auto;
+    animation: arrowBounce 1.5s ease-in-out infinite;
+}
+
+@keyframes arrowBounce {
+    0%, 100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-15px);
+        opacity: 0.7;
+    }
+}
+
+/* Responsive para modal de emergencia */
+@media (max-width: 768px) {
+    .emergency-modal-container {
+        padding: 25px;
+        min-height: 350px;
+    }
+
+    .emergency-option {
+        width: 200px;
+        padding: 18px;
+    }
+
+    .emergency-arrows {
+        width: 100px;
+        height: 100px;
+        bottom: -190px;
+    }
+}
+
+@media (max-width: 480px) {
+    .emergency-modal-container {
+        padding: 20px;
+        max-width: 95%;
+        min-height: 300px;
+    }
+
+    .emergency-options {
+        gap: 15px;
+    }
+
+    .emergency-option {
+        width: 170px;
+        padding: 15px;
+    }
+
+    .emergency-close-btn {
+        width: 40px;
+        height: 40px;
+        top: 10px;
+        right: 10px;
+    }
+
+    .emergency-arrows {
+        width: 80px;
+        height: 80px;
+        bottom: -160px;
+    }
+}
+
+/* Modal de sección en desarrollo */
+.development-modal-container {
+    background: white;
+    border-radius: 25px;
+    padding: 40px 30px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    animation: scaleIn 0.3s ease forwards;
+    position: relative;
+    text-align: center;
+}
+
+.development-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    transition: transform 0.3s ease;
+}
+
+.development-close-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+}
+
+.development-close-btn svg {
+    width: 100%;
+    height: 100%;
+}
+
+.development-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.development-icon {
+    font-size: 60px;
+    margin-bottom: 10px;
+    color: #0047B3;
+}
+
+.development-icon i {
+    font-size: 60px;
+}
+
+.development-title {
+    color: #0047B3;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.development-message {
+    color: #333;
+    font-size: 18px;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.development-submessage {
+    color: #666;
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.development-tools {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #F0F7FF;
+    padding: 15px 25px;
+    border-radius: 15px;
+    border: 2px solid #E3F2FD;
+    margin-top: 10px;
+}
+
+.tool-icon {
+    font-size: 24px;
+    color: #0047B3;
+}
+
+.tool-icon i {
+    font-size: 24px;
+}
+
+.tool-text {
+    color: #0047B3;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* Responsive para modal de desarrollo */
+@media (max-width: 480px) {
+    .development-modal-container {
+        padding: 30px 25px;
+        max-width: 95%;
+    }
+    
+    .development-icon {
+        font-size: 50px;
+    }
+    
+    .development-icon i {
+        font-size: 50px;
+    }
+    
+    .development-title {
+        font-size: 24px;
+    }
+    
+    .development-message {
+        font-size: 16px;
+    }
+    
+    .development-submessage {
+        font-size: 14px;
+    }
+    
+    .development-tools {
+        padding: 12px 20px;
+    }
+    
+    .tool-text {
+        font-size: 14px;
+    }
+}

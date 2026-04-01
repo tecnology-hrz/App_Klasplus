@@ -218,11 +218,11 @@ body {
 
 .dashboard-content {
     flex: 1;
-    padding: 40px 30px 100px 30px; /* Espacio inferior para la barra de navegación */
+    padding: 20px 30px 100px 30px; /* Espacio inferior para la barra de navegación */
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
-    margin-top: 120px; /* Espacio para el header fijo */
+    margin-top: 100px; /* Espacio para el header fijo */
 }
 
 /* Barra de navegación inferior */
@@ -463,8 +463,8 @@ body {
     }
 
     .dashboard-content {
-        padding: 30px 20px 100px 20px;
-        margin-top: 110px;
+        padding: 20px 20px 100px 20px;
+        margin-top: 95px;
     }
 
     .dashboard-content h1 {
@@ -736,5 +736,449 @@ body {
     
     .tool-text {
         font-size: 14px;
+    }
+}
+
+/* Estilos para Dashboard de Brigadas */
+.brigada-section {
+    margin-top: 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.section-title {
+    color: white;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-align: left;
+    margin-top: 0;
+    padding-left: 10px;
+}
+
+.ver-todas-btn {
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+.ver-todas-btn:hover {
+    opacity: 0.8;
+}
+
+.main-card {
+    background: white;
+    border-radius: 25px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tasks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.task-card {
+    background: #F8F9FA;
+    border-radius: 15px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid #E9ECEF;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    border-color: #FF6B35;
+}
+
+.task-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.task-icon.camera {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.task-icon.warning {
+    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+    color: white;
+}
+
+.task-icon.stairs {
+    background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+    color: white;
+}
+
+.task-icon.extinguisher {
+    background: linear-gradient(135deg, #FF0000 0%, #D32F2F 100%);
+    color: white;
+}
+
+.task-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 10px 0;
+    line-height: 1.3;
+}
+
+.task-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.progress-text {
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #E0E0E0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF6B35 0%, #F7931E 100%);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.task-btn {
+    background: #FF6B35;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.task-btn:hover {
+    background: #F7931E;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+}
+
+.task-btn:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+    .main-card {
+        padding: 20px;
+        border-radius: 20px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    .task-card {
+        padding: 15px;
+        gap: 12px;
+    }
+
+    .task-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+
+    .task-title {
+        font-size: 15px;
+    }
+
+    .progress-text {
+        font-size: 12px;
+    }
+
+    .task-btn {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-card {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .section-title {
+        font-size: 22px;
+    }
+
+    .task-card {
+        flex-wrap: wrap;
+        padding: 15px;
+    }
+
+    .task-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 22px;
+    }
+
+    .task-content {
+        flex: 1;
+        min-width: calc(100% - 60px);
+    }
+
+    .task-title {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .task-btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+}
+
+/* Estilos para Estudiantes Brigadistas */
+.brigadistas-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.loading-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 30px;
+    color: #666;
+    font-size: 16px;
+}
+
+.loading-message i {
+    font-size: 24px;
+    color: #0047B3;
+}
+
+.brigadista-card {
+    background: #F8F9FA;
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid #E9ECEF;
+}
+
+.brigadista-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    border-color: #0047B3;
+}
+
+.brigadista-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #0047B3;
+    flex-shrink: 0;
+}
+
+.brigadista-avatar-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    border: 3px solid #0047B3;
+    flex-shrink: 0;
+}
+
+.brigadista-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.brigadista-nombre {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.brigadista-detalles {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brigadista-rol {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #0047B3;
+    font-weight: 500;
+}
+
+.brigadista-rol i {
+    font-size: 16px;
+}
+
+.brigadista-rol.jefe {
+    color: #FF6B35;
+}
+
+.brigadista-rol.jefe i {
+    color: #FF6B35;
+}
+
+.brigadista-grado {
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+}
+
+.brigadista-grado::before {
+    content: "• ";
+    margin: 0 4px;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.empty-message i {
+    font-size: 48px;
+    color: #CCC;
+    margin-bottom: 15px;
+}
+
+.empty-message p {
+    font-size: 16px;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .section-header {
+        margin-bottom: 8px;
+    }
+
+    .section-title {
+        font-size: 24px;
+    }
+
+    .ver-todas-btn {
+        font-size: 14px;
+    }
+
+    .brigadista-card {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .brigadista-avatar,
+    .brigadista-avatar-placeholder {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .brigadista-nombre {
+        font-size: 15px;
+    }
+
+    .brigadista-rol {
+        font-size: 13px;
+    }
+
+    .brigadista-grado {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .brigadista-card {
+        flex-wrap: nowrap;
+    }
+
+    .brigadista-avatar,
+    .brigadista-avatar-placeholder {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+
+    .brigadista-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .brigadista-nombre {
+        font-size: 14px;
+    }
+
+    .brigadista-detalles {
+        flex-wrap: wrap;
+    }
+
+    .brigadista-rol {
+        font-size: 12px;
+    }
+
+    .brigadista-grado {
+        font-size: 11px;
     }
 }
