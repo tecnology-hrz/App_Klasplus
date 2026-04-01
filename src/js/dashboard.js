@@ -18,6 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
         userNameElement.textContent = userName;
     }
 
+    // Mostrar nombre en la tarjeta de bienvenida
+    const welcomeUserName = document.getElementById('welcomeUserName');
+    if (welcomeUserName && userName) {
+        welcomeUserName.textContent = userName;
+    }
+
     // Mostrar foto del usuario o iniciales
     const userAvatar = document.getElementById('userAvatar');
     const userAvatarPlaceholder = document.getElementById('userAvatarPlaceholder');
@@ -58,6 +64,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     console.log('Usuario autenticado:', { userId, userName, userRole });
+
+    // Botón de Hablar con IA
+    const hablarIABtn = document.getElementById('hablarIABtn');
+    if (hablarIABtn) {
+        hablarIABtn.addEventListener('click', function() {
+            window.location.href = 'dashboard-ia.html';
+        });
+    }
+
+    // Botón de Tienda
+    const tiendaBtn = document.getElementById('tiendaBtn');
+    if (tiendaBtn) {
+        tiendaBtn.addEventListener('click', function() {
+            alert('Funcionalidad de tienda próximamente');
+        });
+    }
+
+    // Botón de Brigada
+    const brigadaBtn = document.getElementById('brigadaBtn');
+    if (brigadaBtn) {
+        brigadaBtn.addEventListener('click', function() {
+            // Cambiar a la sección de brigada
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(nav => nav.classList.remove('active'));
+            const brigadaNavItem = document.querySelector('.nav-item[data-section="brigada"]');
+            if (brigadaNavItem) {
+                brigadaNavItem.classList.add('active');
+            }
+            cambiarSeccion('brigada');
+        });
+    }
 
     // Navegación inferior
     const navItems = document.querySelectorAll('.nav-item');

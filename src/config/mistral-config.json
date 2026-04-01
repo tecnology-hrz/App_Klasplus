@@ -1,0 +1,6 @@
+{
+  "_comment": "⚠️ TESTING KEY - CAMBIAR ANTES DE PRODUCCIÓN",
+  "mistralApiKey": "CuWSOHVYlJzPguJSqIbh3KciskJqmgiz",
+  "mistralApiUrl": "https://api.mistral.ai/v1/chat/completions",
+  "model": "mistral-small-latest"
+}

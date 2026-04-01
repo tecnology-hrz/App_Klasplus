@@ -8,6 +8,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Obtener datos del usuario
     const userName = localStorage.getItem('userName');
     const userPhoto = localStorage.getItem('userPhoto');
+    const preguntaIA = localStorage.getItem('preguntaIA');
+
+    // Si hay una pregunta del dashboard, enviarla automáticamente
+    if (preguntaIA) {
+        setTimeout(() => {
+            chatInput.value = preguntaIA;
+            sendMessage();
+            localStorage.removeItem('preguntaIA'); // Limpiar después de usar
+        }, 500);
+    }
 
     // Función para obtener la hora actual
     function getCurrentTime() {
@@ -94,12 +104,19 @@ document.addEventListener('DOMContentLoaded', function() {
             addUserMessage(userMessage);
             chatInput.value = '';
 
-            // Simular respuesta de la IA
+            // Mostrar indicador de escritura
             showTypingIndicator();
-            setTimeout(() => {
-                removeTypingIndicator();
-                addIAMessage('Gracias por tu mensaje. Estoy aquí para ayudarte con cualquier pregunta sobre seguridad escolar.');
-            }, 1500);
+            
+            // Obtener respuesta de Mistral
+            getMistralResponse(userMessage)
+                .then(response => {
+                    removeTypingIndicator();
+                    addIAMessage(response);
+                })
+                .catch(error => {
+                    removeTypingIndicator();
+                    addIAMessage('Lo siento, hubo un error al procesar tu pregunta. Intenta de nuevo.');
+                });
         }
     }
 
@@ -107,6 +124,17 @@ document.addEventListener('DOMContentLoaded', function() {
     chatInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             sendMessage();
+        }
+    });
+
+    // Mostrar/ocultar botón de enviar según el contenido
+    chatInput.addEventListener('input', function() {
+        if (chatInput.value.trim() !== '') {
+            sendBtn.classList.add('visible');
+            voiceBtn.classList.add('hidden');
+        } else {
+            sendBtn.classList.remove('visible');
+            voiceBtn.classList.remove('hidden');
         }
     });
 
