@@ -102,6 +102,20 @@ body {
     box-shadow: 0 6px 20px rgba(0, 71, 179, 0.3);
 }
 
+.welcome-image-zones {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    display: block;
+    margin-top: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.welcome-image-zones:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3);
+}
+
 .user-profile {
     display: flex;
     align-items: center;

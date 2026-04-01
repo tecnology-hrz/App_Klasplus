@@ -1,4 +1,4 @@
-// Dashboard común para todos los roles
+// Dashboard de Brigada
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar si el usuario está autenticado
     const userId = localStorage.getItem('userId');
@@ -16,12 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const userNameElement = document.getElementById('userName');
     if (userNameElement && userName) {
         userNameElement.textContent = userName;
-    }
-
-    // Mostrar nombre en la tarjeta de bienvenida
-    const welcomeUserName = document.getElementById('welcomeUserName');
-    if (welcomeUserName && userName) {
-        welcomeUserName.textContent = userName;
     }
 
     // Mostrar foto del usuario o iniciales
@@ -63,40 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    console.log('Usuario autenticado:', { userId, userName, userRole });
-
-    // Botón de Hablar con IA
-    const hablarIABtn = document.getElementById('hablarIABtn');
-    if (hablarIABtn) {
-        hablarIABtn.addEventListener('click', function() {
-            window.location.href = 'dashboard-ia.html';
-        });
-    }
-
-    // Botón de Tienda
-    const tiendaBtn = document.getElementById('tiendaBtn');
-    if (tiendaBtn) {
-        tiendaBtn.addEventListener('click', function() {
-            alert('Funcionalidad de tienda próximamente');
-        });
-    }
-
-    // Botón de Brigada
-    const brigadaBtn = document.getElementById('brigadaBtn');
-    if (brigadaBtn) {
-        brigadaBtn.addEventListener('click', function() {
-            // Redirigir a la página de brigada
-            window.location.href = 'dashboard-brigada.html';
-        });
-    }
-
-    // Botón de Zonas de Peligro
-    const zonasPeligroBtn = document.getElementById('zonasPeligroBtn');
-    if (zonasPeligroBtn) {
-        zonasPeligroBtn.addEventListener('click', function() {
-            alert('Funcionalidad de zonas de peligro próximamente');
-        });
-    }
+    console.log('Usuario autenticado en Brigada:', { userId, userName, userRole });
 
     // Navegación inferior
     const navItems = document.querySelectorAll('.nav-item');
@@ -115,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
             
-            // Aquí puedes agregar la lógica para cambiar el contenido
+            // Navegación a otras secciones
             console.log('Navegando a:', section);
             cambiarSeccion(section);
         });
@@ -187,8 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     function cambiarSeccion(seccion) {
-        const content = document.querySelector('.dashboard-content');
-        
         switch(seccion) {
             case 'inicio':
                 // Redirigir al dashboard principal según el rol
@@ -203,27 +162,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = dashboardPage;
                 break;
             case 'brigada':
-                // Redirigir a la página de brigada
-                window.location.href = 'dashboard-brigada.html';
+                // Ya estamos en brigada, no hacer nada
                 break;
             case 'ia':
                 // Redirigir a la página de IA
                 window.location.href = 'dashboard-ia.html';
                 break;
             case 'perfil':
-                if (content) {
-                    content.innerHTML = `
-                        <h1>Mi Perfil</h1>
-                        <p><strong>Nombre:</strong> ${userName}</p>
-                        <p><strong>Rol:</strong> ${userRole}</p>
-                        <p><strong>ID:</strong> ${userId}</p>
-                    `;
-                }
+                // Redirigir a perfil (puedes crear esta página después)
+                alert('Funcionalidad de perfil próximamente');
                 break;
             default:
-                if (content) {
-                    content.innerHTML = '<h1>Sección no encontrada</h1>';
-                }
+                console.log('Sección no encontrada:', seccion);
         }
     }
 });

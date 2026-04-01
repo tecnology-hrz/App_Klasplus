@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klasplus - Dashboard Estudiante</title>
+    <title>Klasplus - Brigada</title>
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../css/modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -36,34 +36,19 @@
             </div>
         </header>
 
-        <!-- Tarjeta de Bienvenida -->
-        <div class="welcome-card">
-            <h1 class="welcome-text">Bienvenid@ <span id="welcomeUserName">Usuario</span></h1>
-            <img src="../img/principal.png" alt="Bienvenida" class="welcome-image">
-            <img src="../img/Hablar_IA.png" alt="Hablar con IA" class="welcome-image-ia" id="hablarIABtn" style="cursor: pointer;">
-            
-            <!-- Contenedor para las imágenes de tienda y brigada -->
-            <div class="bottom-images-container">
-                <img src="../img/tienda.png" alt="Tienda" class="bottom-image" id="tiendaBtn" style="cursor: pointer;">
-                <img src="../img/brigada.png" alt="Brigada" class="bottom-image" id="brigadaBtn" style="cursor: pointer;">
-            </div>
-            
-            <!-- Imagen de zonas de peligro -->
-            <img src="../img/zonas_peligro.png" alt="Zonas de Peligro" class="welcome-image-zones" id="zonasPeligroBtn" style="cursor: pointer;">
-        </div>
-
         <main class="dashboard-content">
-            <!-- Contenido del dashboard -->
+            <h1>Brigada de Seguridad</h1>
+            <p>Información sobre las brigadas de seguridad escolar</p>
         </main>
 
         <!-- Barra de navegación inferior -->
         <nav class="bottom-nav">
-            <button class="nav-item active" data-section="inicio">
+            <button class="nav-item" data-section="inicio">
                 <i class="fa-solid fa-house nav-icon"></i>
                 <span class="nav-label">Inicio</span>
             </button>
 
-            <button class="nav-item" data-section="brigada">
+            <button class="nav-item active" data-section="brigada">
                 <i class="fa-solid fa-user-group nav-icon"></i>
                 <span class="nav-label">Brigada</span>
             </button>
@@ -85,6 +70,6 @@
     </div>
 
     <script src="../js/modal.js"></script>
-    <script src="../js/dashboard.js"></script>
+    <script src="../js/dashboard-brigada.js"></script>
 </body>
 </html>
