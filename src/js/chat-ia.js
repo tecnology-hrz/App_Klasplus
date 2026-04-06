@@ -121,6 +121,10 @@ document.addEventListener('DOMContentLoaded', function() {
             addUserMessage(userMessage);
             chatInput.value = '';
 
+            // Restaurar botones a estado inicial (micrófono visible, enviar oculto)
+            sendBtn.classList.remove('visible');
+            voiceBtn.classList.remove('hidden');
+
             // Mostrar indicador de escritura
             showTypingIndicator();
             
