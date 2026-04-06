@@ -27,6 +27,13 @@
 
         <!-- Input de mensaje (estado normal) -->
         <div class="chat-input-container" id="chatInputContainer">
+            
+            <!-- Contenedor de previsualización de imagen -->
+            <div id="imagePreviewContainer" style="display: none; padding-bottom: 10px; position: relative; width: max-content;">
+                <img id="imagePreviewImg" src="" style="height: 70px; border-radius: 10px; border: 2px solid #E3F2FD; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <button id="imagePreviewClose" style="position: absolute; top: -5px; right: -5px; background: #FF4444; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
             <!-- Estado normal: texto + mic -->
             <div class="chat-input-wrapper" id="normalInputState">
                 <input 
@@ -110,8 +117,14 @@
             </button>
         </div>
     </div>
+    <!-- Modal para ver imagen en grande -->
+    <div class="image-viewer-overlay" id="imageViewerOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 4000; align-items: center; justify-content: center; flex-direction: column;">
+        <button id="imageViewerClose" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 30px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+        <img id="imageViewerImg" src="" style="max-width: 90%; max-height: 80vh; object-fit: contain; border-radius: 8px;">
+    </div>
     
     <script src="../js/modal.js"></script>
+    <script src="../js/openrouter-config.js"></script>
     <script src="../js/groq-config.js"></script>
     <script src="../js/mistral-config.js"></script>
     <script src="../js/chat-ia.js"></script>

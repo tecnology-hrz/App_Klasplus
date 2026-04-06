@@ -6,6 +6,52 @@ document.addEventListener('DOMContentLoaded', function() {
     const sendBtn = document.getElementById('sendBtn');
     const cameraBtn = document.getElementById('cameraBtn');
     const cameraInput = document.getElementById('cameraInput');
+    
+    // Variables de previsualización
+    let pendingImageBase64 = null;
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imagePreviewImg = document.getElementById('imagePreviewImg');
+    const imagePreviewClose = document.getElementById('imagePreviewClose');
+
+    function setPendingImage(base64) {
+        pendingImageBase64 = base64;
+        imagePreviewImg.src = base64;
+        imagePreviewContainer.style.display = 'block';
+        chatInput.focus();
+        
+        // Forzar envío visible aunque no haya texto
+        sendBtn.classList.add('visible');
+        voiceBtn.classList.add('hidden');
+        cameraBtn.classList.add('hidden');
+    }
+
+    function clearPendingImage() {
+        pendingImageBase64 = null;
+        imagePreviewImg.src = '';
+        imagePreviewContainer.style.display = 'none';
+        
+        if (chatInput.value.trim() === '') {
+            sendBtn.classList.remove('visible');
+            voiceBtn.classList.remove('hidden');
+            cameraBtn.classList.remove('hidden');
+        }
+    }
+
+    if (imagePreviewClose) {
+        imagePreviewClose.addEventListener('click', function(e) {
+            e.preventDefault();
+            clearPendingImage();
+        });
+    }
+
+    window.openImageModal = function(src) {
+        document.getElementById('imageViewerImg').src = src;
+        document.getElementById('imageViewerOverlay').style.display = 'flex';
+    };
+    
+    document.getElementById('imageViewerClose')?.addEventListener('click', function() {
+        document.getElementById('imageViewerOverlay').style.display = 'none';
+    });
 
     // Obtener datos del usuario
     const userName = localStorage.getItem('userName');
@@ -42,12 +88,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Función para agregar mensaje del usuario
-    function addUserMessage(text) {
+    function addUserMessage(text, imageSrc = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message user';
+        
+        let imageHtml = '';
+        if (imageSrc) {
+            imageHtml = `<img src="${imageSrc}" class="message-image" alt="Imagen enviada por el usuario" onclick="openImageModal(this.src)" style="max-height: 180px; width: auto; max-width: 100%; object-fit: contain; border-radius: 8px; margin-bottom: 8px; cursor: pointer; border: 2px solid rgba(255,255,255,0.3); display: block; background: #fff;">`;
+        }
+
         messageDiv.innerHTML = `
-            <div class="message-content">
-                ${text}
+            <div class="message-content" style="display: flex; flex-direction: column; align-items: flex-end;">
+                ${imageHtml}
+                ${text ? text : ''}
                 <div class="message-time">${getCurrentTime()}</div>
             </div>
             ${getUserAvatar()}
@@ -118,30 +171,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para enviar mensaje
     function sendMessage() {
-        if (chatInput.value.trim() !== '') {
-            const userMessage = chatInput.value.trim();
-            addUserMessage(userMessage);
+        const textValue = chatInput.value.trim();
+        const hasImage = pendingImageBase64 !== null;
+
+        if (textValue !== '' || hasImage) {
+            const userMessage = textValue !== '' ? textValue : '';
+            const imageToSend = pendingImageBase64;
+            
+            // Render visible inmediato
+            addUserMessage(userMessage, imageToSend);
+            
+            // Limpiar inputs
             chatInput.value = '';
+            clearPendingImage();
 
-            // Restaurar botones a estado inicial (micrófono visible, enviar oculto)
-            sendBtn.classList.remove('visible');
-            voiceBtn.classList.remove('hidden');
-            cameraBtn.classList.remove('hidden');
-
-            // Mostrar indicador de escritura
+            // Mostrar el loader
             showTypingIndicator();
             
-            // Obtener respuesta de Mistral
-            getMistralResponse(userMessage)
-                .then(response => {
-                    removeTypingIndicator();
-                    addIAMessage(response);
-                    speakText(response);
-                })
-                .catch(error => {
-                    removeTypingIndicator();
-                    addIAMessage('Lo siento, hubo un error al procesar tu pregunta. Intenta de nuevo.');
-                });
+            if (imageToSend) {
+                // Procesar con visión
+                handleImageSubmitBackground(imageToSend, userMessage);
+            } else {
+                // Flujo normal texto con Mistral
+                getMistralResponse(userMessage)
+                    .then(response => {
+                        removeTypingIndicator();
+                        addIAMessage(response);
+                        speakText(response);
+                    })
+                    .catch(error => {
+                        removeTypingIndicator();
+                        addIAMessage('Lo siento, hubo un error al procesar tu pregunta. Intenta de nuevo.');
+                    });
+            }
         }
     }
 
@@ -154,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Mostrar/ocultar botón de enviar según el contenido
     chatInput.addEventListener('input', function() {
-        if (chatInput.value.trim() !== '') {
+        if (chatInput.value.trim() !== '' || pendingImageBase64 !== null) {
             sendBtn.classList.add('visible');
             voiceBtn.classList.add('hidden');
             cameraBtn.classList.add('hidden');
@@ -216,6 +278,56 @@ document.addEventListener('DOMContentLoaded', function() {
             webrtcCloseBtn.addEventListener('click', stopWebRTC);
         }
 
+        // Función de background para enviar a OpenRouter
+        async function handleImageSubmitBackground(base64Image, textPrompt) {
+            try {
+                if (typeof processImageWithOpenRouter !== 'undefined') {
+                    // Si el usuario no escribió nada, enviamos una pregunta por default
+                    const finalPrompt = textPrompt && textPrompt.trim() !== '' ? textPrompt : "¿Qué ves en esta imagen? Describe de forma general.";
+                    
+                    const responseText = await processImageWithOpenRouter(base64Image, finalPrompt);
+                    removeTypingIndicator();
+                    addIAMessage(responseText);
+                    speakText(responseText);
+                } else {
+                    throw new Error("Configuración de OpenRouter no encontrada");
+                }
+            } catch (error) {
+                console.error("OpenRouter Error:", error);
+                removeTypingIndicator();
+                addIAMessage("Ups, no pude procesar tu imagen en este momento. Intenta de nuevo más tarde.");
+            }
+        }
+
+        function resizeImage(base64Str, maxWidth = 800, maxHeight = 800) {
+            return new Promise((resolve) => {
+                let img = new Image();
+                img.src = base64Str;
+                img.onload = () => {
+                    let canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    let ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.8)); // compresión Jpeg 80%
+                }
+            });
+        }
+
         if (webrtcCaptureBtn) {
             webrtcCaptureBtn.addEventListener('click', function() {
                 if (!webrtcStream) return;
@@ -224,11 +336,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const ctx = webrtcCanvas.getContext('2d');
                 ctx.drawImage(webrtcVideo, 0, 0, webrtcCanvas.width, webrtcCanvas.height);
                 
-                // Aquí tienes la imagen en base64 si la necesitas:
-                // const imageDataURL = webrtcCanvas.toDataURL('image/jpeg');
-
+                const imageDataURL = webrtcCanvas.toDataURL('image/jpeg');
                 stopWebRTC();
-                mostrarModalDesarrollo('Procesamiento de imágenes', '<i class="fa-solid fa-camera"></i>');
+                
+                resizeImage(imageDataURL).then(resized => {
+                    setPendingImage(resized);
+                });
             });
         }
 
@@ -262,7 +375,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         cameraInput.addEventListener('change', function(e) {
             if (this.files && this.files.length > 0) {
-                mostrarModalDesarrollo('Procesamiento de imágenes', '<i class="fa-solid fa-image"></i>');
+                const file = this.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const imageDataURL = event.target.result;
+                    resizeImage(imageDataURL).then(resized => {
+                        setPendingImage(resized);
+                    });
+                };
+                reader.readAsDataURL(file);
                 this.value = ''; // Reset input
             }
         });
