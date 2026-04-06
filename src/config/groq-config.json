@@ -1,5 +1,5 @@
 {
-  "_comment": "⚠️ TESTING KEY - CAMBIAR ANTES DE PRODUCCIÓN",
-  "groqApiKey": "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",
+  "_comment": "Configuración de transcripción de voz",
+  "groqApiKey": "",
   "groqApiUrl": "https://api.groq.com/openai/v1/audio/transcriptions"
 }
