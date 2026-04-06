@@ -524,6 +524,126 @@ body {
     }
 }
 
+/* ===== Modal de Adjuntos (Cámara/Galería) ===== */
+.attachment-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.attachment-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.attachment-modal {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 40px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    position: relative;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.attachment-modal-overlay.active .attachment-modal {
+    transform: translateY(0);
+}
+
+.attachment-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #F0F0F0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #666;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.attachment-close-btn:hover {
+    background: #E0E0E0;
+    color: #333;
+}
+
+.attachment-title {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 24px;
+}
+
+.attachment-options {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.attachment-option-btn {
+    background: transparent;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.attachment-option-btn:hover {
+    transform: scale(1.05);
+}
+
+.attachment-option-btn:active {
+    transform: scale(0.95);
+}
+
+.attachment-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.attachment-icon.camera {
+    background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%);
+}
+
+.attachment-icon.gallery {
+    background: linear-gradient(135deg, #00B4DB 0%, #0083B0 100%);
+}
+
+.attachment-option-btn span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #424242;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .chat-header {

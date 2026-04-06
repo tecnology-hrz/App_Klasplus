@@ -168,17 +168,49 @@ document.addEventListener('DOMContentLoaded', function() {
     // Manejar clic en botón de enviar
     sendBtn.addEventListener('click', sendMessage);
 
-    // Sistema de cámara para simular toma y subida fotográfica
-    if (cameraBtn && cameraInput) {
+    // Modal de adjuntos
+    const attachmentModal = document.getElementById('attachmentModal');
+    const attachmentCloseBtn = document.getElementById('attachmentCloseBtn');
+    const btnTomarFoto = document.getElementById('btnTomarFoto');
+    const btnElegirGaleria = document.getElementById('btnElegirGaleria');
+
+    if (cameraBtn && attachmentModal && cameraInput) {
+        // Abrir modal de adjuntos
         cameraBtn.addEventListener('click', function(e) {
             e.preventDefault();
+            attachmentModal.classList.add('active');
+        });
+
+        // Cerrar modal
+        function closeAttachmentModal() {
+            attachmentModal.classList.remove('active');
+        }
+
+        attachmentCloseBtn.addEventListener('click', closeAttachmentModal);
+        
+        attachmentModal.addEventListener('click', function(e) {
+            if (e.target === attachmentModal) {
+                closeAttachmentModal();
+            }
+        });
+
+        // Opción: Tomar Foto
+        btnTomarFoto.addEventListener('click', function() {
             cameraInput.setAttribute("capture", "environment");
-            cameraInput.click();
+            closeAttachmentModal();
+            setTimeout(() => cameraInput.click(), 300);
+        });
+
+        // Opción: Elegir de Galería
+        btnElegirGaleria.addEventListener('click', function() {
+            cameraInput.removeAttribute("capture");
+            closeAttachmentModal();
+            setTimeout(() => cameraInput.click(), 300);
         });
 
         cameraInput.addEventListener('change', function(e) {
             if (this.files && this.files.length > 0) {
-                mostrarModalDesarrollo('Procesamiento de imágenes', '<i class="fa-solid fa-camera"></i>');
+                mostrarModalDesarrollo('Procesamiento de imágenes', '<i class="fa-solid fa-image"></i>');
                 this.value = ''; // Reset input
             }
         });

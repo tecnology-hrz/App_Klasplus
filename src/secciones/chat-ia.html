@@ -74,6 +74,26 @@
         </div>
     </div>
 
+    <!-- Modal de opciones de imagen (Cámara o Galería) -->
+    <div class="attachment-modal-overlay" id="attachmentModal">
+        <div class="attachment-modal">
+            <button class="attachment-close-btn" id="attachmentCloseBtn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="attachment-title">Adjuntar imagen</h3>
+            <div class="attachment-options">
+                <button class="attachment-option-btn" id="btnTomarFoto">
+                    <div class="attachment-icon camera"><i class="fa-solid fa-camera"></i></div>
+                    <span>Tomar foto</span>
+                </button>
+                <button class="attachment-option-btn" id="btnElegirGaleria">
+                    <div class="attachment-icon gallery"><i class="fa-solid fa-image"></i></div>
+                    <span>Elegir de galería</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/modal.js"></script>
     <script src="../js/groq-config.js"></script>
     <script src="../js/mistral-config.js"></script>
