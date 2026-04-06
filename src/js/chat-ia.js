@@ -273,51 +273,58 @@ document.addEventListener('DOMContentLoaded', function() {
     function startNativeRecognition() {
         if (isRecording) return;
 
-        speechRecognizer = new SpeechRecognition();
-        speechRecognizer.lang = 'es-ES';
-        speechRecognizer.continuous = true;
-        speechRecognizer.interimResults = true;
-        speechRecognizer.maxAlternatives = 1;
-
         nativeTranscript = '';
 
-        speechRecognizer.onresult = (event) => {
-            let interim = '';
-            let final = '';
-            for (let i = 0; i < event.results.length; i++) {
-                if (event.results[i].isFinal) {
-                    final += event.results[i][0].transcript + ' ';
-                } else {
-                    interim += event.results[i][0].transcript;
+        function createRecognizer() {
+            speechRecognizer = new SpeechRecognition();
+            speechRecognizer.lang = 'es-ES';
+            speechRecognizer.continuous = false;
+            speechRecognizer.interimResults = true;
+            speechRecognizer.maxAlternatives = 1;
+
+            speechRecognizer.onresult = (event) => {
+                // Solo tomar el resultado de ESTA sesión
+                let sessionText = '';
+                for (let i = 0; i < event.results.length; i++) {
+                    sessionText += event.results[i][0].transcript;
                 }
-            }
-            nativeTranscript = final.trim();
-            // Mostrar texto en tiempo real en el placeholder
-            chatInput.placeholder = nativeTranscript || interim || 'Escuchando...';
-        };
+                // Mostrar en tiempo real: lo acumulado + lo de esta sesión
+                const preview = nativeTranscript
+                    ? nativeTranscript + ' ' + sessionText
+                    : sessionText;
+                chatInput.placeholder = preview || 'Escuchando...';
 
-        speechRecognizer.onerror = (event) => {
-            console.warn('Error en reconocimiento nativo:', event.error);
-            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-                stopAllRecording();
-                showError(
-                    'Permite el acceso al micrófono en los ajustes de la app.',
-                    'Micrófono no disponible'
-                );
-            }
-            // Para 'network' u otros errores, no detenemos — el usuario puede cancelar
-        };
+                // Si el resultado es final, guardarlo permanentemente
+                if (event.results[event.results.length - 1].isFinal) {
+                    nativeTranscript = preview.trim();
+                }
+            };
 
-        speechRecognizer.onend = () => {
-            // Si la grabación sigue activa, reiniciar (el nativo se detiene solo tras silencio)
-            if (isRecording && speechRecognizer) {
-                try {
-                    speechRecognizer.start();
-                } catch(e) {} // Ignorar si ya está corriendo
-            }
-        };
+            speechRecognizer.onerror = (event) => {
+                console.warn('Error reconocimiento:', event.error);
+                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                    stopAllRecording();
+                    showError(
+                        'Permite el acceso al micrófono en los ajustes de la app.',
+                        'Micrófono no disponible'
+                    );
+                }
+                // 'no-speech' es normal — silencio, se reinicia solo
+            };
+
+            speechRecognizer.onend = () => {
+                // Reiniciar si sigue grabando (nueva sesión limpia)
+                if (isRecording) {
+                    try {
+                        createRecognizer();
+                        speechRecognizer.start();
+                    } catch(e) {}
+                }
+            };
+        }
 
         try {
+            createRecognizer();
             speechRecognizer.start();
         } catch(e) {
             console.error('No se pudo iniciar reconocimiento:', e);
