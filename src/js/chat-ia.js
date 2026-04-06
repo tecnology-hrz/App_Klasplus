@@ -263,19 +263,20 @@ document.addEventListener('DOMContentLoaded', function() {
         window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.lang = 'es-ES';
         
         if (!ttsVoice) setupTTSVoice();
         
-        // Solo reproducir si realmente tenemos una voz válida (no bloqueada)
         if (ttsVoice) {
             utterance.voice = ttsVoice;
-            utterance.rate = 1.0;
-            utterance.pitch = 1.0;
-            window.speechSynthesis.speak(utterance);
+            utterance.lang = ttsVoice.lang || 'es-ES';
         } else {
-            console.warn('Bloqueado: No se enviará a hablar porque solo están disponibles voces indeseadas (como Helena/Pablo).');
+            utterance.lang = 'es-ES'; // fallback
         }
+
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        window.speechSynthesis.speak(utterance);
     }
 
     // ===== SISTEMA DE VOZ HÍBRIDO (Nativo móvil + Groq desktop) =====
