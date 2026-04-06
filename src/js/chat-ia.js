@@ -158,157 +158,275 @@ document.addEventListener('DOMContentLoaded', function() {
     // Manejar clic en botón de enviar
     sendBtn.addEventListener('click', sendMessage);
 
-    // Grabación de audio con Groq Whisper
+    // ===== SISTEMA DE VOZ ESTILO WHATSAPP =====
+    // Elementos del UI de grabación
+    const normalInputState = document.getElementById('normalInputState');
+    const recordingInputState = document.getElementById('recordingInputState');
+    const recordingCancelBtn = document.getElementById('recordingCancelBtn');
+    const recordingSendBtn = document.getElementById('recordingSendBtn');
+    const recordingTimerEl = document.getElementById('recordingTimer');
+
+    // Estado de grabación
     let mediaRecorder = null;
     let audioChunks = [];
     let isRecording = false;
+    let recordingStream = null;
     let audioContext = null;
     let analyser = null;
     let microphone = null;
     let animationId = null;
+    let timerInterval = null;
+    let recordingStartTime = null;
 
     // Función para reproducir sonido
     function playSound(frequency, duration, type = 'sine') {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-
-        oscillator.frequency.value = frequency;
-        oscillator.type = type;
-
-        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-
-        oscillator.start(audioCtx.currentTime);
-        oscillator.stop(audioCtx.currentTime + duration);
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
     }
 
-    // Sonido al presionar (beep corto)
-    function playStartSound() {
-        playSound(800, 0.1);
+    function playStartSound() { playSound(800, 0.1); }
+    function playStopSound() { playSound(600, 0.15); }
+
+    // Actualizar cronómetro
+    function updateTimer() {
+        if (!recordingStartTime) return;
+        const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        recordingTimerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 
-    // Sonido al soltar (beep más grave)
-    function playStopSound() {
-        playSound(600, 0.15);
-    }
-
-    // Función para animar las barras según el volumen
-    function animateVoiceWave() {
+    // Animar barras según volumen REAL del micrófono
+    function animateRecordingBars() {
         if (!analyser || !isRecording) return;
 
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(dataArray);
 
-        // Calcular el volumen promedio
-        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-        
-        // Obtener las barras
-        const bars = document.querySelectorAll('.recording-bar');
-        
-        // Orden desde el centro: [3, 2, 1, 0, 4, 5, 6]
-        const centerOrder = [3, 2, 1, 0, 4, 5, 6];
-        
-        // Animar cada barra con valores diferentes basados en el volumen
-        bars.forEach((bar, index) => {
-            const dataIndex = centerOrder[index];
-            const value = dataArray[dataIndex * 15] || average;
-            const height = Math.max(8, (value / 255) * 40); // Entre 8px y 40px
+        const bars = document.querySelectorAll('.rec-bar');
+        const totalBars = bars.length;
+        const chunkSize = Math.floor(dataArray.length / totalBars);
+
+        bars.forEach((bar, i) => {
+            let sum = 0;
+            for (let j = 0; j < chunkSize; j++) {
+                sum += dataArray[i * chunkSize + j];
+            }
+            const avg = sum / chunkSize;
+            const height = Math.max(4, (avg / 255) * 36);
             bar.style.height = `${height}px`;
         });
 
-        animationId = requestAnimationFrame(animateVoiceWave);
+        animationId = requestAnimationFrame(animateRecordingBars);
     }
 
-    // Manejar botón de voz - Presionar para grabar, soltar para detener
-    voiceBtn.addEventListener('mousedown', async function(e) {
-        e.preventDefault();
-        
-        if (isRecording) return; // Evitar múltiples grabaciones
-        
-        // Reproducir sonido de inicio
-        playStartSound();
-        
+    // Mostrar UI de grabación
+    function showRecordingUI() {
+        normalInputState.classList.add('hidden-for-recording');
+        recordingInputState.classList.add('active');
+    }
+
+    // Ocultar UI de grabación
+    function hideRecordingUI() {
+        normalInputState.classList.remove('hidden-for-recording');
+        recordingInputState.classList.remove('active');
+        recordingTimerEl.textContent = '0:00';
+        // Resetear barras
+        document.querySelectorAll('.rec-bar').forEach(bar => {
+            bar.style.height = '8px';
+        });
+    }
+
+    // INICIAR GRABACIÓN
+    async function startRecording() {
+        if (isRecording) return;
+
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            
-            // Configurar análisis de audio
+            recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            // Configurar análisis de audio para ondas reales
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioContext.createAnalyser();
-            microphone = audioContext.createMediaStreamSource(stream);
+            microphone = audioContext.createMediaStreamSource(recordingStream);
             analyser.fftSize = 256;
             microphone.connect(analyser);
 
-            mediaRecorder = new MediaRecorder(stream);
+            // Configurar MediaRecorder
+            mediaRecorder = new MediaRecorder(recordingStream);
             audioChunks = [];
 
             mediaRecorder.ondataavailable = (event) => {
-                audioChunks.push(event.data);
-            };
-
-            mediaRecorder.onstart = () => {
-                isRecording = true;
-                voiceBtn.classList.add('recording');
-                document.getElementById('recordingIndicator').classList.add('active');
-                chatInput.placeholder = 'Escuchando...';
-                
-                // Iniciar animación de ondas
-                animateVoiceWave();
-            };
-
-            mediaRecorder.onstop = async () => {
-                isRecording = false;
-                voiceBtn.classList.remove('recording');
-                document.getElementById('recordingIndicator').classList.remove('active');
-                chatInput.placeholder = 'Procesando audio...';
-
-                // Detener el stream
-                stream.getTracks().forEach(track => track.stop());
-
-                // Crear blob de audio
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-
-                try {
-                    // Transcribir con Groq
-                    const transcript = await transcribeAudio(audioBlob);
-                    chatInput.value = transcript;
-                    chatInput.placeholder = 'Escribe un mensaje...';
-
-                    // Enviar mensaje automáticamente si hay texto
-                    if (transcript.trim() !== '') {
-                        sendMessage();
-                    }
-                } catch (error) {
-                    console.error('Error al transcribir:', error);
-                    chatInput.placeholder = 'Escribe un mensaje...';
-                    alert('Error al procesar el audio. Intenta de nuevo.');
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
                 }
             };
 
             mediaRecorder.start();
+            isRecording = true;
+            recordingStartTime = Date.now();
+
+            // Mostrar UI
+            playStartSound();
+            showRecordingUI();
+
+            // Iniciar cronómetro
+            timerInterval = setInterval(updateTimer, 1000);
+
+            // Iniciar animación de ondas
+            animateRecordingBars();
+
         } catch (error) {
             console.error('Error al acceder al micrófono:', error);
-            alert('No se pudo acceder al micrófono. Verifica los permisos.');
+            showError(
+                'No se pudo acceder al micrófono. Verifica los permisos del navegador.',
+                'Micrófono no disponible'
+            );
         }
+    }
+
+    // DETENER GRABACIÓN Y ENVIAR
+    async function stopAndSendRecording() {
+        if (!isRecording || !mediaRecorder) return;
+
+        // Detener animaciones y timer
+        clearInterval(timerInterval);
+        cancelAnimationFrame(animationId);
+        playStopSound();
+
+        // Detener el MediaRecorder
+        return new Promise((resolve) => {
+            mediaRecorder.onstop = async () => {
+                isRecording = false;
+
+                // Detener stream
+                recordingStream.getTracks().forEach(track => track.stop());
+                if (audioContext) audioContext.close();
+
+                hideRecordingUI();
+                chatInput.placeholder = 'Procesando audio...';
+
+                // Crear blob de audio
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+
+                // Verificar que haya audio
+                if (audioBlob.size < 1000) {
+                    chatInput.placeholder = 'Escribe un mensaje...';
+                    showWarning(
+                        'La grabación fue muy corta. Mantén presionado y habla antes de enviar.',
+                        'Grabación muy corta'
+                    );
+                    resolve();
+                    return;
+                }
+
+                try {
+                    // Transcribir con Groq Whisper
+                    const transcript = await transcribeAudio(audioBlob);
+
+                    chatInput.placeholder = 'Escribe un mensaje...';
+
+                    if (transcript && transcript.trim() !== '') {
+                        chatInput.value = transcript;
+                        sendMessage();
+                    } else {
+                        showWarning(
+                            'No se detectó voz en el audio. Intenta hablar más cerca del micrófono.',
+                            'Sin voz detectada'
+                        );
+                    }
+                } catch (error) {
+                    console.error('Error al transcribir:', error);
+                    chatInput.placeholder = 'Escribe un mensaje...';
+
+                    const msg = error.message || '';
+
+                    if (msg.includes('401')) {
+                        // API Key inválida o expirada
+                        showModal({
+                            type: 'error',
+                            title: 'API Key de voz expirada',
+                            message: 'La clave de la API de transcripción (Groq) está expirada o es inválida. Necesitas renovarla en console.groq.com (es gratis). Contacta al administrador del sistema.',
+                            confirmText: 'Entendido'
+                        });
+                    } else if (msg.includes('429')) {
+                        showModal({
+                            type: 'warning',
+                            title: 'Límite de uso alcanzado',
+                            message: 'Se alcanzó el límite de la API de transcripción. Intenta de nuevo en unos minutos o escribe tu mensaje manualmente.',
+                            confirmText: 'Entendido'
+                        });
+                    } else if (msg.includes('413')) {
+                        showWarning(
+                            'El audio fue demasiado largo. Intenta con un mensaje más corto (máximo 1 minuto).',
+                            'Audio demasiado largo'
+                        );
+                    } else {
+                        showError(
+                            'Error al procesar el audio. Verifica tu conexión a internet e intenta de nuevo.',
+                            'Error de transcripción'
+                        );
+                    }
+                }
+
+                resolve();
+            };
+
+            mediaRecorder.stop();
+        });
+    }
+
+    // CANCELAR GRABACIÓN
+    function cancelRecording() {
+        if (!isRecording) return;
+
+        clearInterval(timerInterval);
+        cancelAnimationFrame(animationId);
+
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.onstop = () => {}; // No procesar al detener
+            mediaRecorder.stop();
+        }
+
+        if (recordingStream) {
+            recordingStream.getTracks().forEach(track => track.stop());
+        }
+        if (audioContext) {
+            audioContext.close();
+        }
+
+        isRecording = false;
+        audioChunks = [];
+        hideRecordingUI();
+    }
+
+    // EVENT LISTENERS
+    // Botón de micrófono → iniciar grabación
+    voiceBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        startRecording();
     });
 
-    // Detener grabación al soltar el botón
-    document.addEventListener('mouseup', function() {
-        if (isRecording && mediaRecorder) {
-            // Reproducir sonido de fin
-            playStopSound();
-            
-            mediaRecorder.stop();
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
-            if (audioContext) {
-                audioContext.close();
-            }
-        }
+    // Botón enviar audio → detener y transcribir
+    recordingSendBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        stopAndSendRecording();
+    });
+
+    // Botón cancelar → descartar grabación
+    recordingCancelBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        cancelRecording();
     });
 
     // Mensaje de bienvenida inicial

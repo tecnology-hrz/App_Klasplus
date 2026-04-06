@@ -26,9 +26,10 @@
             <!-- Los mensajes aparecerán aquí -->
         </main>
 
-        <!-- Input de mensaje -->
-        <div class="chat-input-container">
-            <div class="chat-input-wrapper">
+        <!-- Input de mensaje (estado normal) -->
+        <div class="chat-input-container" id="chatInputContainer">
+            <!-- Estado normal: texto + mic -->
+            <div class="chat-input-wrapper" id="normalInputState">
                 <input 
                     type="text" 
                     class="chat-input" 
@@ -38,26 +39,39 @@
                 >
                 <button class="voice-btn" id="voiceBtn">
                     <i class="fa-solid fa-microphone"></i>
-                    <div class="recording-indicator" id="recordingIndicator">
-                        <div class="recording-wave">
-                            <div class="recording-bar"></div>
-                            <div class="recording-bar"></div>
-                            <div class="recording-bar"></div>
-                            <div class="recording-bar center-bar"></div>
-                            <div class="recording-bar"></div>
-                            <div class="recording-bar"></div>
-                            <div class="recording-bar"></div>
-                        </div>
-                        <span class="recording-text">Grabando...</span>
-                    </div>
                 </button>
                 <button class="send-btn" id="sendBtn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <!-- Estado grabando: cancelar | ondas + timer | enviar -->
+            <div class="recording-input-wrapper" id="recordingInputState">
+                <button class="recording-cancel-btn" id="recordingCancelBtn" title="Cancelar grabación">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <div class="recording-panel">
+                    <div class="recording-wave-live">
+                        <div class="rec-bar"></div>
+                        <div class="rec-bar"></div>
+                        <div class="rec-bar"></div>
+                        <div class="rec-bar"></div>
+                        <div class="rec-bar"></div>
+                        <div class="rec-bar"></div>
+                        <div class="rec-bar"></div>
+                        <div class="rec-bar"></div>
+                        <div class="rec-bar"></div>
+                    </div>
+                    <span class="recording-timer" id="recordingTimer">0:00</span>
+                </div>
+                <button class="recording-send-btn" id="recordingSendBtn" title="Enviar audio">
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
             </div>
         </div>
     </div>
 
+    <script src="../js/modal.js"></script>
     <script src="../js/groq-config.js"></script>
     <script src="../js/mistral-config.js"></script>
     <script src="../js/chat-ia.js"></script>
