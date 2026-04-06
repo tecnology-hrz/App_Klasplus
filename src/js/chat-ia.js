@@ -285,6 +285,8 @@ document.addEventListener('DOMContentLoaded', function() {
             speechRecognizer.maxAlternatives = 1;
 
             speechRecognizer.onresult = (event) => {
+                if (!isRecording) return; // Evitar que escriba en el placeholder después de haber enviado el mensaje
+
                 // Solo tomar el resultado de ESTA sesión
                 let sessionText = '';
                 for (let i = 0; i < event.results.length; i++) {
