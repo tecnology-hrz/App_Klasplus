@@ -177,6 +177,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar según sesión
     let isTTSActive = localStorage.getItem('chatVoiceActive') === 'true';
     let ttsVoice = null;
+    const voiceSelect = document.getElementById('voiceSelect');
+
+    function populateVoiceList() {
+        if (!voiceSelect) return;
+        const voices = window.speechSynthesis.getVoices();
+        const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
+        
+        voiceSelect.innerHTML = '';
+        if (spanishVoices.length === 0) {
+            voiceSelect.innerHTML = '<option value="">Sin voces en español</option>';
+            return;
+        }
+
+        spanishVoices.forEach(voice => {
+            const option = document.createElement('option');
+            option.textContent = `${voice.name}`;
+            option.value = voice.voiceURI;
+            voiceSelect.appendChild(option);
+        });
+        
+        if (ttsVoice) {
+            voiceSelect.value = ttsVoice.voiceURI;
+        }
+    }
 
     function setupTTSVoice() {
         const voices = window.speechSynthesis.getVoices();
@@ -188,8 +212,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
         if (spanishVoices.length === 0) return;
 
-        // 1. Prioridad: Jorge (por si estás en Edge)
-        let bestVoice = spanishVoices.find(v => v.name.includes('Jorge'));
+        let bestVoice = null;
+        const savedVoiceURI = localStorage.getItem('chatVoiceURI');
+        
+        // 0. Preferencia manual del usuario
+        if (savedVoiceURI) {
+            bestVoice = spanishVoices.find(v => v.voiceURI === savedVoiceURI);
+        }
+
+        // 1. Prioridad automática: Jorge (por si estás en Edge)
+        if (!bestVoice) {
+            bestVoice = spanishVoices.find(v => v.name.includes('Jorge'));
+        }
         
         // 2. Prioridad Móvil (APK/Android): Motor nativo de Google
         if (!bestVoice) {
@@ -213,11 +247,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         ttsVoice = bestVoice;
         console.log("🗣️ Voz nativa seleccionada:", ttsVoice ? ttsVoice.name : "Ninguna");
+        
+        populateVoiceList();
     }
 
     if (window.speechSynthesis) {
         window.speechSynthesis.onvoiceschanged = setupTTSVoice;
         setupTTSVoice(); // Intentar cargar inicial si ya existen
+    }
+
+    if (voiceSelect) {
+        voiceSelect.addEventListener('change', (e) => {
+            localStorage.setItem('chatVoiceURI', e.target.value);
+            setupTTSVoice();
+        });
     }
 
     const toggleVoiceModalBtn = document.getElementById('toggleVoiceModalBtn');
@@ -263,20 +306,19 @@ document.addEventListener('DOMContentLoaded', function() {
         window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'es-ES';
         
         if (!ttsVoice) setupTTSVoice();
         
+        // Solo reproducir si realmente tenemos una voz válida (no bloqueada)
         if (ttsVoice) {
             utterance.voice = ttsVoice;
-            utterance.lang = ttsVoice.lang || 'es-ES';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
         } else {
-            utterance.lang = 'es-ES'; // fallback
+            console.warn('Bloqueado: No se enviará a hablar porque solo están disponibles voces indeseadas (como Helena/Pablo).');
         }
-
-        utterance.rate = 1.0;
-        utterance.pitch = 1.0;
-
-        window.speechSynthesis.speak(utterance);
     }
 
     // ===== SISTEMA DE VOZ HÍBRIDO (Nativo móvil + Groq desktop) =====
