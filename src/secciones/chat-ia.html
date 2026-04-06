@@ -15,8 +15,8 @@
                 <i class="fa-solid fa-chevron-left"></i>
                 <span>Volver atrás</span>
             </button>
-            <button class="settings-top-btn" id="settingsBtn" aria-label="Configuración de Chat" title="Configuración de Chat">
-                <i class="fa-solid fa-gear"></i>
+            <button class="voice-read-btn" id="voiceReadToggle" aria-label="Activar lectura de IA" title="Activar lectura de IA">
+                <i class="fa-solid fa-volume-xmark"></i>
             </button>
         </header>
 
@@ -65,42 +65,6 @@
                 </div>
                 <button class="recording-send-btn" id="recordingSendBtn" title="Enviar audio">
                     <i class="fa-solid fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Configuración del Chat -->
-    <div class="modal-overlay" id="chatSettingsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10000;">
-        <div class="development-modal-container" style="background: white; border-radius: 25px; padding: 40px 30px; max-width: 450px; width: 90%; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3); transform: scale(0.9); animation: scaleIn 0.3s ease forwards; position: relative; text-align: center;">
-            <button id="closeSettingsBtn" style="position: absolute; top: 15px; right: 15px; background: none; border: none; cursor: pointer; padding: 0; width: 40px; height: 40px; transition: transform 0.3s ease;">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
-                    <circle cx="12" cy="12" r="10" fill="#0047B3"/>
-                    <path d="M15 9L9 15M9 9L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-                </svg>
-            </button>
-            
-            <div style="font-size: 60px; margin-bottom: 10px; color: #0047B3;">
-                <i class="fa-solid fa-gear"></i>
-            </div>
-            <h2 style="color: #0047B3; font-size: 28px; font-weight: 700; margin: 0; margin-bottom: 25px;">Ajustes de Chat</h2>
-            
-            <div style="display: flex; flex-direction: column; gap: 15px; align-items: stretch;">
-                <button id="toggleVoiceModalBtn" style="background: #F0F7FF; color: #1565C0; border: 2px solid #E3F2FD; padding: 15px; border-radius: 15px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease;">
-                    <i class="fa-solid fa-volume-high"></i> <span id="toggleVoiceText">Voz: Activada</span>
-                </button>
-
-                <div style="text-align: left; background: #F8F9FA; padding: 15px; border-radius: 15px; border: 1px solid #E0E0E0;">
-                    <label for="voiceSelect" style="display: block; margin-bottom: 8px; color: #333; font-weight: 600; font-size: 14px;">Voz del Asistente:</label>
-                    <select id="voiceSelect" style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #D0D0D0; background: white; color: #333; font-size: 14px; outline: none; cursor: pointer;">
-                        <option value="">Cargando voces...</option>
-                    </select>
-                </div>
-
-                <div style="margin: 5px 0; height: 1px; background: #E0E0E0;"></div>
-
-                <button id="clearChatBtn" style="background: #FFF5F5; color: #FF4444; border: 2px solid #FF4444; padding: 15px; border-radius: 15px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease;">
-                    <i class="fa-solid fa-trash"></i> Limpiar Historial
                 </button>
             </div>
         </div>

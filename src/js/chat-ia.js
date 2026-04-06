@@ -40,24 +40,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Función para agregar mensaje del usuario
-    function addUserMessage(text, save = true, time = getCurrentTime()) {
+    function addUserMessage(text) {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message user';
         messageDiv.innerHTML = `
             <div class="message-content">
                 ${text}
-                <div class="message-time">${time}</div>
+                <div class="message-time">${getCurrentTime()}</div>
             </div>
             ${getUserAvatar()}
         `;
         chatMessages.appendChild(messageDiv);
         scrollToBottom();
-
-        if (save) {
-            let history = JSON.parse(localStorage.getItem('chatHistory')) || [];
-            history.push({ role: 'user', text: text, time: time });
-            localStorage.setItem('chatHistory', JSON.stringify(history));
-        }
     }
 
     // Función para procesar markdown básico (negritas y saltos de línea)
@@ -75,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Función para agregar mensaje de la IA
-    function addIAMessage(text, save = true, time = getCurrentTime()) {
+    function addIAMessage(text) {
         const processedText = processMarkdown(text);
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message ia';
@@ -83,17 +77,11 @@ document.addEventListener('DOMContentLoaded', function() {
             <img src="../img/IA-1.png" alt="IA Assistant" class="message-avatar-ia">
             <div class="message-content">
                 ${processedText}
-                <div class="message-time">${time}</div>
+                <div class="message-time">${getCurrentTime()}</div>
             </div>
         `;
         chatMessages.appendChild(messageDiv);
         scrollToBottom();
-
-        if (save) {
-            let history = JSON.parse(localStorage.getItem('chatHistory')) || [];
-            history.push({ role: 'ia', text: text, time: time });
-            localStorage.setItem('chatHistory', JSON.stringify(history));
-        }
     }
 
     // Función para mostrar indicador de escritura
@@ -172,83 +160,39 @@ document.addEventListener('DOMContentLoaded', function() {
     sendBtn.addEventListener('click', sendMessage);
 
     // ===== SISTEMA DE TEXTO A VOZ (TTS) =====
-    // Inicializar según sesión
-    // ===== SISTEMA DE TEXTO A VOZ (WEB SPEECH NATIVO) =====
-    // Inicializar según sesión
-    let isTTSActive = localStorage.getItem('chatVoiceActive') === 'true';
+    const voiceReadToggle = document.getElementById('voiceReadToggle');
+    let isTTSActive = false;
     let ttsVoice = null;
-    const voiceSelect = document.getElementById('voiceSelect');
-
-    function populateVoiceList() {
-        if (!voiceSelect) return;
-        const voices = window.speechSynthesis.getVoices();
-        const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
-        
-        voiceSelect.innerHTML = '';
-        if (spanishVoices.length === 0) {
-            voiceSelect.innerHTML = '<option value="">Sin voces en español</option>';
-            return;
-        }
-
-        spanishVoices.forEach(voice => {
-            const option = document.createElement('option');
-            option.textContent = `${voice.name}`;
-            option.value = voice.voiceURI;
-            voiceSelect.appendChild(option);
-        });
-        
-        if (ttsVoice) {
-            voiceSelect.value = ttsVoice.voiceURI;
-        }
-    }
 
     function setupTTSVoice() {
         const voices = window.speechSynthesis.getVoices();
-        if (voices.length === 0) {
-            setTimeout(setupTTSVoice, 100);
-            return;
-        }
+        if (voices.length === 0) return;
 
+        // Filtrar solo voces en español
         const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
+
         if (spanishVoices.length === 0) return;
 
-        let bestVoice = null;
-        const savedVoiceURI = localStorage.getItem('chatVoiceURI');
+        // Prioridad 1: Voces "Natural" u "Online" de Edge (son las más realistas)
+        let bestVoice = spanishVoices.find(v => v.name.includes('Natural') || v.name.includes('Online'));
         
-        // 0. Preferencia manual del usuario
-        if (savedVoiceURI) {
-            bestVoice = spanishVoices.find(v => v.voiceURI === savedVoiceURI);
-        }
-
-        // 1. Prioridad automática: Jorge (por si estás en Edge)
-        if (!bestVoice) {
-            bestVoice = spanishVoices.find(v => v.name.includes('Jorge'));
-        }
-        
-        // 2. Prioridad Móvil (APK/Android): Motor nativo de Google
+        // Prioridad 2: Voces de Google (suelen ser buenas en Android/Chrome)
         if (!bestVoice) {
             bestVoice = spanishVoices.find(v => v.name.includes('Google'));
         }
 
-        // 3. Prioridad: Español Latino / México
+        // Prioridad 3: Microsoft Jorge u otras especificas (evitar Helena si es posible)
         if (!bestVoice) {
-            bestVoice = spanishVoices.find(v => v.lang.includes('MX') || v.name.includes('Latam') || v.name.includes('América'));
+            bestVoice = spanishVoices.find(v => v.name.includes('Jorge'));
         }
 
-        // 4. Voz predeterminada del sistema
+        // Prioridad 4: Cualquier otra en español (fallback)
         if (!bestVoice) {
-            bestVoice = spanishVoices.find(v => v.default);
-        }
-
-        // 5. Fallback: Cualquier voz en español
-        if (!bestVoice) {
-            bestVoice = spanishVoices[0];
+            bestVoice = spanishVoices.find(v => !v.name.includes('Helena')) || spanishVoices[0];
         }
 
         ttsVoice = bestVoice;
-        console.log("🗣️ Voz nativa seleccionada:", ttsVoice ? ttsVoice.name : "Ninguna");
-        
-        populateVoiceList();
+        console.log("🗣️ Voz seleccionada:", ttsVoice ? ttsVoice.name : "Ninguna");
     }
 
     if (window.speechSynthesis) {
@@ -256,41 +200,24 @@ document.addEventListener('DOMContentLoaded', function() {
         setupTTSVoice(); // Intentar cargar inicial si ya existen
     }
 
-    if (voiceSelect) {
-        voiceSelect.addEventListener('change', (e) => {
-            localStorage.setItem('chatVoiceURI', e.target.value);
-            setupTTSVoice();
-        });
-    }
-
-    const toggleVoiceModalBtn = document.getElementById('toggleVoiceModalBtn');
-
-    function updateVoiceToggleUI() {
-        if (isTTSActive) {
-            if (toggleVoiceModalBtn) {
-                toggleVoiceModalBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> <span id="toggleVoiceText">Voz: Activada</span>';
-            }
-            if (!ttsVoice && window.speechSynthesis) setupTTSVoice();
-        } else {
-            if (toggleVoiceModalBtn) {
-                toggleVoiceModalBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> <span id="toggleVoiceText">Voz: Desactivada</span>';
-            }
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-            }
-        }
-        localStorage.setItem('chatVoiceActive', isTTSActive);
-    }
-
-    if (toggleVoiceModalBtn) {
-        toggleVoiceModalBtn.addEventListener('click', () => {
+    if (voiceReadToggle) {
+        voiceReadToggle.addEventListener('click', () => {
             isTTSActive = !isTTSActive;
-            updateVoiceToggleUI();
+            const icon = voiceReadToggle.querySelector('i');
+            
+            if (isTTSActive) {
+                icon.className = 'fa-solid fa-volume-high';
+                voiceReadToggle.classList.add('active');
+                if (!ttsVoice) setupTTSVoice();
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                voiceReadToggle.classList.remove('active');
+                if (window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                }
+            }
         });
     }
-
-    // Inicializar UI al cargar
-    updateVoiceToggleUI();
 
     function speakText(htmlText) {
         if (!isTTSActive || !window.speechSynthesis) return;
@@ -309,16 +236,14 @@ document.addEventListener('DOMContentLoaded', function() {
         utterance.lang = 'es-ES';
         
         if (!ttsVoice) setupTTSVoice();
-        
-        // Solo reproducir si realmente tenemos una voz válida (no bloqueada)
         if (ttsVoice) {
             utterance.voice = ttsVoice;
-            utterance.rate = 1.0;
-            utterance.pitch = 1.0;
-            window.speechSynthesis.speak(utterance);
-        } else {
-            console.warn('Bloqueado: No se enviará a hablar porque solo están disponibles voces indeseadas (como Helena/Pablo).');
         }
+
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        window.speechSynthesis.speak(utterance);
     }
 
     // ===== SISTEMA DE VOZ HÍBRIDO (Nativo móvil + Groq desktop) =====
@@ -731,50 +656,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Carga de historial y msj de bienvenida
-    let loadedHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
-    if (loadedHistory.length === 0) {
-        addIAMessage('Hola, soy tu asistente de seguridad escolar. Estoy aquí para ayudarte con temas de **gestión de riesgo**, **brigadas de emergencia** y **protocolos de seguridad**.\n\n¿En qué puedo ayudarte hoy?');
-    } else {
-        loadedHistory.forEach(msg => {
-            if (msg.role === 'user') {
-                addUserMessage(msg.text, false, msg.time);
-            } else {
-                addIAMessage(msg.text, false, msg.time);
-            }
-        });
-    }
-
-    // ===== MODAL DE CONFIGURACIÓN =====
-    const settingsBtn = document.getElementById('settingsBtn');
-    const chatSettingsModal = document.getElementById('chatSettingsModal');
-    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-    const clearChatBtn = document.getElementById('clearChatBtn');
-
-    if (settingsBtn && chatSettingsModal) {
-        settingsBtn.addEventListener('click', () => {
-            chatSettingsModal.style.display = 'flex';
-        });
-
-        closeSettingsBtn.addEventListener('click', () => {
-            chatSettingsModal.style.display = 'none';
-        });
-
-        chatSettingsModal.addEventListener('click', (e) => {
-            if (e.target === chatSettingsModal) {
-                chatSettingsModal.style.display = 'none';
-            }
-        });
-    }
-
-    if (clearChatBtn) {
-        clearChatBtn.addEventListener('click', () => {
-            localStorage.removeItem('chatHistory');
-            chatMessages.innerHTML = '';
-            chatSettingsModal.style.display = 'none';
-            addIAMessage('Hola, soy tu asistente de seguridad escolar. Estoy aquí para ayudarte con temas de **gestión de riesgo**, **brigadas de emergencia** y **protocolos de seguridad**.\n\n¿En qué puedo ayudarte hoy?', true);
-        });
-    }
+    // Mensaje de bienvenida inicial
+    addIAMessage('Hola, soy tu asistente de seguridad escolar. Estoy aquí para ayudarte con temas de **gestión de riesgo**, **brigadas de emergencia** y **protocolos de seguridad**.\n\n¿En qué puedo ayudarte hoy?');
 
     // Botón de notificaciones
     const notificationBtn = document.querySelector('.notification-btn');
