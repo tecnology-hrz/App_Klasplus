@@ -194,11 +194,63 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Opción: Tomar Foto
-        btnTomarFoto.addEventListener('click', function() {
-            cameraInput.setAttribute("capture", "environment");
+        // Variables para WebRTC
+        const webrtcOverlay = document.getElementById('webrtcCameraOverlay');
+        const webrtcVideo = document.getElementById('webrtcVideo');
+        const webrtcCanvas = document.getElementById('webrtcCanvas');
+        const webrtcCaptureBtn = document.getElementById('webrtcCaptureBtn');
+        const webrtcCloseBtn = document.getElementById('webrtcCloseBtn');
+        let webrtcStream = null;
+
+        function stopWebRTC() {
+            if (webrtcStream) {
+                webrtcStream.getTracks().forEach(track => track.stop());
+                webrtcStream = null;
+            }
+            if (webrtcOverlay) {
+                webrtcOverlay.classList.remove('active');
+            }
+        }
+
+        if (webrtcCloseBtn) {
+            webrtcCloseBtn.addEventListener('click', stopWebRTC);
+        }
+
+        if (webrtcCaptureBtn) {
+            webrtcCaptureBtn.addEventListener('click', function() {
+                if (!webrtcStream) return;
+                webrtcCanvas.width = webrtcVideo.videoWidth;
+                webrtcCanvas.height = webrtcVideo.videoHeight;
+                const ctx = webrtcCanvas.getContext('2d');
+                ctx.drawImage(webrtcVideo, 0, 0, webrtcCanvas.width, webrtcCanvas.height);
+                
+                // Aquí tienes la imagen en base64 si la necesitas:
+                // const imageDataURL = webrtcCanvas.toDataURL('image/jpeg');
+
+                stopWebRTC();
+                mostrarModalDesarrollo('Procesamiento de imágenes', '<i class="fa-solid fa-camera"></i>');
+            });
+        }
+
+        // Opción: Tomar Foto (Lanzar WebRTC)
+        btnTomarFoto.addEventListener('click', async function() {
             closeAttachmentModal();
-            setTimeout(() => cameraInput.click(), 300);
+            
+            try {
+                // Intentar abrir cámara trasera
+                webrtcStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' },
+                    audio: false
+                });
+                webrtcVideo.srcObject = webrtcStream;
+                webrtcOverlay.classList.add('active');
+            } catch (err) {
+                console.error("Error al acceder a la cámara nativa: ", err);
+                // Fallback: Si no hay permisos o no soporta WebRTC, intentamos con input file de fallback
+                alert("No se pudo iniciar la cámara en la app. Asegúrate de dar permisos de cámara.");
+                cameraInput.setAttribute("capture", "environment");
+                setTimeout(() => cameraInput.click(), 300);
+            }
         });
 
         // Opción: Elegir de Galería

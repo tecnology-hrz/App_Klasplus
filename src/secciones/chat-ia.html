@@ -94,6 +94,23 @@
         </div>
     </div>
 
+    <!-- Cámara WebRTC Integrada -->
+    <div class="webrtc-camera-overlay" id="webrtcCameraOverlay">
+        <div class="webrtc-header">
+            <span>Cámara</span>
+            <button class="webrtc-close-btn" id="webrtcCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="webrtc-video-container">
+            <video id="webrtcVideo" autoplay playsinline></video>
+            <canvas id="webrtcCanvas" style="display: none;"></canvas>
+        </div>
+        <div class="webrtc-controls">
+            <button class="webrtc-capture-btn" id="webrtcCaptureBtn">
+                <div class="webrtc-capture-inner"></div>
+            </button>
+        </div>
+    </div>
+    
     <script src="../js/modal.js"></script>
     <script src="../js/groq-config.js"></script>
     <script src="../js/mistral-config.js"></script>
