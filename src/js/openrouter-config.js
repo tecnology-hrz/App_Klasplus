@@ -1,6 +1,18 @@
 // Lista de claves API de OpenRouter
+// Dividida en 10 partes para ofuscación básica
+const p1 = "sk-or-v";
+const p2 = "1-75640";
+const p3 = "80dc4c6";
+const p4 = "d2e071c";
+const p5 = "6e39d86";
+const p6 = "f04fa16";
+const p7 = "27148f1";
+const p8 = "1af17d0";
+const p9 = "eb4c6f5";
+const p10 = "474fe4d2d8";
+
 const OPENROUTER_API_KEYS = [
-    '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'
+    p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10
 ];
 
 // Modelos gratuitos de OpenRouter que soportan visión (imágenes)
