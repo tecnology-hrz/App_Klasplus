@@ -129,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => {
                     removeTypingIndicator();
                     addIAMessage(response);
+                    speakText(response);
                 })
                 .catch(error => {
                     removeTypingIndicator();
@@ -157,6 +158,73 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Manejar clic en botón de enviar
     sendBtn.addEventListener('click', sendMessage);
+
+    // ===== SISTEMA DE TEXTO A VOZ (TTS) =====
+    const voiceReadToggle = document.getElementById('voiceReadToggle');
+    let isTTSActive = false;
+    let ttsVoice = null;
+
+    function setupTTSVoice() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+
+        // Buscar voces naturales en español (Google o Jorge de Microsoft)
+        ttsVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('es')) ||
+                   voices.find(v => v.name.includes('Jorge') && v.lang.includes('es')) ||
+                   voices.find(v => v.name.includes('Microsoft') && v.lang.includes('es')) ||
+                   voices.find(v => v.lang.startsWith('es-') || v.lang === 'es');
+    }
+
+    if (window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = setupTTSVoice;
+        setupTTSVoice(); // Intentar cargar inicial si ya existen
+    }
+
+    if (voiceReadToggle) {
+        voiceReadToggle.addEventListener('click', () => {
+            isTTSActive = !isTTSActive;
+            const icon = voiceReadToggle.querySelector('i');
+            
+            if (isTTSActive) {
+                icon.className = 'fa-solid fa-volume-high';
+                voiceReadToggle.classList.add('active');
+                if (!ttsVoice) setupTTSVoice();
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                voiceReadToggle.classList.remove('active');
+                if (window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                }
+            }
+        });
+    }
+
+    function speakText(htmlText) {
+        if (!isTTSActive || !window.speechSynthesis) return;
+
+        // Limpiar texto de Markdown/HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlText;
+        let cleanText = tempDiv.textContent || tempDiv.innerText || '';
+        
+        // Quitar asteriscos del markdown para que no los lea
+        cleanText = cleanText.replace(/\*/g, '');
+
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'es-ES';
+        
+        if (!ttsVoice) setupTTSVoice();
+        if (ttsVoice) {
+            utterance.voice = ttsVoice;
+        }
+
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        window.speechSynthesis.speak(utterance);
+    }
 
     // ===== SISTEMA DE VOZ HÍBRIDO (Nativo móvil + Groq desktop) =====
     // Elementos del UI de grabación

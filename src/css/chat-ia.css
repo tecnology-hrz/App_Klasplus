@@ -61,38 +61,37 @@ body {
     font-size: 18px;
 }
 
-.notification-btn {
+.voice-read-btn {
     position: relative;
-    background: none;
+    background: #f0f0f0;
     border: none;
     cursor: pointer;
-    padding: 8px;
-    transition: transform 0.3s ease;
-}
-
-.notification-btn:hover {
-    transform: scale(1.1);
-}
-
-.notification-btn i {
-    font-size: 24px;
-    color: #666;
-}
-
-.notification-badge {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    background: #D32F2F;
-    color: white;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    width: 18px;
-    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.voice-read-btn:hover {
+    background: #e0e0e0;
+    transform: scale(1.05);
+}
+
+.voice-read-btn i {
+    font-size: 18px;
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+.voice-read-btn.active {
+    background: #E3F2FD;
+}
+
+.voice-read-btn.active i {
+    color: #1565C0;
 }
 
 /* Área de mensajes */
