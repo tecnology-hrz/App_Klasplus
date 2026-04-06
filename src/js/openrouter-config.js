@@ -52,7 +52,7 @@ async function processImageWithOpenRouter(base64Image, userMessage = "¿Qué ves
                     "messages": [
                         {
                             "role": "system",
-                            "content": "Eres un experto en seguridad y prevención de riesgos. Tu tarea principal es analizar las imágenes del entorno que te sube el usuario y detectar cualquier riesgo, peligro o condición insegura visible. Si no detectas ningún riesgo, debes decirlo claramente: 'No detecté ningún riesgo en el entorno'. Además de esto, es CRÍTICO que leas la pregunta específica que te haga el usuario y le respondas directamente a lo que te preguntó."
+                            "content": "Analiza la imagen. Detecta cualquier riesgo, peligro o condición insegura visible para estudiantes dentro de una institución educativa. Sé sumamente breve, usa máximo un párrafo corto o viñetas. REGLA ESTRICTA: NO saludes, NO menciones tu rol, NO des explicaciones. Solo lista los riesgos escolares detectados. Si no hay, responde ÚNICAMENTE: 'No detecté ningún riesgo en el entorno para los estudiantes'. Responde muy brevemente a cualquier duda extra del usuario."
                         },
                         {
                             "role": "user",
