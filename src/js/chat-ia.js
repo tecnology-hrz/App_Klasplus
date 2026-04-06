@@ -188,6 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let recordingStartTime = null;
     let speechRecognizer = null;
     let nativeTranscript = '';
+    let livePreview = '';
 
     // Función para reproducir sonido
     function playSound(frequency, duration, type = 'sine') {
@@ -274,6 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isRecording) return;
 
         nativeTranscript = '';
+        livePreview = '';
 
         function createRecognizer() {
             speechRecognizer = new SpeechRecognition();
@@ -294,7 +296,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     : sessionText;
                 chatInput.placeholder = preview || 'Escuchando...';
 
-                // Si el resultado es final, guardarlo permanentemente
+                // SIEMPRE guardar lo que se ve en pantalla (para enviar)
+                livePreview = preview.trim();
+
+                // Si el resultado es final, guardarlo como base permanente
                 if (event.results[event.results.length - 1].isFinal) {
                     nativeTranscript = preview.trim();
                 }
@@ -349,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function() {
         playStopSound();
 
         if (speechRecognizer) {
-            speechRecognizer.onend = null; // No reiniciar
+            speechRecognizer.onend = null;
             speechRecognizer.stop();
             speechRecognizer = null;
         }
@@ -358,8 +363,11 @@ document.addEventListener('DOMContentLoaded', function() {
         hideRecordingUI();
         chatInput.placeholder = 'Escribe un mensaje...';
 
-        if (nativeTranscript && nativeTranscript.trim() !== '') {
-            chatInput.value = nativeTranscript.trim();
+        // Usar livePreview (lo que ve el usuario) si nativeTranscript está vacío
+        const textToSend = (nativeTranscript || livePreview || '').trim();
+
+        if (textToSend !== '') {
+            chatInput.value = textToSend;
             sendMessage();
         } else {
             showWarning(
@@ -369,6 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         nativeTranscript = '';
+        livePreview = '';
     }
 
     function cancelNativeRecognition() {
