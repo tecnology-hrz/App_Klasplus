@@ -164,6 +164,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Función de background para enviar a OpenRouter
+    async function handleImageSubmitBackground(base64Image, textPrompt) {
+        try {
+            if (typeof processImageWithOpenRouter !== 'undefined') {
+                // Si el usuario no escribió nada, enviamos una pregunta por default
+                const finalPrompt = textPrompt && textPrompt.trim() !== '' ? textPrompt : "¿Qué ves en esta imagen? Describe de forma general.";
+                
+                const responseText = await processImageWithOpenRouter(base64Image, finalPrompt);
+                removeTypingIndicator();
+                addIAMessage(responseText);
+                speakText(responseText);
+            } else {
+                throw new Error("Configuración de OpenRouter no encontrada");
+            }
+        } catch (error) {
+            console.error("OpenRouter Error:", error);
+            removeTypingIndicator();
+            addIAMessage("Ups, no pude procesar tu imagen en este momento. Intenta de nuevo más tarde.");
+        }
+    }
+
     // Función para hacer scroll al final
     function scrollToBottom() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -278,26 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
             webrtcCloseBtn.addEventListener('click', stopWebRTC);
         }
 
-        // Función de background para enviar a OpenRouter
-        async function handleImageSubmitBackground(base64Image, textPrompt) {
-            try {
-                if (typeof processImageWithOpenRouter !== 'undefined') {
-                    // Si el usuario no escribió nada, enviamos una pregunta por default
-                    const finalPrompt = textPrompt && textPrompt.trim() !== '' ? textPrompt : "¿Qué ves en esta imagen? Describe de forma general.";
-                    
-                    const responseText = await processImageWithOpenRouter(base64Image, finalPrompt);
-                    removeTypingIndicator();
-                    addIAMessage(responseText);
-                    speakText(responseText);
-                } else {
-                    throw new Error("Configuración de OpenRouter no encontrada");
-                }
-            } catch (error) {
-                console.error("OpenRouter Error:", error);
-                removeTypingIndicator();
-                addIAMessage("Ups, no pude procesar tu imagen en este momento. Intenta de nuevo más tarde.");
-            }
-        }
+
 
         function resizeImage(base64Str, maxWidth = 800, maxHeight = 800) {
             return new Promise((resolve) => {
