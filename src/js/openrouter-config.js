@@ -1,9 +1,6 @@
-// Lista de claves API de OpenRouter para respaldo
+// Lista de claves API de OpenRouter
 const OPENROUTER_API_KEYS = [
-    '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',
-    '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',
-    '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',
-    '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'
+    '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'
 ];
 
 // Modelos gratuitos de OpenRouter que soportan visión (imágenes)
