@@ -172,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cameraBtn && cameraInput) {
         cameraBtn.addEventListener('click', function(e) {
             e.preventDefault();
+            cameraInput.setAttribute("capture", "environment");
             cameraInput.click();
         });
 
