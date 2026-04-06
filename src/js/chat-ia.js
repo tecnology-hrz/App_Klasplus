@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatMessages = document.getElementById('chatMessages');
     const voiceBtn = document.getElementById('voiceBtn');
     const sendBtn = document.getElementById('sendBtn');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const cameraInput = document.getElementById('cameraInput');
 
     // Obtener datos del usuario
     const userName = localStorage.getItem('userName');
@@ -124,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Restaurar botones a estado inicial (micrófono visible, enviar oculto)
             sendBtn.classList.remove('visible');
             voiceBtn.classList.remove('hidden');
+            cameraBtn.classList.remove('hidden');
 
             // Mostrar indicador de escritura
             showTypingIndicator();
@@ -154,14 +157,31 @@ document.addEventListener('DOMContentLoaded', function() {
         if (chatInput.value.trim() !== '') {
             sendBtn.classList.add('visible');
             voiceBtn.classList.add('hidden');
+            cameraBtn.classList.add('hidden');
         } else {
             sendBtn.classList.remove('visible');
             voiceBtn.classList.remove('hidden');
+            cameraBtn.classList.remove('hidden');
         }
     });
 
     // Manejar clic en botón de enviar
     sendBtn.addEventListener('click', sendMessage);
+
+    // Sistema de cámara para simular toma y subida fotográfica
+    if (cameraBtn && cameraInput) {
+        cameraBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            cameraInput.click();
+        });
+
+        cameraInput.addEventListener('change', function(e) {
+            if (this.files && this.files.length > 0) {
+                mostrarModalDesarrollo('Procesamiento de imágenes', '<i class="fa-solid fa-camera"></i>');
+                this.value = ''; // Reset input
+            }
+        });
+    }
 
     // ===== SISTEMA DE TEXTO A VOZ (TTS) =====
     const voiceReadToggle = document.getElementById('voiceReadToggle');

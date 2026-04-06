@@ -264,6 +264,32 @@ body {
     color: #9E9E9E;
 }
 
+.camera-btn {
+    background: transparent;
+    border: none;
+    width: 44px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    color: #9E9E9E;
+}
+
+.camera-btn.hidden {
+    display: none;
+}
+
+.camera-btn:hover {
+    color: #1565C0;
+}
+
+.camera-btn i {
+    font-size: 22px;
+}
+
 .voice-btn {
     background: #FF0000;
     border: none;
