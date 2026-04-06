@@ -158,13 +158,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // Manejar clic en botón de enviar
     sendBtn.addEventListener('click', sendMessage);
 
-    // ===== SISTEMA DE VOZ ESTILO WHATSAPP =====
+    // ===== SISTEMA DE VOZ HÍBRIDO (Nativo móvil + Groq desktop) =====
     // Elementos del UI de grabación
     const normalInputState = document.getElementById('normalInputState');
     const recordingInputState = document.getElementById('recordingInputState');
     const recordingCancelBtn = document.getElementById('recordingCancelBtn');
     const recordingSendBtn = document.getElementById('recordingSendBtn');
     const recordingTimerEl = document.getElementById('recordingTimer');
+
+    // Detectar plataforma
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const canUseNativeVoice = !!SpeechRecognition;
+
+    // Elegir método: móvil usa reconocimiento nativo, desktop usa Groq
+    const useNativeVoice = isMobile && canUseNativeVoice;
+    console.log(`🎤 Modo de voz: ${useNativeVoice ? 'Nativo del dispositivo' : 'Groq Whisper (grabación)'}`);
 
     // Estado de grabación
     let mediaRecorder = null;
@@ -177,6 +186,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let animationId = null;
     let timerInterval = null;
     let recordingStartTime = null;
+    let speechRecognizer = null;
+    let nativeTranscript = '';
 
     // Función para reproducir sonido
     function playSound(frequency, duration, type = 'sine') {
@@ -207,26 +218,35 @@ document.addEventListener('DOMContentLoaded', function() {
         recordingTimerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 
-    // Animar barras según volumen REAL del micrófono
+    // Animar barras (volumen real con analyser, o simulado sin él)
     function animateRecordingBars() {
-        if (!analyser || !isRecording) return;
-
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(dataArray);
+        if (!isRecording) return;
 
         const bars = document.querySelectorAll('.rec-bar');
-        const totalBars = bars.length;
-        const chunkSize = Math.floor(dataArray.length / totalBars);
 
-        bars.forEach((bar, i) => {
-            let sum = 0;
-            for (let j = 0; j < chunkSize; j++) {
-                sum += dataArray[i * chunkSize + j];
-            }
-            const avg = sum / chunkSize;
-            const height = Math.max(4, (avg / 255) * 36);
-            bar.style.height = `${height}px`;
-        });
+        if (analyser) {
+            // Ondas reales basadas en micrófono
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(dataArray);
+            const totalBars = bars.length;
+            const chunkSize = Math.floor(dataArray.length / totalBars);
+
+            bars.forEach((bar, i) => {
+                let sum = 0;
+                for (let j = 0; j < chunkSize; j++) {
+                    sum += dataArray[i * chunkSize + j];
+                }
+                const avg = sum / chunkSize;
+                const height = Math.max(4, (avg / 255) * 36);
+                bar.style.height = `${height}px`;
+            });
+        } else {
+            // Ondas simuladas (para reconocimiento nativo sin analyser)
+            bars.forEach((bar, i) => {
+                const height = 4 + Math.abs(Math.sin(Date.now() / 180 + i * 0.7)) * 32;
+                bar.style.height = `${height}px`;
+            });
+        }
 
         animationId = requestAnimationFrame(animateRecordingBars);
     }
@@ -242,27 +262,141 @@ document.addEventListener('DOMContentLoaded', function() {
         normalInputState.classList.remove('hidden-for-recording');
         recordingInputState.classList.remove('active');
         recordingTimerEl.textContent = '0:00';
-        // Resetear barras
         document.querySelectorAll('.rec-bar').forEach(bar => {
             bar.style.height = '8px';
         });
     }
 
-    // INICIAR GRABACIÓN
-    async function startRecording() {
+    // ==========================================
+    // MODO NATIVO (Móvil/APK) — Web Speech API
+    // ==========================================
+    function startNativeRecognition() {
+        if (isRecording) return;
+
+        speechRecognizer = new SpeechRecognition();
+        speechRecognizer.lang = 'es-ES';
+        speechRecognizer.continuous = true;
+        speechRecognizer.interimResults = true;
+        speechRecognizer.maxAlternatives = 1;
+
+        nativeTranscript = '';
+
+        speechRecognizer.onresult = (event) => {
+            let interim = '';
+            let final = '';
+            for (let i = 0; i < event.results.length; i++) {
+                if (event.results[i].isFinal) {
+                    final += event.results[i][0].transcript + ' ';
+                } else {
+                    interim += event.results[i][0].transcript;
+                }
+            }
+            nativeTranscript = final.trim();
+            // Mostrar texto en tiempo real en el placeholder
+            chatInput.placeholder = nativeTranscript || interim || 'Escuchando...';
+        };
+
+        speechRecognizer.onerror = (event) => {
+            console.warn('Error en reconocimiento nativo:', event.error);
+            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                stopAllRecording();
+                showError(
+                    'Permite el acceso al micrófono en los ajustes de la app.',
+                    'Micrófono no disponible'
+                );
+            }
+            // Para 'network' u otros errores, no detenemos — el usuario puede cancelar
+        };
+
+        speechRecognizer.onend = () => {
+            // Si la grabación sigue activa, reiniciar (el nativo se detiene solo tras silencio)
+            if (isRecording && speechRecognizer) {
+                try {
+                    speechRecognizer.start();
+                } catch(e) {} // Ignorar si ya está corriendo
+            }
+        };
+
+        try {
+            speechRecognizer.start();
+        } catch(e) {
+            console.error('No se pudo iniciar reconocimiento:', e);
+            showError('No se pudo activar el reconocimiento de voz.', 'Error de voz');
+            return;
+        }
+
+        isRecording = true;
+        recordingStartTime = Date.now();
+        playStartSound();
+        showRecordingUI();
+        chatInput.placeholder = 'Escuchando...';
+        timerInterval = setInterval(updateTimer, 1000);
+        animateRecordingBars();
+    }
+
+    function stopNativeAndSend() {
+        if (!isRecording) return;
+
+        clearInterval(timerInterval);
+        cancelAnimationFrame(animationId);
+        playStopSound();
+
+        if (speechRecognizer) {
+            speechRecognizer.onend = null; // No reiniciar
+            speechRecognizer.stop();
+            speechRecognizer = null;
+        }
+
+        isRecording = false;
+        hideRecordingUI();
+        chatInput.placeholder = 'Escribe un mensaje...';
+
+        if (nativeTranscript && nativeTranscript.trim() !== '') {
+            chatInput.value = nativeTranscript.trim();
+            sendMessage();
+        } else {
+            showWarning(
+                'No se detectó ninguna palabra. Habla más cerca del micrófono.',
+                'Sin voz detectada'
+            );
+        }
+
+        nativeTranscript = '';
+    }
+
+    function cancelNativeRecognition() {
+        if (!isRecording) return;
+
+        clearInterval(timerInterval);
+        cancelAnimationFrame(animationId);
+
+        if (speechRecognizer) {
+            speechRecognizer.onend = null;
+            speechRecognizer.abort();
+            speechRecognizer = null;
+        }
+
+        isRecording = false;
+        nativeTranscript = '';
+        hideRecordingUI();
+        chatInput.placeholder = 'Escribe un mensaje...';
+    }
+
+    // ==========================================
+    // MODO GROQ (Desktop) — MediaRecorder + API
+    // ==========================================
+    async function startGroqRecording() {
         if (isRecording) return;
 
         try {
             recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-            // Configurar análisis de audio para ondas reales
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioContext.createAnalyser();
             microphone = audioContext.createMediaStreamSource(recordingStream);
             analyser.fftSize = 256;
             microphone.connect(analyser);
 
-            // Configurar MediaRecorder
             mediaRecorder = new MediaRecorder(recordingStream);
             audioChunks = [];
 
@@ -276,14 +410,9 @@ document.addEventListener('DOMContentLoaded', function() {
             isRecording = true;
             recordingStartTime = Date.now();
 
-            // Mostrar UI
             playStartSound();
             showRecordingUI();
-
-            // Iniciar cronómetro
             timerInterval = setInterval(updateTimer, 1000);
-
-            // Iniciar animación de ondas
             animateRecordingBars();
 
         } catch (error) {
@@ -295,114 +424,87 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // DETENER GRABACIÓN Y ENVIAR
-    async function stopAndSendRecording() {
+    async function stopGroqAndSend() {
         if (!isRecording || !mediaRecorder) return;
 
-        // Detener animaciones y timer
         clearInterval(timerInterval);
         cancelAnimationFrame(animationId);
         playStopSound();
 
-        // Detener el MediaRecorder
         return new Promise((resolve) => {
             mediaRecorder.onstop = async () => {
                 isRecording = false;
-
-                // Detener stream
                 recordingStream.getTracks().forEach(track => track.stop());
                 if (audioContext) audioContext.close();
+                analyser = null;
 
                 hideRecordingUI();
                 chatInput.placeholder = 'Procesando audio...';
 
-                // Crear blob de audio
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
 
-                // Verificar que haya audio
                 if (audioBlob.size < 1000) {
                     chatInput.placeholder = 'Escribe un mensaje...';
-                    showWarning(
-                        'La grabación fue muy corta. Mantén presionado y habla antes de enviar.',
-                        'Grabación muy corta'
-                    );
+                    showWarning('La grabación fue muy corta.', 'Grabación muy corta');
                     resolve();
                     return;
                 }
 
                 try {
-                    // Transcribir con Groq Whisper
                     const transcript = await transcribeAudio(audioBlob);
-
                     chatInput.placeholder = 'Escribe un mensaje...';
 
                     if (transcript && transcript.trim() !== '') {
                         chatInput.value = transcript;
                         sendMessage();
                     } else {
-                        showWarning(
-                            'No se detectó voz en el audio. Intenta hablar más cerca del micrófono.',
-                            'Sin voz detectada'
-                        );
+                        showWarning('No se detectó voz.', 'Sin voz detectada');
                     }
                 } catch (error) {
                     console.error('Error al transcribir:', error);
                     chatInput.placeholder = 'Escribe un mensaje...';
-
                     const msg = error.message || '';
 
                     if (msg.includes('401')) {
-                        // API Key inválida o expirada
                         showModal({
                             type: 'error',
-                            title: 'API Key de voz expirada',
-                            message: 'La clave de la API de transcripción (Groq) está expirada o es inválida. Necesitas renovarla en console.groq.com (es gratis). Contacta al administrador del sistema.',
+                            title: 'API Key expirada',
+                            message: 'La clave de transcripción está expirada. Contacta al administrador.',
                             confirmText: 'Entendido'
                         });
                     } else if (msg.includes('429')) {
                         showModal({
                             type: 'warning',
-                            title: 'Límite de uso alcanzado',
-                            message: 'Se alcanzó el límite de la API de transcripción. Intenta de nuevo en unos minutos o escribe tu mensaje manualmente.',
+                            title: 'Límite alcanzado',
+                            message: 'Intenta de nuevo en unos minutos.',
                             confirmText: 'Entendido'
                         });
-                    } else if (msg.includes('413')) {
-                        showWarning(
-                            'El audio fue demasiado largo. Intenta con un mensaje más corto (máximo 1 minuto).',
-                            'Audio demasiado largo'
-                        );
                     } else {
-                        showError(
-                            'Error al procesar el audio. Verifica tu conexión a internet e intenta de nuevo.',
-                            'Error de transcripción'
-                        );
+                        showError('Error al procesar el audio. Verifica tu conexión.', 'Error de transcripción');
                     }
                 }
-
                 resolve();
             };
-
             mediaRecorder.stop();
         });
     }
 
-    // CANCELAR GRABACIÓN
-    function cancelRecording() {
+    function cancelGroqRecording() {
         if (!isRecording) return;
 
         clearInterval(timerInterval);
         cancelAnimationFrame(animationId);
 
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.onstop = () => {}; // No procesar al detener
+            mediaRecorder.onstop = () => {};
             mediaRecorder.stop();
         }
-
         if (recordingStream) {
             recordingStream.getTracks().forEach(track => track.stop());
         }
         if (audioContext) {
             audioContext.close();
+            analyser = null;
         }
 
         isRecording = false;
@@ -410,23 +512,42 @@ document.addEventListener('DOMContentLoaded', function() {
         hideRecordingUI();
     }
 
-    // EVENT LISTENERS
-    // Botón de micrófono → iniciar grabación
+    // ==========================================
+    // Función general para detener todo
+    // ==========================================
+    function stopAllRecording() {
+        cancelNativeRecognition();
+        cancelGroqRecording();
+    }
+
+    // ==========================================
+    // EVENT LISTENERS — Usan el método correcto
+    // ==========================================
     voiceBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        startRecording();
+        if (useNativeVoice) {
+            startNativeRecognition();
+        } else {
+            startGroqRecording();
+        }
     });
 
-    // Botón enviar audio → detener y transcribir
     recordingSendBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        stopAndSendRecording();
+        if (useNativeVoice) {
+            stopNativeAndSend();
+        } else {
+            stopGroqAndSend();
+        }
     });
 
-    // Botón cancelar → descartar grabación
     recordingCancelBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        cancelRecording();
+        if (useNativeVoice) {
+            cancelNativeRecognition();
+        } else {
+            cancelGroqRecording();
+        }
     });
 
     // Mensaje de bienvenida inicial
