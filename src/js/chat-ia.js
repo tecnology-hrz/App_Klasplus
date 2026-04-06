@@ -168,11 +168,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const voices = window.speechSynthesis.getVoices();
         if (voices.length === 0) return;
 
-        // Buscar voces naturales en español (Google o Jorge de Microsoft)
-        ttsVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('es')) ||
-                   voices.find(v => v.name.includes('Jorge') && v.lang.includes('es')) ||
-                   voices.find(v => v.name.includes('Microsoft') && v.lang.includes('es')) ||
-                   voices.find(v => v.lang.startsWith('es-') || v.lang === 'es');
+        // Filtrar solo voces en español
+        const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
+
+        if (spanishVoices.length === 0) return;
+
+        // Prioridad 1: Voces "Natural" u "Online" de Edge (son las más realistas)
+        let bestVoice = spanishVoices.find(v => v.name.includes('Natural') || v.name.includes('Online'));
+        
+        // Prioridad 2: Voces de Google (suelen ser buenas en Android/Chrome)
+        if (!bestVoice) {
+            bestVoice = spanishVoices.find(v => v.name.includes('Google'));
+        }
+
+        // Prioridad 3: Microsoft Jorge u otras especificas (evitar Helena si es posible)
+        if (!bestVoice) {
+            bestVoice = spanishVoices.find(v => v.name.includes('Jorge'));
+        }
+
+        // Prioridad 4: Cualquier otra en español (fallback)
+        if (!bestVoice) {
+            bestVoice = spanishVoices.find(v => !v.name.includes('Helena')) || spanishVoices[0];
+        }
+
+        ttsVoice = bestVoice;
+        console.log("🗣️ Voz seleccionada:", ttsVoice ? ttsVoice.name : "Ninguna");
     }
 
     if (window.speechSynthesis) {
