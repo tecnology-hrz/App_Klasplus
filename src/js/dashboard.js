@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const zonasPeligroBtn = document.getElementById('zonasPeligroBtn');
     if (zonasPeligroBtn) {
         zonasPeligroBtn.addEventListener('click', function() {
-            mostrarModalDesarrollo('Zonas de Peligro', '<i class="fa-solid fa-triangle-exclamation"></i>');
+            window.location.href = 'mapa-peligro.html';
         });
     }
 

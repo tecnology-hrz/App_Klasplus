@@ -1,0 +1,470 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #000;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Header */
+.mapa-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.back-btn,
+.legend-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.back-btn:hover,
+.legend-btn:hover {
+    background: rgba(255,255,255,0.28);
+}
+
+.mapa-title {
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
+    flex: 1;
+    margin: 0 12px;
+}
+
+/* Mapa ocupa toda la pantalla */
+#map {
+    width: 100%;
+    height: 100vh;
+    padding-top: 70px;
+}
+
+/* Ocultar atribucion de Leaflet (pequeña) */
+.leaflet-control-attribution {
+    font-size: 9px !important;
+    opacity: 0.5;
+}
+
+/* Etiqueta nombre encima del pin */
+.pin-label {
+    background: rgba(0, 0, 0, 0.72) !important;
+    backdrop-filter: blur(8px);
+    border: none !important;
+    border-radius: 8px !important;
+    color: white !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    padding: 5px 10px !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5) !important;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Quitar la flechita del tooltip */
+.pin-label::before {
+    display: none !important;
+}
+
+/* =============================================
+   PINES PERSONALIZADOS
+   ============================================= */
+.map-pin {
+    width: 36px;
+    height: 36px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.8);
+}
+
+.map-pin i {
+    transform: rotate(45deg);
+    font-size: 15px;
+}
+
+.pin-protected {
+    background: #00C853;
+    color: white;
+    animation: pinPulse 2s infinite;
+}
+
+.pin-locked {
+    background: #455A64;
+    color: #B0BEC5;
+    border-color: #607D8B;
+}
+
+@keyframes pinPulse {
+    0%, 100% { box-shadow: 0 4px 14px rgba(0,200,83,0.5), 0 0 0 0 rgba(0,200,83,0.5); }
+    50%       { box-shadow: 0 4px 14px rgba(0,200,83,0.5), 0 0 0 10px rgba(0,200,83,0); }
+}
+
+/* =============================================
+   PANEL DE LEYENDA
+   ============================================= */
+.legend-panel {
+    position: fixed;
+    top: 80px;
+    right: 16px;
+    background: rgba(12, 12, 12, 0.93);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 16px;
+    width: 220px;
+    z-index: 999;
+    transform: translateX(260px);
+    transition: transform 0.3s ease;
+}
+
+.legend-panel.visible {
+    transform: translateX(0);
+}
+
+.legend-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.legend-title {
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.legend-close {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 2px 6px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    color: rgba(255,255,255,0.82);
+    font-size: 13px;
+}
+
+.legend-dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-dot.protected {
+    background: #00C853;
+    box-shadow: 0 0 8px #00C853;
+}
+
+.legend-dot.undiscovered {
+    background: #607D8B;
+}
+
+.heat-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+.heat-gradient {
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #4CAF50, #FFEB3B, #FF9800, #FF5722, #D32F2F);
+}
+
+.heat-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+}
+
+.heat-desc {
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+}
+
+/* =============================================
+   INFO CARD
+   ============================================= */
+.info-card {
+    position: fixed;
+    bottom: -420px;
+    left: 16px;
+    right: 16px;
+    background: rgba(12, 12, 12, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px 24px 16px 16px;
+    padding: 20px;
+    z-index: 1001;
+    transition: bottom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.info-card.visible {
+    bottom: 20px;
+}
+
+.info-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.info-close {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.info-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-status.status-protected {
+    background: rgba(0, 200, 83, 0.18);
+    color: #00C853;
+    border: 1px solid rgba(0, 200, 83, 0.35);
+}
+
+.info-status.status-locked {
+    background: rgba(96, 125, 139, 0.18);
+    color: #90A4AE;
+    border: 1px solid rgba(96, 125, 139, 0.3);
+}
+
+.info-name {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.info-address {
+    color: rgba(255,255,255,0.45);
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+.info-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255,255,255,0.8);
+    font-size: 14px;
+}
+
+.stat-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.stat-locked {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: rgba(255,255,255,0.38);
+    font-size: 13px;
+    background: rgba(255,255,255,0.05);
+    padding: 10px 12px;
+    border-radius: 10px;
+    line-height: 1.4;
+}
+
+.stat-locked i {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* Banner de advertencia */
+.danger-banner {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(211, 47, 47, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 20px;
+    z-index: 998;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(211,47,47,0.4);
+    animation: bannerPulse 3s ease-in-out infinite;
+}
+
+@keyframes bannerPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.75; }
+}
+
+/* Aviso dentro de la info card */
+.stat-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: #FF9800;
+    font-size: 12px;
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.25);
+    padding: 10px 12px;
+    border-radius: 10px;
+    line-height: 1.4;
+    margin-top: 4px;
+}
+
+.stat-warning i {
+    margin-top: 1px;
+    flex-shrink: 0;
+    font-size: 13px;
+}
+
+/* Clasificacion Klasplus score */
+.klas-score {
+    background: rgba(0, 71, 179, 0.12);
+    border: 1px solid rgba(0, 71, 179, 0.25);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.klas-score-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.klas-score-label {
+    color: rgba(255,255,255,0.75);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.klas-score-label i { color: #4d8fff; }
+
+.klas-score-value {
+    color: white;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.klas-score-max {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.4);
+}
+
+.klas-score-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.klas-score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0047B3, #00C853);
+    border-radius: 10px;
+    min-width: 2px;
+}
+
+.klas-score-note {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+}
+    font-size: 13px;
+}
+
+@media (max-width: 480px) {
+    .mapa-title { font-size: 15px; }
+    .info-name  { font-size: 16px; }
+    .legend-panel { width: 195px; }
+    .danger-banner { font-size: 11px; padding: 7px 14px; }
+}

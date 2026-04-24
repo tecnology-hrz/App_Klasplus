@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klasplus - Zonas de Peligro</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="styleshee
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <!-- Leaflet Heat plugin -->
+    <link rel="stylesheet" href="../css/mapa-peligro.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="mapa-header">
+        <button class="back-btn" onclick="history.back()">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h1 class="mapa-title">Zonas de Peligro - Cali</h1>
+        <button class="legend-btn" id="legendBtn">
+            <i class="fa-solid fa-circle-info"></i>
+        </button>
+    </header>
+
+    <!-- Mapa -->
+    <div id="map"></div>
+
+    <!-- Panel de leyenda -->
+    <div class="legend-panel" id="legendPanel">
+        <div class="legend-header">
+            <span class="legend-title">Leyenda</span>
+            <button class="legend-close" id="legendClose"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot protected"></div>
+            <span>En proteccion activa</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot undiscovered"></div>
+            <span>Por descubrir</span>
+        </div>
+        <div class="legend-item heat-item">
+            <div class="heat-gradient"></div>
+            <div class="heat-labels">
+                <span>Bajo</span><span>Critico</span>
+            </div>
+            <span class="heat-desc">Nivel de peligro</span>
+        </div>
+    </div>
+
+    <!-- Info card al tocar marcador -->
+    <div class="info-card" id="infoCard">
+        <div class="info-card-header">
+            <div class="info-status" id="infoStatus"></div>
+            <button class="info-close" id="infoClose"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <h2 class="info-name" id="infoName"></h2>
+        <p class="info-address" id="infoAddress"></p>
+        <div class="info-stats" id="infoStats"></div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet.heat para heatmap -->
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+    <script>
+        // =============================================
+        // DATOS DE INSTITUCIONES DE CALI
+        // =============================================
+        const INSTITUCIONES = [
+            // ── PROTEGIDA ──────────────────────────────────────────
+            { id:1, nombre:"Escuela Ana Maria De Lloreda", direccion:"Av. 4 Bis Oe. #25-02, COMUNA 1, Cali", lat:3.4518, lng:-76.5688, estado:"protegida", nivelPeligro:3, incidentes:3, brigadistas:8, klasScore:0 },
+            // ── NORTE ──────────────────────────────────────────────
+            { id:2,  nombre:"IE Alfonso Lopez Pumarejo",            direccion:"Cra. 8 #68-00, Cali",          lat:3.4720, lng:-76.5320, estado:"bloqueada", nivelPeligro:4 },
+            { id:3,  nombre:"Colegio Multiproposito",               direccion:"Cra. 23 #73-00, Cali",         lat:3.4790, lng:-76.5490, estado:"bloqueada", nivelPeligro:4 },
+            { id:4,  nombre:"IE Jorge Isaacs",                      direccion:"Cl. 44N #3-00, Cali",          lat:3.4850, lng:-76.5350, estado:"bloqueada", nivelPeligro:1 },
+            { id:5,  nombre:"IE Evaristo Garcia",                   direccion:"Av. 3N #50-00, Cali",          lat:3.4680, lng:-76.5410, estado:"bloqueada", nivelPeligro:2 },
+            { id:6,  nombre:"Colegio Americano de Cali",            direccion:"Av. 6N #28-00, Cali",          lat:3.4640, lng:-76.5380, estado:"bloqueada", nivelPeligro:1 },
+            { id:7,  nombre:"IE Tecnico Industrial Pedro A. Molina", direccion:"Cl. 70 #26-00, Cali",         lat:3.4900, lng:-76.5270, estado:"bloqueada", nivelPeligro:3 },
+            { id:8,  nombre:"Colegio Berchmans",                    direccion:"Av. 2N #24-46, Cali",          lat:3.4610, lng:-76.5440, estado:"bloqueada", nivelPeligro:1 },
+            { id:9,  nombre:"IE Nuestra Señora de Fatima",          direccion:"Cra. 15 #62-00, Cali",         lat:3.4760, lng:-76.5460, estado:"bloqueada", nivelPeligro:2 },
+            { id:10, nombre:"IE Colegio Vallegrande",               direccion:"Cra. 3 #60-00, Cali",          lat:3.4800, lng:-76.5680, estado:"bloqueada", nivelPeligro:2 },
+            { id:11, nombre:"IE Agricola de Cali",                  direccion:"Cl. 50 #1-00, Cali",           lat:3.4720, lng:-76.5650, estado:"bloqueada", nivelPeligro:3 },
+            // ── CENTRO ─────────────────────────────────────────────
+            { id:12, nombre:"Colegio Santa Librada",                direccion:"Cl. 15 #10-00, Cali",          lat:3.4450, lng:-76.5280, estado:"bloqueada", nivelPeligro:3 },
+            { id:13, nombre:"IE Republica de Israel",               direccion:"Cra. 26 #24-00, Cali",         lat:3.4560, lng:-76.5440, estado:"bloqueada", nivelPeligro:3 },
+            { id:14, nombre:"IE Carlos Holguin Mallarino",          direccion:"Cra. 39 #5-00, Cali",          lat:3.4290, lng:-76.5390, estado:"bloqueada", nivelPeligro:5 },
+            { id:15, nombre:"Colegio Bolivariano",                  direccion:"Cl. 5 #38-00, Cali",           lat:3.4380, lng:-76.5210, estado:"bloqueada", nivelPeligro:2 },
+            { id:16, nombre:"IE San Juan Bosco",                    direccion:"Cra. 10 #25-00, Cali",         lat:3.4490, lng:-76.5310, estado:"bloqueada", nivelPeligro:3 },
+            { id:17, nombre:"Colegio La Presentacion",              direccion:"Cl. 12 #6-00, Cali",           lat:3.4420, lng:-76.5260, estado:"bloqueada", nivelPeligro:2 },
+            { id:18, nombre:"IE Eustaquio Palacios",                direccion:"Cl. 25 #2-00, Cali",           lat:3.4560, lng:-76.5660, estado:"bloqueada", nivelPeligro:3 },
+            // ── ORIENTE ────────────────────────────────────────────
+            { id:19, nombre:"IE Rodrigo Lara Bonilla",              direccion:"Cra. 50 #22-00, Cali",         lat:3.4510, lng:-76.4980, estado:"bloqueada", nivelPeligro:5 },
+            { id:20, nombre:"IE Libardo Madrid Valderrama",         direccion:"Cl. 24 #55-00, Cali",          lat:3.4580, lng:-76.4920, estado:"bloqueada", nivelPeligro:5 },
+            { id:21, nombre:"IE Ciudadela Desepaz",                 direccion:"Cra. 60 #16-00, Cali",         lat:3.4390, lng:-76.4850, estado:"bloqueada", nivelPeligro:5 },
+            { id:22, nombre:"IE Nuevo Latir",                       direccion:"Cl. 18 #62-00, Cali",          lat:3.4440, lng:-76.4900, estado:"bloqueada", nivelPeligro:4 },
+            { id:23, nombre:"IE Llano Verde",                       direccion:"Cra. 68 #10-00, Cali",         lat:3.4320, lng:-76.4780, estado:"bloqueada", nivelPeligro:4 },
+            { id:24, nombre:"IE Colegio Multipropósito Oriente",    direccion:"Cl. 20 #70-00, Cali",          lat:3.4600, lng:-76.4860, estado:"bloqueada", nivelPeligro:4 },
+            { id:25, nombre:"IE Colegio Republica de Panama",       direccion:"Cra. 55 #30-00, Cali",         lat:3.4650, lng:-76.4950, estado:"bloqueada", nivelPeligro:3 },
+            // ── SUR ────────────────────────────────────────────────
+            { id:26, nombre:"Colegio San Francisco de Asis",        direccion:"Cl. 5 #58-00, Cali",           lat:3.4180, lng:-76.5520, estado:"bloqueada", nivelPeligro:2 },
+            { id:27, nombre:"IE Colegio Mayor del Cauca",           direccion:"Av. Roosevelt #28-00, Cali",   lat:3.4250, lng:-76.5480, estado:"bloqueada", nivelPeligro:2 },
+            { id:28, nombre:"Colegio Gimnasio Los Pinos",           direccion:"Cl. 16 #98-00, Cali",          lat:3.3980, lng:-76.5560, estado:"bloqueada", nivelPeligro:1 },
+            { id:29, nombre:"IE Alfredo Spath Berrio",              direccion:"Cra. 80 #5-00, Cali",          lat:3.4100, lng:-76.5620, estado:"bloqueada", nivelPeligro:3 },
+            { id:30, nombre:"Colegio Colombo Britanico",            direccion:"Cl. 19 #122-00, Cali",         lat:3.3850, lng:-76.5490, estado:"bloqueada", nivelPeligro:1 },
+            { id:31, nombre:"IE Colegio Hernando Caicedo",          direccion:"Cra. 2 #45-00, Cali",          lat:3.4650, lng:-76.5700, estado:"bloqueada", nivelPeligro:4 },
+            { id:32, nombre:"IE Tecnico Comercial Manuela Beltran", direccion:"Cra. 1 #30-00, Cali",          lat:3.4530, lng:-76.5720, estado:"bloqueada", nivelPeligro:4 },
+            { id:33, nombre:"Colegio Jefferson",                    direccion:"Cl. 10 #90-00, Cali",          lat:3.4150, lng:-76.5580, estado:"bloqueada", nivelPeligro:2 },
+            { id:34, nombre:"IE Colegio Comfandi Sur",              direccion:"Cra. 70 #2-00, Cali",          lat:3.4050, lng:-76.5540, estado:"bloqueada", nivelPeligro:2 },
+            { id:35, nombre:"Colegio Gimnasio del Pacifico",        direccion:"Cl. 5 #80-00, Cali",           lat:3.4200, lng:-76.5600, estado:"bloqueada", nivelPeligro:1 }
+        ];
+
+        const HEAT_COLORS = {
+            1: '#4CAF50',
+            2: '#FFEB3B',
+            3: '#FF9800',
+            4: '#FF5722',
+            5: '#D32F2F'
+        };
+
+        const HEAT_LABELS = {
+            1: 'Bajo',
+            2: 'Moderado',
+            3: 'Medio',
+            4: 'Alto',
+            5: 'Critico'
+        };
+
+        // =============================================
+        // INICIALIZAR MAPA CON LEAFLET + OPENSTREETMAP
+        // Coordenadas exactas: Escuela Ana Maria De Lloreda
+        // =============================================
+        const ESCUELA_LAT = 3.4518;
+        const ESCUELA_LNG = -76.5688;
+
+        const map = L.map('map', {
+            center: [ESCUELA_LAT, ESCUELA_LNG],
+            zoom: 19,
+            zoomControl: false,
+            maxZoom: 21
+        });
+
+        // Satelite puro Google (sin etiquetas ni POIs)
+        L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            attribution: '&copy; Google Maps',
+            subdomains: ['0','1','2','3'],
+            maxZoom: 21,
+            maxNativeZoom: 20
+        }).addTo(map);
+
+        // Solo nombres de calles y barrios — sin restaurantes, tiendas ni POIs
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; CartoDB',
+            subdomains: 'abcd',
+            maxZoom: 21,
+            opacity: 0.85
+        }).addTo(map);
+
+        // Control de zoom
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        // =============================================
+        // ZONA DE PELIGRO — solo rodea la institucion
+        // =============================================
+        L.circle([ESCUELA_LAT, ESCUELA_LNG], {
+            radius: 30,
+            color: '#FF5722',
+            fillColor: '#FF5722',
+            fillOpacity: 0.08,
+            weight: 1.5,
+            dashArray: '5 4',
+            interactive: false
+        }).addTo(map);
+
+        // =============================================
+        // MARCADORES PERSONALIZADOS
+        // =============================================
+        // Corregir coordenadas de la escuela con las exactas del iframe
+        INSTITUCIONES[0].lat = ESCUELA_LAT;
+        INSTITUCIONES[0].lng = ESCUELA_LNG;
+
+        INSTITUCIONES.forEach(inst => {
+            const esProtegida = inst.estado === 'protegida';
+
+            const iconHtml = `
+                <div class="map-pin ${esProtegida ? 'pin-protected' : 'pin-locked'}">
+                    <i class="fa-solid ${esProtegida ? 'fa-shield-halved' : 'fa-lock'}"></i>
+                </div>
+            `;
+
+            const icon = L.divIcon({
+                html: iconHtml,
+                className: '',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -44]
+            });
+
+            const marker = L.marker([inst.lat, inst.lng], { icon })
+                .addTo(map)
+                .on('click', (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    mostrarInfoCard(inst);
+                });
+
+            // Etiqueta con nombre encima del pin (solo instituciones protegidas)
+            if (esProtegida) {
+                marker.bindTooltip(inst.nombre, {
+                    permanent: true,
+                    direction: 'top',
+                    offset: [0, -44],
+                    className: 'pin-label'
+                }).openTooltip();
+            }
+        });
+
+        // =============================================
+        // INFO CARD
+        // =============================================
+        function mostrarInfoCard(inst) {
+            const card = document.getElementById('infoCard');
+            const esProtegida = inst.estado === 'protegida';
+
+            const statusEl = document.getElementById('infoStatus');
+            statusEl.innerHTML = esProtegida
+                ? '<i class="fa-solid fa-shield-halved"></i> En proteccion activa'
+                : '<i class="fa-solid fa-lock"></i> Por descubrir';
+            statusEl.className = 'info-status ' + (esProtegida ? 'status-protected' : 'status-locked');
+
+            document.getElementById('infoName').textContent = inst.nombre;
+            document.getElementById('infoAddress').textContent = inst.direccion;
+
+            const heatColor = HEAT_COLORS[inst.nivelPeligro];
+            const heatLabel = HEAT_LABELS[inst.nivelPeligro];
+
+            let statsHTML = `
+                <div class="stat-item">
+                    <div class="stat-dot" style="background:${heatColor}"></div>
+                    <span>Nivel de peligro: <strong>${heatLabel}</strong></span>
+                </div>
+            `;
+
+            if (esProtegida) {
+                statsHTML += `
+                    <div class="stat-item">
+                        <i class="fa-solid fa-triangle-exclamation" style="color:#FF9800"></i>
+                        <span>Incidentes registrados: <strong>${inst.incidentes}</strong></span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fa-solid fa-user-group" style="color:#0047B3"></i>
+                        <span>Brigadistas activos: <strong>${inst.brigadistas}</strong></span>
+                    </div>
+                    <div class="klas-score">
+                        <div class="klas-score-header">
+                            <span class="klas-score-label"><i class="fa-solid fa-shield-halved"></i> Clasificacion Klasplus</span>
+                            <span class="klas-score-value">${inst.klasScore ?? 0}<span class="klas-score-max">/100</span></span>
+                        </div>
+                        <div class="klas-score-bar">
+                            <div class="klas-score-fill" style="width:${inst.klasScore ?? 0}%"></div>
+                        </div>
+                        <span class="klas-score-note">Sin diagnostico completado</span>
+                    </div>
+                    <div class="stat-warning">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>Zona sin diagnostico de riesgo — toda el area circundante se considera peligrosa hasta completar la evaluacion</span>
+                    </div>
+                `;
+            } else {
+                statsHTML += `
+                    <div class="stat-locked">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>Informacion disponible cuando la institucion se una a Klasplus</span>
+                    </div>
+                `;
+            }
+
+            document.getElementById('infoStats').innerHTML = statsHTML;
+            card.classList.add('visible');
+        }
+
+        // UI eventos
+        document.getElementById('legendBtn').addEventListener('click', () => {
+            document.getElementById('legendPanel').classList.toggle('visible');
+        });
+        document.getElementById('legendClose').addEventListener('click', () => {
+            document.getElementById('legendPanel').classList.remove('visible');
+        });
+        document.getElementById('infoClose').addEventListener('click', () => {
+            document.getElementById('infoCard').classList.remove('visible');
+        });
+
+        // Cerrar info card al tocar el mapa
+        map.on('click', () => {
+            document.getElementById('infoCard').classList.remove('visible');
+        });
+    </script>
+</body>
+</html>
