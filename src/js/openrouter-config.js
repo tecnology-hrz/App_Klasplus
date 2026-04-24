@@ -31,9 +31,26 @@ const OPENROUTER_API_KEYS = [
 
 // Modelos gratuitos de OpenRouter que soportan visión (imágenes)
 const OPENROUTER_VISION_MODELS = [
-    'qwen/qwen3.6-plus:free',
-    'google/gemma-3-27b-it:free',
-    'nvidia/nemotron-nano-12b-2-vl:free'
+    // --- Tier 1: Mejores modelos multimodales gratuitos (2025-2026) ---
+    'google/gemma-4-31b-it:free',           // Gemma 4 31B - multimodal texto+imagen, 256K ctx
+    'google/gemma-4-26b-a4b-it:free',       // Gemma 4 26B MoE - texto+imagen+video, 256K ctx
+    'meta-llama/llama-4-maverick:free',     // Llama 4 Maverick - multimodal, 12 idiomas
+    'meta-llama/llama-4-scout:free',        // Llama 4 Scout - multimodal ligero
+    'nvidia/nemotron-nano-12b-v2-vl:free',  // Nemotron Nano 12B V2 - OCR, documentos, multi-imagen
+    'moonshotai/kimi-vl-a3b-thinking:free', // Kimi VL - razonamiento visual
+    'qwen/qwen2.5-vl-72b-instruct:free',    // Qwen 2.5 VL 72B - visión de alta calidad
+    'qwen/qwen2.5-vl-32b-instruct:free',    // Qwen 2.5 VL 32B - visión equilibrado
+    'qwen/qwen2.5-vl-7b-instruct:free',     // Qwen 2.5 VL 7B - visión rápido
+    'qwen/qwen-vl-plus:free',               // Qwen VL Plus - visión general
+    // --- Tier 2: Modelos con capacidad visual confirmada ---
+    'google/gemma-3-27b-it:free',           // Gemma 3 27B - multimodal
+    'google/gemma-3-12b-it:free',           // Gemma 3 12B - multimodal ligero
+    'google/gemma-3-4b-it:free',            // Gemma 3 4B - multimodal muy ligero
+    'mistralai/mistral-small-3.2-24b-instruct:free', // Mistral Small 3.2 - visión
+    'mistralai/pixtral-12b:free',           // Pixtral 12B - especializado en visión
+    // --- Tier 3: Fallbacks ---
+    'nvidia/nemotron-nano-12b-2-vl:free',   // Nemotron V1
+    'openrouter/free'                        // Router automático de OpenRouter
 ];
 
 async function processImageWithOpenRouter(base64Image, userMessage = "¿Qué ves en esta imagen? Describe brevemente.") {
@@ -52,7 +69,7 @@ async function processImageWithOpenRouter(base64Image, userMessage = "¿Qué ves
                     "messages": [
                         {
                             "role": "system",
-                            "content": "Analiza la imagen. Detecta cualquier riesgo, peligro o condición insegura visible para estudiantes dentro de una institución educativa. Sé sumamente breve, usa máximo un párrafo corto o viñetas. REGLA ESTRICTA: NO saludes, NO menciones tu rol, NO des explicaciones. Solo lista los riesgos escolares detectados. Si no hay, responde ÚNICAMENTE: 'No detecté ningún riesgo en el entorno para los estudiantes'. Responde muy brevemente a cualquier duda extra del usuario."
+                            "content": "Analiza la imagen. Detecta cualquier riesgo, peligro o condición insegura visible para estudiantes dentro de una institución educativa. Sé sumamente breve, usa máximo un párrafo corto o viñetas. REGLA ESTRICTA: NO uses emojis ni símbolos decorativos. NO saludes, NO menciones tu rol, NO des explicaciones. Solo lista los riesgos escolares detectados. Si no hay, responde ÚNICAMENTE: 'No detecte ningun riesgo en el entorno para los estudiantes'. Responde muy brevemente a cualquier duda extra del usuario."
                         },
                         {
                             "role": "user",
