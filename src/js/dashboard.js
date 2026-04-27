@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const tiendaBtn = document.getElementById('tiendaBtn');
     if (tiendaBtn) {
         tiendaBtn.addEventListener('click', function() {
-            mostrarModalDesarrollo('Tienda', '<i class="fa-solid fa-store"></i>');
+            window.location.href = 'tienda.html';
         });
     }
 

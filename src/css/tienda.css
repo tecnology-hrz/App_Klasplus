@@ -1,0 +1,247 @@
+/* Tienda - Seguridad Escolar */
+
+/* Botón volver en header */
+.back-header-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #E3F2FD;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: #0047B3;
+    font-size: 20px;
+}
+
+.back-header-btn:hover {
+    background: #BBDEFB;
+    transform: scale(1.05);
+}
+
+/* Contenedor principal de tienda */
+.tienda-content {
+    margin-top: 100px;
+    padding: 15px 15px 100px 15px;
+}
+
+.tienda-header-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-left: 5px;
+}
+
+.tienda-header-section i {
+    font-size: 22px;
+    color: white;
+}
+
+.tienda-header-section h2 {
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Categorías */
+.categorias-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 5px 12px 5px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.categorias-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.categoria-chip {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 7px 16px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.categoria-chip.active,
+.categoria-chip:hover {
+    background: white;
+    color: #0047B3;
+    border-color: white;
+}
+
+/* Grid de productos - 2 columnas */
+.tienda-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.producto-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.producto-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.producto-img-container {
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 140px;
+    background: white;
+}
+
+.producto-img {
+    max-width: 100%;
+    max-height: 120px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.producto-info {
+    padding: 10px 12px 14px;
+}
+
+.producto-badge {
+    display: inline-block;
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+}
+
+.producto-nombre {
+    font-size: 13px;
+    font-weight: 700;
+    color: #283593;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+}
+
+.producto-descripcion {
+    font-size: 11px;
+    color: #888;
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.producto-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.producto-precio {
+    font-size: 15px;
+    font-weight: 800;
+    color: #FF6B35;
+}
+
+.producto-precio span {
+    font-size: 10px;
+    font-weight: 500;
+    color: #999;
+    display: block;
+}
+
+.producto-btn {
+    background: #0047B3;
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.producto-btn:hover {
+    background: #003388;
+    transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(0, 71, 179, 0.4);
+}
+
+.producto-btn:active {
+    transform: scale(0.95);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tienda-content {
+        margin-top: 90px;
+        padding: 12px 12px 100px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tienda-content {
+        margin-top: 85px;
+        padding: 10px 10px 100px 10px;
+    }
+
+    .tienda-header-section h2 {
+        font-size: 18px;
+    }
+
+    .tienda-grid {
+        gap: 10px;
+    }
+
+    .producto-img-container {
+        height: 120px;
+        padding: 10px;
+    }
+
+    .producto-img {
+        max-height: 100px;
+    }
+
+    .producto-info {
+        padding: 8px 10px 12px;
+    }
+
+    .producto-nombre {
+        font-size: 12px;
+    }
+
+    .producto-precio {
+        font-size: 14px;
+    }
+
+    .back-header-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+}

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klasplus - Tienda</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/tienda.css">
+    <link rel="stylesheet" href="../css/modal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="user-profile">
+                <button class="back-header-btn" id="backBtn">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h2 class="user-name">Tienda</h2>
+            </div>
+            <div class="header-actions">
+                <button class="notification-btn" id="notificationBtn">
+                    <svg class="notification-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button id="logoutBtn" class="logout-btn">
+                    <svg class="logout-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="tienda-content">
+            <div class="tienda-header-section">
+                <i class="fa-solid fa-store"></i>
+                <h2>Tienda de Seguridad Escolar</h2>
+            </div>
+
+            <div class="categorias-scroll">
+                <button class="categoria-chip active" style="background:#0047B3;color:white;border-color:#0047B3;">Todos</button>
+                <button class="categoria-chip" style="background:#E3F2FD;color:#0047B3;border-color:#BBDEFB;">Señalización</button>
+                <button class="categoria-chip" style="background:#E3F2FD;color:#0047B3;border-color:#BBDEFB;">Emergencia</button>
+                <button class="categoria-chip" style="background:#E3F2FD;color:#0047B3;border-color:#BBDEFB;">Protección</button>
+            </div>
+
+            <div class="tienda-grid">
+                <div class="producto-card">
+                    <div class="producto-img-container">
+                        <img src="https://media.falabella.com/falabellaCO/126693294_01/w=1500,h=1500,fit=cover" alt="Silbato de Emergencia" class="producto-img">
+                    </div>
+                    <div class="producto-info">
+                        <span class="producto-badge">Mas vendido</span>
+                        <h3 class="producto-nombre">Silbato de Emergencia Escolar</h3>
+                        <p class="producto-descripcion">Silbato de alta potencia (120 dB) con cordón de seguridad.</p>
+                        <div class="producto-footer">
+                            <div class="producto-precio">$12.500 <span>COP</span></div>
+                            <button class="producto-btn" onclick="agregarCarrito('Silbato de Emergencia', 12500)">
+                                <i class="fa-solid fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="producto-card">
+                    <div class="producto-img-container">
+                        <img src="https://www.electromanferonline.com/75-large_default/chaleco-reflectivo-en-malla.jpg" alt="Chaleco Reflectivo" class="producto-img">
+                    </div>
+                    <div class="producto-info">
+                        <span class="producto-badge" style="background:#E3F2FD;color:#0047B3;">Recomendado</span>
+                        <h3 class="producto-nombre">Chaleco Reflectivo Brigadista</h3>
+                        <p class="producto-descripcion">Chaleco de alta visibilidad con bandas reflectivas.</p>
+                        <div class="producto-footer">
+                            <div class="producto-precio">$35.000 <span>COP</span></div>
+                            <button class="producto-btn" onclick="agregarCarrito('Chaleco Reflectivo', 35000)">
+                                <i class="fa-solid fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="producto-card">
+                    <div class="producto-img-container">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLmlExpzDYA-9RL_gxlEbjjbPGzPZgZet8JQ&s" alt="Botiquín Escolar" class="producto-img">
+                    </div>
+                    <div class="producto-info">
+                        <span class="producto-badge" style="background:#FFF3E0;color:#E65100;">Esencial</span>
+                        <h3 class="producto-nombre">Botiquín Primeros Auxilios</h3>
+                        <p class="producto-descripcion">Kit completo con vendas, gasas, alcohol y guantes.</p>
+                        <div class="producto-footer">
+                            <div class="producto-precio">$48.900 <span>COP</span></div>
+                            <button class="producto-btn" onclick="agregarCarrito('Botiquín Escolar', 48900)">
+                                <i class="fa-solid fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="producto-card">
+                    <div class="producto-img-container">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiOF4gD7qPA3B2isnLk-aFHFO-6UEdcVcyVQ&s" alt="Kit Señalización" class="producto-img">
+                    </div>
+                    <div class="producto-info">
+                        <span class="producto-badge" style="background:#F3E5F5;color:#7B1FA2;">Pack x5</span>
+                        <h3 class="producto-nombre">Kit Señalización Evacuación</h3>
+                        <p class="producto-descripcion">Señales fotoluminiscentes de ruta y salida de emergencia.</p>
+                        <div class="producto-footer">
+                            <div class="producto-precio">$28.500 <span>COP</span></div>
+                            <button class="producto-btn" onclick="agregarCarrito('Kit Señalización', 28500)">
+                                <i class="fa-solid fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-section="inicio">
+                <i class="fa-solid fa-house nav-icon"></i>
+                <span class="nav-label">Inicio</span>
+            </button>
+            <button class="nav-item" data-section="brigada">
+                <i class="fa-solid fa-user-group nav-icon"></i>
+                <span class="nav-label">Brigada</span>
+            </button>
+            <button class="nav-item emergency" data-section="emergencia">
+                <i class="fa-solid fa-phone-volume nav-icon-emergency"></i>
+            </button>
+            <button class="nav-item" data-section="ia">
+                <i class="fa-solid fa-comment-dots nav-icon"></i>
+                <span class="nav-label">IA</span>
+            </button>
+            <button class="nav-item" data-section="perfil">
+                <i class="fa-solid fa-user nav-icon"></i>
+                <span class="nav-label">Perfil</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="../js/modal.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) { window.location.href = 'login.html'; return; }
+
+            const userRole = (localStorage.getItem('userRole') || 'estudiante').toLowerCase();
+            const roleMap = {
+                'estudiante': 'dashboard-estudiante.html',
+                'profesor': 'dashboard-profesor.html',
+                'admin': 'dashboard-admin.html',
+                'coordinador': 'dashboard-coordinador.html',
+                'institucion': 'dashboard-institucion.html'
+            };
+
+            // Botón volver
+            document.getElementById('backBtn').addEventListener('click', function() {
+                window.location.href = roleMap[userRole] || 'dashboard-estudiante.html';
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            });
+
+            // Navegación inferior
+            document.querySelectorAll('.nav-item').forEach(function(item) {
+                item.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    if (section === 'emergencia') {
+                        mostrarEmergencia();
+                        return;
+                    }
+                    const rutas = {
+                        'inicio': roleMap[userRole] || 'dashboard-estudiante.html',
+                        'brigada': 'dashboard-brigada.html',
+                        'ia': 'dashboard-ia.html',
+                        'perfil': 'dashboard-perfil.html'
+                    };
+                    if (rutas[section]) window.location.href = rutas[section];
+                });
+            });
+
+            function mostrarEmergencia() {
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                overlay.style.zIndex = '10000';
+                overlay.innerHTML = `
+                    <div class="emergency-modal-container">
+                        <button class="emergency-close-btn" onclick="this.closest('.modal-overlay').remove()">
+                            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FF0000"/><path d="M15 9L9 15M9 9L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="emergency-options">
+                            <button class="emergency-option" onclick="window.location.href='tel:125'">
+                                <img src="../img/ambulancia_cel.png" alt="Ambulancia">
+                            </button>
+                            <button class="emergency-option" onclick="window.location.href='tel:119'">
+                                <img src="../img/bomberos_cel.png" alt="Bomberos">
+                            </button>
+                        </div>
+                        <div class="emergency-arrows">
+                            <img src="../img/flechas.png" alt="Flechas" class="arrows-animation">
+                        </div>
+                    </div>`;
+                document.body.appendChild(overlay);
+            }
+        });
+
+        window.agregarCarrito = function(producto, precio) {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.style.zIndex = '10000';
+            const container = document.createElement('div');
+            container.className = 'development-modal-container';
+            container.style.maxWidth = '400px';
+            container.innerHTML = `
+                <button class="development-close-btn" onclick="this.closest('.modal-overlay').remove()">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#0047B3"/><path d="M15 9L9 15M9 9L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+                </button>
+                <div class="development-content">
+                    <div class="development-icon"><i class="fa-solid fa-cart-shopping" style="color:#2E7D32;"></i></div>
+                    <h2 class="development-title" style="color:#2E7D32;">Producto Agregado</h2>
+                    <p class="development-message"><strong>${producto}</strong></p>
+                    <p class="development-submessage" style="font-size:20px;font-weight:700;color:#FF6B35;">$${precio.toLocaleString('es-CO')} COP</p>
+                    <p class="development-submessage">El módulo de pagos estará disponible próximamente.</p>
+                </div>`;
+            overlay.appendChild(container);
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        };
+    </script>
+</body>
+</html>
