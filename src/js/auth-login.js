@@ -205,16 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para redirigir según el rol
     function redirectByRole(role) {
-        const roleMap = {
-            'estudiante': 'dashboard-estudiante.html',
-            'profesor': 'dashboard-profesor.html',
-            'admin': 'dashboard-admin.html',
-            'coordinador': 'dashboard-coordinador.html',
-            'institucion': 'dashboard-institucion.html'
-        };
-
-        const dashboardPage = roleMap[role.toLowerCase()] || 'dashboard-estudiante.html';
-        window.location.href = dashboardPage;
+        window.location.href = 'dashboard.html';
     }
 
     // Efecto visual en los inputs

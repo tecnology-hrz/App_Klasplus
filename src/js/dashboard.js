@@ -286,16 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         switch(seccion) {
             case 'inicio':
-                // Redirigir al dashboard principal según el rol
-                const roleMap = {
-                    'estudiante': 'dashboard-estudiante.html',
-                    'profesor': 'dashboard-profesor.html',
-                    'admin': 'dashboard-admin.html',
-                    'coordinador': 'dashboard-coordinador.html',
-                    'institucion': 'dashboard-institucion.html'
-                };
-                const dashboardPage = roleMap[userRole.toLowerCase()] || 'dashboard-estudiante.html';
-                window.location.href = dashboardPage;
+                window.location.href = 'dashboard.html';
                 break;
             case 'brigada':
                 // Redirigir a la página de brigada
