@@ -62,17 +62,8 @@
         const userRole = localStorage.getItem('userRole');
         
         if (userId && userRole) {
-            // Si hay sesión, redirigir al dashboard correspondiente
-            const roleMap = {
-                'estudiante': 'src/secciones/dashboard-estudiante.html',
-                'profesor': 'src/secciones/dashboard-profesor.html',
-                'admin': 'src/secciones/dashboard-admin.html',
-                'coordinador': 'src/secciones/dashboard-coordinador.html',
-                'institucion': 'src/secciones/dashboard-institucion.html'
-            };
-            
-            const dashboardPage = roleMap[userRole.toLowerCase()] || 'src/secciones/dashboard-estudiante.html';
-            window.location.href = dashboardPage;
+            // Si hay sesión, redirigir al dashboard principal
+            window.location.href = 'src/secciones/dashboard.html';
         } else {
             // Si no hay sesión, redirigir al login después de 1 segundo
             setTimeout(function() {

@@ -149,18 +149,9 @@
             const userId = localStorage.getItem('userId');
             if (!userId) { window.location.href = 'login.html'; return; }
 
-            const userRole = (localStorage.getItem('userRole') || 'estudiante').toLowerCase();
-            const roleMap = {
-                'estudiante': 'dashboard-estudiante.html',
-                'profesor': 'dashboard-profesor.html',
-                'admin': 'dashboard-admin.html',
-                'coordinador': 'dashboard-coordinador.html',
-                'institucion': 'dashboard-institucion.html'
-            };
-
             // Botón volver
             document.getElementById('backBtn').addEventListener('click', function() {
-                window.location.href = roleMap[userRole] || 'dashboard-estudiante.html';
+                window.location.href = 'dashboard.html';
             });
 
             // Logout
@@ -178,7 +169,7 @@
                         return;
                     }
                     const rutas = {
-                        'inicio': roleMap[userRole] || 'dashboard-estudiante.html',
+                        'inicio': 'dashboard.html',
                         'brigada': 'dashboard-brigada.html',
                         'ia': 'dashboard-ia.html',
                         'perfil': 'dashboard-perfil.html'

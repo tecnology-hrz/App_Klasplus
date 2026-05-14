@@ -41,17 +41,7 @@ function cargarDatosUsuario(userName, userPhoto) {
 
 // Botón de volver atrás
 document.getElementById('backBtn').addEventListener('click', () => {
-    // Redirigir al dashboard según el rol del usuario
-    const userRole = localStorage.getItem('userRole');
-    const roleMap = {
-        'estudiante': 'dashboard-estudiante.html',
-        'profesor': 'dashboard-profesor.html',
-        'admin': 'dashboard-admin.html',
-        'coordinador': 'dashboard-coordinador.html',
-        'institucion': 'dashboard-institucion.html'
-    };
-    const dashboardPage = roleMap[userRole?.toLowerCase()] || 'dashboard-estudiante.html';
-    window.location.href = dashboardPage;
+    window.location.href = 'dashboard.html';
 });
 
 // Botón de notificaciones
@@ -150,17 +140,7 @@ document.querySelectorAll('.nav-item').forEach(item => {
         const section = item.dataset.section;
         
         if (section === 'inicio') {
-            // Redirigir al dashboard según el rol del usuario
-            const userRole = localStorage.getItem('userRole');
-            const roleMap = {
-                'estudiante': 'dashboard-estudiante.html',
-                'profesor': 'dashboard-profesor.html',
-                'admin': 'dashboard-admin.html',
-                'coordinador': 'dashboard-coordinador.html',
-                'institucion': 'dashboard-institucion.html'
-            };
-            const dashboardPage = roleMap[userRole?.toLowerCase()] || 'dashboard-estudiante.html';
-            window.location.href = dashboardPage;
+            window.location.href = 'dashboard.html';
         } else if (section === 'brigada') {
             window.location.href = 'dashboard-brigada.html';
         } else if (section === 'emergencia') {
