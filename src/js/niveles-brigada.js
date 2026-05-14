@@ -382,7 +382,7 @@ function abrirTareaFoto(tarea) {
 
 function abrirTareaPregunta(tarea) {
     document.getElementById('preguntaTareaTitulo').textContent = tarea.titulo;
-    document.getElementById('preguntaTexto').textContent = tarea.titulo;
+    document.getElementById('preguntaTexto').style.display = 'none';
     const container = document.getElementById('opcionesContainer');
     container.innerHTML = '';
 
@@ -449,11 +449,36 @@ async function completarTarea(tipo, respuesta, fotoURL) {
     document.getElementById('tareaPreguntaModal').style.display = 'none';
     document.getElementById('tareaIAModal').style.display = 'none';
 
-    if (todasCompletadas) {
-        mostrarNivelCompletado();
-    } else {
-        abrirNivel(nivelSeleccionado);
-    }
+    // Mostrar toast de puntos ganados
+    mostrarToastPuntos(tareaActual.puntos, todasCompletadas);
+}
+
+function mostrarToastPuntos(puntos, esUltimaTarea) {
+    const toast = document.getElementById('puntosToast');
+    const texto = document.getElementById('puntosToastTexto');
+    texto.textContent = `+${puntos} puntos Klasplus`;
+
+    // Reset
+    toast.classList.remove('visible', 'saliendo');
+    toast.style.display = 'flex';
+
+    // Forzar reflow
+    toast.offsetHeight;
+    toast.classList.add('visible');
+
+    setTimeout(() => {
+        toast.classList.remove('visible');
+        toast.classList.add('saliendo');
+        setTimeout(() => {
+            toast.style.display = 'none';
+            toast.classList.remove('saliendo');
+            if (esUltimaTarea) {
+                mostrarNivelCompletado();
+            } else {
+                abrirNivel(nivelSeleccionado);
+            }
+        }, 300);
+    }, 1800);
 }
 
 function mostrarNivelCompletado() {
@@ -513,33 +538,113 @@ function setupEventListeners() {
 
     // FOTO: upload area click
     document.getElementById('fotoUploadArea').addEventListener('click', () => {
-        document.getElementById('fotoInput').click();
+        document.getElementById('fotoAttachmentModal').classList.add('active');
+    });
+
+    // Modal adjuntos - cerrar
+    document.getElementById('fotoAttachmentClose').addEventListener('click', () => {
+        document.getElementById('fotoAttachmentModal').classList.remove('active');
+    });
+    document.getElementById('fotoAttachmentModal').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('active');
+    });
+
+    // Cambiar foto (preview)
+    document.getElementById('fotoCambiar').addEventListener('click', () => {
+        document.getElementById('fotoAttachmentModal').classList.add('active');
+    });
+
+    // Variables WebRTC
+    let webrtcStream = null;
+    const webrtcOverlay = document.getElementById('nivelesWebrtcOverlay');
+    const webrtcVideo = document.getElementById('nivelesWebrtcVideo');
+    const webrtcCanvas = document.getElementById('nivelesWebrtcCanvas');
+
+    function stopWebRTC() {
+        if (webrtcStream) {
+            webrtcStream.getTracks().forEach(t => t.stop());
+            webrtcStream = null;
+        }
+        webrtcOverlay.classList.remove('active');
+    }
+
+    document.getElementById('nivelesWebrtcClose').addEventListener('click', stopWebRTC);
+
+    function resizeImage(base64Str, maxW = 800, maxH = 800) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.src = base64Str;
+            img.onload = () => {
+                let w = img.width, h = img.height;
+                if (w > maxW) { h *= maxW / w; w = maxW; }
+                if (h > maxH) { w *= maxH / h; h = maxH; }
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', 0.8));
+            };
+        });
+    }
+
+    function setFotoPreview(base64) {
+        fotoSeleccionada = base64;
+        document.getElementById('fotoPreviewImg').src = base64;
+        document.getElementById('fotoPreview').style.display = 'block';
+        document.getElementById('fotoUploadArea').style.display = 'none';
+        validarFoto();
+    }
+
+    // Capturar foto con WebRTC
+    document.getElementById('nivelesWebrtcCapture').addEventListener('click', () => {
+        if (!webrtcStream) return;
+        webrtcCanvas.width = webrtcVideo.videoWidth;
+        webrtcCanvas.height = webrtcVideo.videoHeight;
+        webrtcCanvas.getContext('2d').drawImage(webrtcVideo, 0, 0);
+        const dataURL = webrtcCanvas.toDataURL('image/jpeg');
+        stopWebRTC();
+        resizeImage(dataURL).then(setFotoPreview);
+    });
+
+    // Botón Tomar Foto
+    document.getElementById('btnTomarFotoNiveles').addEventListener('click', async () => {
+        document.getElementById('fotoAttachmentModal').classList.remove('active');
+        try {
+            webrtcStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+            webrtcVideo.srcObject = webrtcStream;
+            webrtcOverlay.classList.add('active');
+        } catch (err) {
+            console.error('Error cámara:', err);
+            const fi = document.getElementById('fotoInput');
+            fi.setAttribute('capture', 'environment');
+            setTimeout(() => fi.click(), 300);
+        }
+    });
+
+    // Botón Elegir de Galería
+    document.getElementById('btnGaleriaNiveles').addEventListener('click', () => {
+        document.getElementById('fotoAttachmentModal').classList.remove('active');
+        const fi = document.getElementById('fotoInput');
+        fi.removeAttribute('capture');
+        setTimeout(() => fi.click(), 300);
     });
 
     // FOTO: file input change
     document.getElementById('fotoInput').addEventListener('change', async function(e) {
         if (e.target.files && e.target.files[0]) {
-            fotoSeleccionada = e.target.files[0];
-            const url = await fotoABase64(fotoSeleccionada);
-            document.getElementById('fotoPreviewImg').src = url;
-            document.getElementById('fotoPreview').style.display = 'block';
-            document.getElementById('fotoUploadArea').style.display = 'none';
-            validarFoto();
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const resized = await resizeImage(ev.target.result);
+                setFotoPreview(resized);
+            };
+            reader.readAsDataURL(e.target.files[0]);
+            this.value = '';
         }
-    });
-
-    // FOTO: cambiar foto
-    document.getElementById('fotoCambiar').addEventListener('click', () => {
-        document.getElementById('fotoInput').click();
     });
 
     // FOTO: submit
     document.getElementById('fotoSubmitBtn').addEventListener('click', async () => {
         const zona = document.getElementById('zonaSelect').value;
-        let fotoURL = '';
-        if (fotoSeleccionada) {
-            fotoURL = await fotoABase64(fotoSeleccionada);
-        }
+        const fotoURL = fotoSeleccionada || '';
         await completarTarea('foto', zona, fotoURL);
     });
 
@@ -583,6 +688,6 @@ function setupEventListeners() {
 function validarFoto() {
     const zona = document.getElementById('zonaSelect').value;
     const tieneZona = zona && zona !== '' && (zona !== 'personalizada' || document.getElementById('zonaPersonalizada').value.trim() !== '');
-    const tieneFoto = fotoSeleccionada !== null;
+    const tieneFoto = fotoSeleccionada !== null && fotoSeleccionada !== '';
     document.getElementById('fotoSubmitBtn').disabled = !(tieneZona && tieneFoto);
 }

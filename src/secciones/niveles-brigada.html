@@ -91,7 +91,7 @@
                     <div class="foto-upload-area" id="fotoUploadArea">
                         <i class="fa-solid fa-camera-retro"></i>
                         <p>Toca para tomar o subir foto</p>
-                        <input type="file" id="fotoInput" accept="image/*" capture="environment" style="display:none;">
+                        <input type="file" id="fotoInput" accept="image/*" style="display:none;">
                     </div>
                     <div class="foto-preview" id="fotoPreview" style="display:none;">
                         <img id="fotoPreviewImg" src="" alt="Preview">
@@ -155,6 +155,14 @@
             </div>
         </div>
 
+        <!-- Toast de puntos ganados -->
+        <div class="puntos-toast" id="puntosToast" style="display:none;">
+            <div class="puntos-toast-inner">
+                <i class="fa-solid fa-star"></i>
+                <span id="puntosToastTexto">+2 puntos Klasplus</span>
+            </div>
+        </div>
+
         <!-- Modal de nivel completado -->
         <div class="nivel-completado-overlay" id="nivelCompletadoModal" style="display:none;">
             <div class="nivel-completado-modal">
@@ -188,5 +196,46 @@
     </div>
 
     <script type="module" src="../js/niveles-brigada.js"></script>
+
+    <!-- Modal de opciones de imagen -->
+    <div class="foto-attachment-overlay" id="fotoAttachmentModal">
+        <div class="foto-attachment-modal">
+            <button class="foto-attachment-close" id="fotoAttachmentClose">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3>Adjuntar foto</h3>
+            <div class="foto-attachment-options">
+                <button class="foto-attachment-btn" id="btnTomarFotoNiveles">
+                    <div class="foto-attachment-icon camara">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <span>Tomar foto</span>
+                </button>
+                <button class="foto-attachment-btn" id="btnGaleriaNiveles">
+                    <div class="foto-attachment-icon galeria">
+                        <i class="fa-solid fa-image"></i>
+                    </div>
+                    <span>Elegir de galería</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cámara WebRTC -->
+    <div class="niveles-webrtc-overlay" id="nivelesWebrtcOverlay">
+        <div class="webrtc-header">
+            <span>Cámara</span>
+            <button id="nivelesWebrtcClose"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="webrtc-video-container">
+            <video id="nivelesWebrtcVideo" autoplay playsinline></video>
+            <canvas id="nivelesWebrtcCanvas" style="display:none;"></canvas>
+        </div>
+        <div class="webrtc-controls">
+            <button class="webrtc-capture-btn" id="nivelesWebrtcCapture">
+                <div class="webrtc-capture-inner"></div>
+            </button>
+        </div>
+    </div>
 </body>
 </html>

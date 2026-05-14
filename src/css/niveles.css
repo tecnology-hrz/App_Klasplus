@@ -246,14 +246,16 @@ body {
 /* Estrellas debajo del nodo completado */
 .nodo-estrellas {
     display: flex;
-    gap: 2px;
-    margin-top: 4px;
+    gap: 3px;
+    margin-top: 5px;
+    position: relative;
+    z-index: 3;
 }
 
 .nodo-estrellas i {
-    font-size: 12px;
+    font-size: 14px;
     color: #FFD700;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    -webkit-text-stroke: 1px #E6A800;
 }
 
 /* Info label debajo */
@@ -853,4 +855,228 @@ body {
     .tarea-modal {
         padding: 25px 20px;
     }
+}
+
+/* ===== Modal adjuntar foto ===== */
+.foto-attachment-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 3000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.foto-attachment-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.foto-attachment-modal {
+    background: white;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 40px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    position: relative;
+}
+
+.foto-attachment-overlay.active .foto-attachment-modal {
+    transform: translateY(0);
+}
+
+.foto-attachment-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #F0F0F0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #666;
+    font-size: 16px;
+}
+
+.foto-attachment-modal h3 {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1A1A2E;
+    margin-bottom: 24px;
+}
+
+.foto-attachment-options {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+.foto-attachment-btn {
+    background: transparent;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.foto-attachment-btn:hover { transform: scale(1.05); }
+.foto-attachment-btn:active { transform: scale(0.95); }
+
+.foto-attachment-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.foto-attachment-icon.camara {
+    background: linear-gradient(135deg, #FF4B2B, #FF416C);
+}
+
+.foto-attachment-icon.galeria {
+    background: linear-gradient(135deg, #00B4DB, #0083B0);
+}
+
+.foto-attachment-btn span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #424242;
+}
+
+/* ===== WebRTC cámara en niveles ===== */
+.niveles-webrtc-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 4000;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.niveles-webrtc-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.niveles-webrtc-overlay .webrtc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 10;
+}
+
+.niveles-webrtc-overlay .webrtc-header button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.niveles-webrtc-overlay .webrtc-video-container {
+    flex: 1;
+    overflow: hidden;
+    background: #111;
+}
+
+.niveles-webrtc-overlay #nivelesWebrtcVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.niveles-webrtc-overlay .webrtc-controls {
+    height: 100px;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 20px;
+}
+
+/* ===== Toast de puntos ganados ===== */
+.puntos-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    z-index: 5000;
+    pointer-events: none;
+    opacity: 0;
+    transition: none;
+}
+
+.puntos-toast.visible {
+    animation: toastEntrada 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.4) forwards;
+}
+
+.puntos-toast.saliendo {
+    animation: toastSalida 0.3s ease-in forwards;
+}
+
+@keyframes toastEntrada {
+    0%   { opacity: 0; transform: translate(-50%, -40%) scale(0.5); }
+    70%  { opacity: 1; transform: translate(-50%, -52%) scale(1.08); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes toastSalida {
+    0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -65%) scale(0.85); }
+}
+
+.puntos-toast-inner {
+    background: white;
+    border-radius: 22px;
+    padding: 18px 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    border: 4px solid #FFD700;
+    white-space: nowrap;
+}
+
+.puntos-toast-inner i {
+    font-size: 32px;
+    color: #FFD700;
+    -webkit-text-stroke: 1px #E6A800;
+    flex-shrink: 0;
+}
+
+.puntos-toast-inner span {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1A1A2E;
+    letter-spacing: -0.5px;
 }

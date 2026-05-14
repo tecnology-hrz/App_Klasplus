@@ -113,6 +113,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('Usuario autenticado en Brigada:', { userId, userName, userRole });
 
+    // Cargar nivel actual y puntos del usuario
+    (async () => {
+        try {
+            const { db, doc, getDoc } = await import('./firebase-config.js');
+            const progresoRef = doc(db, 'progreso_usuario', userId);
+            const snap = await getDoc(progresoRef);
+            if (snap.exists()) {
+                const data = snap.data();
+                const nivelActual = data.nivelActual || 1;
+                const nivelesCompletados = (data.nivelesCompletados || []).length;
+                const puntos = data.puntosKlasplus || 0;
+                const porcentaje = Math.round((nivelesCompletados / 50) * 100);
+
+                const badge = document.getElementById('nivelActualBadge');
+                const puntosBadge = document.getElementById('puntosActualesBadge');
+                const fill = document.getElementById('nivelesProgressFill');
+                const label = document.getElementById('nivelesCompletadosLabel');
+                const pctLabel = document.getElementById('nivelesProgresoLabel');
+
+                if (badge) badge.textContent = `Nv. ${nivelActual}`;
+                if (puntosBadge) puntosBadge.textContent = `${puntos} pts`;
+                if (fill) fill.style.width = `${porcentaje}%`;
+                if (label) label.textContent = `${nivelesCompletados} / 50 niveles`;
+                if (pctLabel) pctLabel.textContent = `${porcentaje}%`;
+            }
+        } catch (e) { console.error(e); }
+    })();
+
     // Función global para continuar tareas
     window.continuarTarea = function(tipoTarea) {
         // Redirigir al sistema de niveles
@@ -133,9 +161,8 @@ document.addEventListener('DOMContentLoaded', function() {
     async function cargarBrigadistas() {
         try {
             const { db, collection, query, where, getDocs } = await import('../js/firebase-config.js');
-
             const brigadistasContainer = document.getElementById('brigadistasContainer');
-            
+
             const usuariosRef = collection(db, 'usuarios');
             const q = query(usuariosRef, where('enBrigada', '==', true));
             const querySnapshot = await getDocs(q);
@@ -145,30 +172,78 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="empty-message">
                         <i class="fa-solid fa-user-group"></i>
                         <p>No hay estudiantes brigadistas registrados</p>
-                    </div>
-                `;
+                    </div>`;
                 return;
             }
 
-            // Guardar todos los docs para el "Ver más"
+            // Cargar puntos y nivel de cada brigadista desde progreso_usuario
             const todosLosDocs = [];
-            querySnapshot.forEach((doc) => todosLosDocs.push({ id: doc.id, data: doc.data() }));
+            for (const docSnap of querySnapshot.docs) {
+                const data = docSnap.data();
+                let puntos = 0;
+                let nivel = 1;
+                try {
+                    const { doc, getDoc } = await import('../js/firebase-config.js');
+                    const progresoSnap = await getDoc(doc(db, 'progreso_usuario', docSnap.id));
+                    if (progresoSnap.exists()) {
+                        puntos = progresoSnap.data().puntosKlasplus || 0;
+                        nivel = progresoSnap.data().nivelActual || 1;
+                    }
+                } catch(e) {}
+                todosLosDocs.push({ id: docSnap.id, data: { ...data, puntosKlasplus: puntos, nivelActual: nivel } });
+            }
 
-            const LIMITE = 3;
+            // Ordenar por puntos descendente
+            todosLosDocs.sort((a, b) => b.data.puntosKlasplus - a.data.puntosKlasplus);
+
             let mostrandoTodos = false;
 
             function renderBrigadistas() {
                 brigadistasContainer.innerHTML = '';
 
-                const lista = mostrandoTodos ? todosLosDocs : todosLosDocs.slice(0, LIMITE);
-                lista.forEach(({ data, id }) => {
-                    brigadistasContainer.appendChild(crearTarjetaBrigadista(data, id));
-                });
+                // Podio top 3
+                const top3 = todosLosDocs.slice(0, 3);
+                if (top3.length >= 2) {
+                    const podio = document.createElement('div');
+                    podio.className = 'podio-container';
 
-                if (todosLosDocs.length > LIMITE) {
+                    const posiciones = top3.length === 3
+                        ? [top3[1], top3[0], top3[2]]  // orden visual: 2°, 1°, 3°
+                        : top3.length === 2
+                            ? [top3[1], top3[0]]
+                            : [top3[0]];
+
+                    const medallas = top3.length === 3
+                        ? [2, 1, 3]
+                        : top3.length === 2
+                            ? [2, 1]
+                            : [1];
+
+                    posiciones.forEach((item, i) => {
+                        const pos = medallas[i];
+                        const card = crearPodioCard(item.data, pos);
+                        podio.appendChild(card);
+                    });
+
+                    brigadistasContainer.appendChild(podio);
+                }
+
+                // Resto de la lista (desde posición 4 en adelante)
+                const resto = mostrandoTodos ? todosLosDocs.slice(3) : todosLosDocs.slice(3, 6);
+                if (resto.length > 0) {
+                    const listaResto = document.createElement('div');
+                    listaResto.className = 'brigadistas-lista-resto';
+                    resto.forEach(({ data, id }, idx) => {
+                        const card = crearTarjetaBrigadista(data, id, idx + 4);
+                        listaResto.appendChild(card);
+                    });
+                    brigadistasContainer.appendChild(listaResto);
+                }
+
+                if (todosLosDocs.length > 6) {
                     const verMasBtn = document.createElement('button');
                     verMasBtn.className = 'ver-mas-btn';
-                    verMasBtn.textContent = mostrandoTodos ? 'Ver menos' : `Ver más (${todosLosDocs.length - LIMITE} más)`;
+                    verMasBtn.textContent = mostrandoTodos ? 'Ver menos' : `Ver más (${todosLosDocs.length - 6} más)`;
                     verMasBtn.addEventListener('click', () => {
                         mostrandoTodos = !mostrandoTodos;
                         renderBrigadistas();
@@ -181,38 +256,61 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Error al cargar brigadistas:', error);
-            const brigadistasContainer = document.getElementById('brigadistasContainer');
-            brigadistasContainer.innerHTML = `
+            document.getElementById('brigadistasContainer').innerHTML = `
                 <div class="empty-message">
                     <i class="fa-solid fa-exclamation-triangle"></i>
                     <p>Error al cargar los brigadistas</p>
-                </div>
-            `;
+                </div>`;
         }
     }
 
-    function crearTarjetaBrigadista(brigadista, id) {
+    function crearPodioCard(brigadista, posicion) {
+        const card = document.createElement('div');
+        card.className = `podio-card podio-${posicion}`;
+
+        const iniciales = (brigadista.nombreCompleto || brigadista.nombre || 'U')
+            .split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+        const avatarHTML = brigadista.fotoPerfil
+            ? `<img src="${brigadista.fotoPerfil}" class="podio-avatar-img" alt="${iniciales}">`
+            : `<div class="podio-avatar-placeholder">${iniciales}</div>`;
+
+        const coronas = { 1: '🥇', 2: '🥈', 3: '🥉' };
+        const alturas = { 1: 'podio-alto', 2: 'podio-medio', 3: 'podio-bajo' };
+
+        card.innerHTML = `
+            <div class="podio-medalla">${coronas[posicion]}</div>
+            <div class="podio-avatar ${alturas[posicion]}">${avatarHTML}</div>
+            <div class="podio-nombre">${(brigadista.nombreCompleto || brigadista.nombre || 'Sin nombre').split(' ')[0]}</div>
+            <div class="podio-puntos-badge">
+                <i class="fa-solid fa-star"></i>
+                ${brigadista.puntosKlasplus || 0}
+            </div>
+            <div class="podio-nivel-badge">Nv. ${brigadista.nivelActual || 1}</div>
+            <div class="podio-base podio-base-${posicion}">${posicion}°</div>
+        `;
+        return card;
+    }
+
+    function crearTarjetaBrigadista(brigadista, id, posicion) {
         const card = document.createElement('div');
         card.className = 'brigadista-card';
 
-        // Determinar si es jefe de brigada (puedes ajustar esta lógica según tus necesidades)
         const esJefe = brigadista.rolBrigada === 'jefe' || false;
 
-        // Crear avatar o placeholder
         let avatarHTML = '';
         if (brigadista.fotoPerfil && brigadista.fotoPerfil !== '') {
             avatarHTML = `<img src="${brigadista.fotoPerfil}" alt="${brigadista.nombreCompleto || brigadista.nombre}" class="brigadista-avatar">`;
         } else {
             const iniciales = (brigadista.nombreCompleto || brigadista.nombre || 'U')
-                .split(' ')
-                .map(n => n[0])
-                .join('')
-                .substring(0, 2)
-                .toUpperCase();
+                .split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
             avatarHTML = `<div class="brigadista-avatar-placeholder">${iniciales}</div>`;
         }
 
+        const posLabel = posicion ? `<span class="brigadista-posicion">${posicion}°</span>` : '';
+
         card.innerHTML = `
+            ${posLabel}
             ${avatarHTML}
             <div class="brigadista-info">
                 <h3 class="brigadista-nombre">${brigadista.nombreCompleto || brigadista.nombre || 'Sin nombre'}</h3>
@@ -221,11 +319,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="fa-solid fa-${esJefe ? 'shield-halved' : 'user-shield'}"></i>
                         <span>${esJefe ? 'Jefe de brigada' : 'Brigadista'}</span>
                     </div>
-                    <span class="brigadista-grado">${brigadista.grado || 'Sin grado'}</span>
+                    <span class="brigadista-grado">${brigadista.grado || ''}</span>
                 </div>
             </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+                <div class="brigadista-pts-badge">
+                    <i class="fa-solid fa-star"></i>
+                    ${brigadista.puntosKlasplus || 0}
+                </div>
+                <span style="font-size:11px;color:#0047B3;font-weight:600;">Nv. ${brigadista.nivelActual || 1}</span>
+            </div>
         `;
-
         return card;
     }
 

@@ -37,54 +37,50 @@
         </header>
 
         <main class="dashboard-content">
-            <!-- Sección de Tareas Pendientes -->
+            <!-- Sección de Acciones Rápidas -->
             <div class="brigada-section">
                 <h2 class="section-title">Misiones de Brigada</h2>
-                
-                <div class="main-card">
-                    <div class="tasks-container">
-                        <!-- Resumen de progreso -->
-                        <div class="task-card" onclick="window.location.href='niveles-brigada.html'" style="cursor:pointer;">
-                            <div class="task-icon camera">
-                                <i class="fa-solid fa-road"></i>
-                            </div>
-                            <div class="task-content">
-                                <h3 class="task-title">Avanza por los 50 niveles</h3>
-                                <div class="task-progress">
-                                    <span class="progress-text">Completa misiones y gana puntos Klasplus</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" id="nivelesProgressFill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="task-btn" onclick="window.location.href='niveles-brigada.html'">Ir</button>
-                        </div>
 
-                        <div class="task-card" onclick="window.location.href='niveles-brigada.html'" style="cursor:pointer;">
-                            <div class="task-icon warning">
-                                <i class="fa-solid fa-camera"></i>
+                <div class="brigada-cards-grid">
+                    <!-- Card 1: Continuar nivel -->
+                    <div class="brigada-action-card card-niveles" onclick="window.location.href='niveles-brigada.html'">
+                        <div class="card-niveles-top">
+                            <div class="brigada-action-icon">
+                                <i class="fa-solid fa-map-location-dot"></i>
                             </div>
-                            <div class="task-content">
-                                <h3 class="task-title">Documenta zonas de riesgo</h3>
-                                <div class="task-progress">
-                                    <span class="progress-text">Toma fotos y alimenta el mapa de peligro</span>
-                                </div>
+                            <div class="brigada-action-info">
+                                <h3>Continuar misiones</h3>
+                                <p>Sigue en tu nivel actual</p>
                             </div>
-                            <button class="task-btn" onclick="window.location.href='niveles-brigada.html'">Ir</button>
+                            <div class="brigada-action-arrow">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </div>
+                            <div class="brigada-action-badge" id="nivelActualBadge">Nv. 1</div>
                         </div>
+                        <div class="card-progreso-wrap">
+                            <div class="card-progreso-labels">
+                                <span id="nivelesCompletadosLabel">0 / 50 niveles</span>
+                                <span id="nivelesProgresoLabel">0%</span>
+                            </div>
+                            <div class="card-progreso-bar">
+                                <div class="card-progreso-fill" id="nivelesProgressFill"></div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div class="task-card" onclick="window.location.href='niveles-brigada.html'" style="cursor:pointer;">
-                            <div class="task-icon stairs">
-                                <i class="fa-solid fa-robot"></i>
-                            </div>
-                            <div class="task-content">
-                                <h3 class="task-title">Entrena la IA de tu institución</h3>
-                                <div class="task-progress">
-                                    <span class="progress-text">Reporta riesgos para mejorar las respuestas</span>
-                                </div>
-                            </div>
-                            <button class="task-btn" onclick="window.location.href='niveles-brigada.html'">Ir</button>
+                    <!-- Card 2: Canjear puntos -->
+                    <div class="brigada-action-card card-tienda" onclick="window.location.href='tienda.html'">
+                        <div class="brigada-action-icon">
+                            <i class="fa-solid fa-star"></i>
                         </div>
+                        <div class="brigada-action-info">
+                            <h3>Canjear</h3>
+                            <p>Intercambia tus puntos</p>
+                        </div>
+                        <div class="brigada-action-arrow">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="brigada-action-badge puntos-badge" id="puntosActualesBadge">0 pts</div>
                     </div>
                 </div>
             </div>
