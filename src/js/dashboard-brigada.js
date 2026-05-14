@@ -115,30 +115,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función global para continuar tareas
     window.continuarTarea = function(tipoTarea) {
-        const tareasTitulos = {
-            'fotos': 'Tomar Fotos de Zonas Peligrosas',
-            'cuestionario': 'Cuestionario de Riesgos',
-            'escaleras': 'Inspección de Escaleras',
-            'extintores': 'Verificación de Extintores'
-        };
-
-        const tareasIconos = {
-            'fotos': '<i class="fa-solid fa-camera"></i>',
-            'cuestionario': '<i class="fa-solid fa-triangle-exclamation"></i>',
-            'escaleras': '<i class="fa-solid fa-stairs"></i>',
-            'extintores': '<i class="fa-solid fa-fire-extinguisher"></i>'
-        };
-
-        const titulo = tareasTitulos[tipoTarea] || 'Tarea';
-        const icono = tareasIconos[tipoTarea] || '<i class="fa-solid fa-tasks"></i>';
-
-        mostrarModalDesarrollo(titulo, icono);
+        // Redirigir al sistema de niveles
+        window.location.href = 'niveles-brigada.html';
     };
 
-    // Función para ver todos los brigadistas
-    window.verTodosBrigadistas = function() {
-        mostrarModalDesarrollo('Lista Completa de Brigadistas', '<i class="fa-solid fa-user-group"></i>');
-    };
+    // Función para ver todos los brigadistas (se sobreescribe tras cargar datos)
+    window.verTodosBrigadistas = function() {};
 
     // Función para ver perfil de brigadista
     window.verPerfilBrigadista = function(brigadistaId) {
@@ -150,12 +132,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function cargarBrigadistas() {
         try {
-            // Importar Firebase
             const { db, collection, query, where, getDocs } = await import('../js/firebase-config.js');
 
             const brigadistasContainer = document.getElementById('brigadistasContainer');
             
-            // Consultar estudiantes que están en brigada
             const usuariosRef = collection(db, 'usuarios');
             const q = query(usuariosRef, where('enBrigada', '==', true));
             const querySnapshot = await getDocs(q);
@@ -170,19 +150,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Limpiar contenedor
-            brigadistasContainer.innerHTML = '';
+            // Guardar todos los docs para el "Ver más"
+            const todosLosDocs = [];
+            querySnapshot.forEach((doc) => todosLosDocs.push({ id: doc.id, data: doc.data() }));
 
-            // Mostrar solo los primeros 3 brigadistas
-            let count = 0;
-            querySnapshot.forEach((doc) => {
-                if (count < 3) {
-                    const brigadista = doc.data();
-                    const brigadistaCard = crearTarjetaBrigadista(brigadista, doc.id);
-                    brigadistasContainer.appendChild(brigadistaCard);
-                    count++;
+            const LIMITE = 3;
+            let mostrandoTodos = false;
+
+            function renderBrigadistas() {
+                brigadistasContainer.innerHTML = '';
+
+                const lista = mostrandoTodos ? todosLosDocs : todosLosDocs.slice(0, LIMITE);
+                lista.forEach(({ data, id }) => {
+                    brigadistasContainer.appendChild(crearTarjetaBrigadista(data, id));
+                });
+
+                if (todosLosDocs.length > LIMITE) {
+                    const verMasBtn = document.createElement('button');
+                    verMasBtn.className = 'ver-mas-btn';
+                    verMasBtn.textContent = mostrandoTodos ? 'Ver menos' : `Ver más (${todosLosDocs.length - LIMITE} más)`;
+                    verMasBtn.addEventListener('click', () => {
+                        mostrandoTodos = !mostrandoTodos;
+                        renderBrigadistas();
+                    });
+                    brigadistasContainer.appendChild(verMasBtn);
                 }
-            });
+            }
+
+            renderBrigadistas();
 
         } catch (error) {
             console.error('Error al cargar brigadistas:', error);
@@ -366,16 +361,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function cambiarSeccion(seccion) {
         switch(seccion) {
             case 'inicio':
-                // Redirigir al dashboard principal según el rol
-                const roleMap = {
-                    'estudiante': 'dashboard-estudiante.html',
-                    'profesor': 'dashboard-profesor.html',
-                    'admin': 'dashboard-admin.html',
-                    'coordinador': 'dashboard-coordinador.html',
-                    'institucion': 'dashboard-institucion.html'
-                };
-                const dashboardPage = roleMap[userRole.toLowerCase()] || 'dashboard-estudiante.html';
-                window.location.href = dashboardPage;
+                window.location.href = 'dashboard.html';
                 break;
             case 'brigada':
                 // Ya estamos en brigada, no hacer nada

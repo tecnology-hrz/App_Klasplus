@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klasplus - Niveles Brigada</title>
+    <link rel="stylesheet" href="../css/niveles.css">
+    <link rel="stylesheet" href="../css/modal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="niveles-container">
+        <!-- Header -->
+        <header class="niveles-header">
+            <button class="back-btn" id="backBtn">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <div class="header-info">
+                <h1>Misiones de Brigada</h1>
+                <div class="puntos-display">
+                    <i class="fa-solid fa-star"></i>
+                    <span id="puntosTotal">0</span> pts
+                </div>
+            </div>
+            <div class="nivel-badge">
+                <span>Nivel</span>
+                <strong id="nivelActualBadge">1</strong>
+            </div>
+        </header>
+
+        <!-- Progreso general -->
+        <div class="progreso-general">
+            <div class="progreso-bar-container">
+                <div class="progreso-bar-fill" id="progresoGeneral" style="width: 0%"></div>
+            </div>
+            <span class="progreso-text" id="progresoText">0/50 niveles</span>
+        </div>
+
+        <!-- Mapa de camino -->
+        <main class="camino-container" id="caminoContainer">
+            <!-- Los nodos se generan dinámicamente -->
+        </main>
+
+        <!-- Modal de nivel (3 tareas) -->
+        <div class="nivel-modal-overlay" id="nivelModal" style="display:none;">
+            <div class="nivel-modal">
+                <button class="nivel-modal-close" id="cerrarNivelModal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="nivel-modal-header">
+                    <div class="nivel-modal-numero" id="modalNivelNumero">1</div>
+                    <h2 id="modalNivelTitulo">Título del Nivel</h2>
+                    <p id="modalNivelDesc">Descripción del nivel</p>
+                </div>
+                <div class="nivel-modal-tareas" id="modalTareas">
+                    <!-- Tareas se generan dinámicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de tarea FOTO -->
+        <div class="tarea-modal-overlay" id="tareaFotoModal" style="display:none;">
+            <div class="tarea-modal">
+                <button class="tarea-modal-close" id="cerrarFotoModal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="tarea-modal-header foto">
+                    <i class="fa-solid fa-camera"></i>
+                    <h2 id="fotoTareaTitulo">Tomar Foto</h2>
+                </div>
+                <div class="tarea-modal-body">
+                    <p id="fotoTareaDesc">Descripción de la tarea</p>
+                    <div class="zona-selector">
+                        <label>Zona de la institución:</label>
+                        <select id="zonaSelect">
+                            <option value="">Selecciona la zona...</option>
+                            <option value="baños">Baños</option>
+                            <option value="escaleras">Escaleras</option>
+                            <option value="patio">Patio principal</option>
+                            <option value="laboratorio">Laboratorio</option>
+                            <option value="cafeteria">Cafetería</option>
+                            <option value="pasillos">Pasillos</option>
+                            <option value="entrada">Entrada principal</option>
+                            <option value="canchas">Canchas</option>
+                            <option value="salones">Salones</option>
+                            <option value="azotea">Azotea/Terraza</option>
+                            <option value="personalizada">Otra zona...</option>
+                        </select>
+                        <input type="text" id="zonaPersonalizada" placeholder="Nombre de la zona..." style="display:none;">
+                    </div>
+                    <div class="foto-upload-area" id="fotoUploadArea">
+                        <i class="fa-solid fa-camera-retro"></i>
+                        <p>Toca para tomar o subir foto</p>
+                        <input type="file" id="fotoInput" accept="image/*" capture="environment" style="display:none;">
+                    </div>
+                    <div class="foto-preview" id="fotoPreview" style="display:none;">
+                        <img id="fotoPreviewImg" src="" alt="Preview">
+                        <button class="foto-cambiar" id="fotoCambiar">
+                            <i class="fa-solid fa-rotate"></i> Cambiar
+                        </button>
+                    </div>
+                    <button class="tarea-submit-btn" id="fotoSubmitBtn" disabled>
+                        <i class="fa-solid fa-check"></i> Completar Tarea (+2 pts)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de tarea PREGUNTA -->
+        <div class="tarea-modal-overlay" id="tareaPreguntaModal" style="display:none;">
+            <div class="tarea-modal">
+                <button class="tarea-modal-close" id="cerrarPreguntaModal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="tarea-modal-header pregunta">
+                    <i class="fa-solid fa-clipboard-question"></i>
+                    <h2 id="preguntaTareaTitulo">Pregunta</h2>
+                </div>
+                <div class="tarea-modal-body">
+                    <p class="pregunta-texto" id="preguntaTexto">¿Pregunta aquí?</p>
+                    <div class="opciones-container" id="opcionesContainer">
+                        <!-- Opciones se generan dinámicamente -->
+                    </div>
+                    <button class="tarea-submit-btn" id="preguntaSubmitBtn" disabled>
+                        <i class="fa-solid fa-check"></i> Confirmar Respuesta (+2 pts)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de tarea IA -->
+        <div class="tarea-modal-overlay" id="tareaIAModal" style="display:none;">
+            <div class="tarea-modal">
+                <button class="tarea-modal-close" id="cerrarIAModal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="tarea-modal-header ia">
+                    <i class="fa-solid fa-robot"></i>
+                    <h2 id="iaTareaTitulo">Reportar a la IA</h2>
+                </div>
+                <div class="tarea-modal-body">
+                    <p id="iaTareaDesc">Describe los riesgos que observas</p>
+                    <textarea id="iaTextoInput" placeholder="Escribe tu reporte o pregunta aquí..." rows="5"></textarea>
+                    <div class="ia-respuesta" id="iaRespuesta" style="display:none;">
+                        <div class="ia-respuesta-header">
+                            <i class="fa-solid fa-robot"></i>
+                            <span>Respuesta de la IA</span>
+                        </div>
+                        <p id="iaRespuestaTexto"></p>
+                    </div>
+                    <button class="tarea-submit-btn" id="iaSubmitBtn" disabled>
+                        <i class="fa-solid fa-paper-plane"></i> Enviar Reporte (+2 pts)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de nivel completado -->
+        <div class="nivel-completado-overlay" id="nivelCompletadoModal" style="display:none;">
+            <div class="nivel-completado-modal">
+                <div class="confetti-container" id="confettiContainer"></div>
+                <div class="nivel-completado-content">
+                    <div class="nivel-completado-icon">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h2>¡Nivel Completado!</h2>
+                    <p class="puntos-ganados">+6 puntos Klasplus</p>
+                    <div class="nivel-completado-stats">
+                        <div class="stat">
+                            <i class="fa-solid fa-camera"></i>
+                            <span>Foto subida</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                            <span>Pregunta respondida</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fa-solid fa-robot"></i>
+                            <span>Reporte enviado</span>
+                        </div>
+                    </div>
+                    <button class="nivel-completado-btn" id="nivelCompletadoContinuar">
+                        Continuar <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../js/niveles-brigada.js"></script>
+</body>
+</html>

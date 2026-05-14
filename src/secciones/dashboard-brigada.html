@@ -39,56 +39,51 @@
         <main class="dashboard-content">
             <!-- Sección de Tareas Pendientes -->
             <div class="brigada-section">
-                <h2 class="section-title">Tareas Pendientes</h2>
+                <h2 class="section-title">Misiones de Brigada</h2>
                 
                 <div class="main-card">
                     <div class="tasks-container">
-                        <!-- Tarea 1: Tomar fotos -->
-                        <div class="task-card">
+                        <!-- Resumen de progreso -->
+                        <div class="task-card" onclick="window.location.href='niveles-brigada.html'" style="cursor:pointer;">
                             <div class="task-icon camera">
+                                <i class="fa-solid fa-road"></i>
+                            </div>
+                            <div class="task-content">
+                                <h3 class="task-title">Avanza por los 50 niveles</h3>
+                                <div class="task-progress">
+                                    <span class="progress-text">Completa misiones y gana puntos Klasplus</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="nivelesProgressFill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="task-btn" onclick="window.location.href='niveles-brigada.html'">Ir</button>
+                        </div>
+
+                        <div class="task-card" onclick="window.location.href='niveles-brigada.html'" style="cursor:pointer;">
+                            <div class="task-icon warning">
                                 <i class="fa-solid fa-camera"></i>
                             </div>
                             <div class="task-content">
-                                <h3 class="task-title">Tomar fotos de zonas peligrosas</h3>
+                                <h3 class="task-title">Documenta zonas de riesgo</h3>
                                 <div class="task-progress">
-                                    <span class="progress-text">1 de 5 fotos tomadas</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 20%"></div>
-                                    </div>
+                                    <span class="progress-text">Toma fotos y alimenta el mapa de peligro</span>
                                 </div>
                             </div>
-                            <button class="task-btn" onclick="continuarTarea('fotos')">Completar</button>
+                            <button class="task-btn" onclick="window.location.href='niveles-brigada.html'">Ir</button>
                         </div>
 
-                        <!-- Tarea 2: Cuestionario -->
-                        <div class="task-card">
-                            <div class="task-icon warning">
-                                <i class="fa-solid fa-triangle-exclamation"></i>
-                            </div>
-                            <div class="task-content">
-                                <h3 class="task-title">¿Cuáles son los puntos de mayor riesgo en la institución?</h3>
-                                <div class="task-progress">
-                                    <span class="progress-text">Pendiente</span>
-                                </div>
-                            </div>
-                            <button class="task-btn" onclick="continuarTarea('cuestionario')">Contestar</button>
-                        </div>
-
-                        <!-- Tarea 3: Inspección de escaleras -->
-                        <div class="task-card">
+                        <div class="task-card" onclick="window.location.href='niveles-brigada.html'" style="cursor:pointer;">
                             <div class="task-icon stairs">
-                                <i class="fa-solid fa-stairs"></i>
+                                <i class="fa-solid fa-robot"></i>
                             </div>
                             <div class="task-content">
-                                <h3 class="task-title">Inspeccionar estado de escaleras</h3>
+                                <h3 class="task-title">Entrena la IA de tu institución</h3>
                                 <div class="task-progress">
-                                    <span class="progress-text">0 de 3 escaleras revisadas</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
+                                    <span class="progress-text">Reporta riesgos para mejorar las respuestas</span>
                                 </div>
                             </div>
-                            <button class="task-btn" onclick="continuarTarea('escaleras')">Continuar</button>
+                            <button class="task-btn" onclick="window.location.href='niveles-brigada.html'">Ir</button>
                         </div>
                     </div>
                 </div>
