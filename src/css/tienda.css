@@ -245,3 +245,274 @@
         font-size: 18px;
     }
 }
+
+/* Sección de puntos del usuario */
+.puntos-usuario-section {
+    margin-bottom: 20px;
+}
+
+.puntos-usuario-card {
+    background: linear-gradient(135deg, #0047B3, #1565C0);
+    border-radius: 16px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 71, 179, 0.3);
+}
+
+.puntos-usuario-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.puntos-usuario-info > i {
+    font-size: 32px;
+    color: #FFD700;
+}
+
+.puntos-usuario-info > div {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.puntos-label {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.8;
+    display: block;
+    width: 100%;
+}
+
+.puntos-valor {
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.puntos-suffix {
+    font-size: 16px;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.puntos-msg {
+    font-size: 12px;
+    opacity: 0.85;
+    margin: 0;
+}
+
+/* Cómo funciona */
+.como-funciona-section {
+    margin-bottom: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 15px;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.como-funciona-section h3 {
+    color: white;
+    font-size: 14px;
+    margin: 0 0 12px 0;
+    text-align: center;
+}
+
+.pasos-grid {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.paso-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+}
+
+.paso-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.paso-item span {
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+}
+
+.paso-item small {
+    font-size: 9px;
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+}
+
+/* Separador */
+.tienda-separador {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 25px 0 15px;
+}
+
+.tienda-separador hr {
+    flex: 1;
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.tienda-separador span {
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Productos redimibles */
+.producto-card.redimible .producto-img-container.redimible-icon {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.redimible-emoji {
+    font-size: 48px;
+}
+
+.producto-card.insuficiente {
+    opacity: 0.6;
+}
+
+.producto-puntos {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0047B3;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.redimir-btn {
+    background: #FF6B35 !important;
+}
+
+.redimir-btn:hover {
+    background: #E55A2B !important;
+}
+
+.redimir-btn:disabled {
+    background: #ccc !important;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Chip de categoría productos */
+.categoria-chip-prod {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 7px 16px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.categoria-chip-prod.active,
+.categoria-chip-prod:hover {
+    background: white;
+    color: #0047B3;
+    border-color: white;
+}
+
+/* Tabs principales Tienda / Canjear */
+.tienda-tabs {
+    display: flex;
+    gap: 0;
+    background: rgba(255,255,255,0.15);
+    border-radius: 14px;
+    padding: 4px;
+    margin-bottom: 20px;
+}
+
+.tienda-tab {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 11px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+}
+
+.tienda-tab.active {
+    background: white;
+    color: #0047B3;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.tienda-tab:not(.active):hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.tienda-tab i {
+    font-size: 16px;
+}
+
+/* Categorías de canje */
+.canjear-categoria {
+    margin-bottom: 25px;
+}
+
+.canjear-categoria-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.canjear-cat-icon {
+    font-size: 24px;
+}
+
+.canjear-categoria-header h3 {
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Icono FA en productos redimibles */
+.redimible-fa-icon {
+    font-size: 40px;
+    color: #0047B3;
+}
+
+.canjear-cat-icon {
+    font-size: 22px;
+}

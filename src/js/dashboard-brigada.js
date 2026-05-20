@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const nivelActual = data.nivelActual || 1;
                 const nivelesCompletados = (data.nivelesCompletados || []).length;
                 const puntos = data.puntosKlasplus || 0;
-                const porcentaje = Math.round((nivelesCompletados / 50) * 100);
+                const porcentaje = Math.round((nivelesCompletados / 250) * 100);
 
                 const badge = document.getElementById('nivelActualBadge');
                 const puntosBadge = document.getElementById('puntosActualesBadge');
@@ -135,8 +135,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (badge) badge.textContent = `Nv. ${nivelActual}`;
                 if (puntosBadge) puntosBadge.textContent = `${puntos} pts`;
                 if (fill) fill.style.width = `${porcentaje}%`;
-                if (label) label.textContent = `${nivelesCompletados} / 50 niveles`;
+                if (label) label.textContent = `${nivelesCompletados} / 250 niveles`;
                 if (pctLabel) pctLabel.textContent = `${porcentaje}%`;
+
+                // Sincronizar puntos con localStorage para la tienda
+                localStorage.setItem('puntosKlasplus', puntos.toString());
             }
         } catch (e) { console.error(e); }
     })();

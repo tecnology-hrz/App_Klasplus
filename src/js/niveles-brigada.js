@@ -28,19 +28,94 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupEventListeners();
 });
 
-// Generar los 50 niveles con sus tareas
+// Generar los 250 niveles (50 por categoría × 5 categorías)
 function generarNiveles() {
-    const bloques = [
-        { tema: 'Reconocimiento general', zonas: ['entrada', 'pasillos', 'patio', 'salones', 'cafeteria'] },
-        { tema: 'Zonas húmedas y sanitarias', zonas: ['baños', 'cafeteria', 'baños', 'cafeteria', 'baños'] },
-        { tema: 'Circulación vertical', zonas: ['escaleras', 'escaleras', 'pasillos', 'escaleras', 'entrada'] },
-        { tema: 'Equipos de emergencia', zonas: ['pasillos', 'salones', 'entrada', 'laboratorio', 'patio'] },
-        { tema: 'Señalización y rutas', zonas: ['pasillos', 'escaleras', 'entrada', 'patio', 'salones'] },
-        { tema: 'Zonas especiales', zonas: ['laboratorio', 'laboratorio', 'salones', 'laboratorio', 'salones'] },
-        { tema: 'Zonas deportivas', zonas: ['canchas', 'canchas', 'patio', 'canchas', 'patio'] },
-        { tema: 'Infraestructura eléctrica', zonas: ['salones', 'pasillos', 'laboratorio', 'cafeteria', 'entrada'] },
-        { tema: 'Zonas exteriores', zonas: ['entrada', 'patio', 'canchas', 'entrada', 'patio'] },
-        { tema: 'Evaluación integral', zonas: ['baños', 'escaleras', 'laboratorio', 'canchas', 'entrada'] }
+    const categorias = [
+        {
+            nombre: 'Estudiantes',
+            icono: '<i class="fa-solid fa-graduation-cap"></i>',
+            color: '#6C63FF',
+            bloques: [
+                { tema: 'Reconocimiento de aulas', zonas: ['salones', 'salones', 'salones', 'salones', 'salones'] },
+                { tema: 'Espacios de estudio', zonas: ['salones', 'laboratorio', 'salones', 'laboratorio', 'salones'] },
+                { tema: 'Zonas de descanso estudiantil', zonas: ['patio', 'cafeteria', 'patio', 'cafeteria', 'patio'] },
+                { tema: 'Mobiliario escolar', zonas: ['salones', 'laboratorio', 'salones', 'laboratorio', 'salones'] },
+                { tema: 'Accesibilidad estudiantil', zonas: ['entrada', 'pasillos', 'escaleras', 'entrada', 'pasillos'] },
+                { tema: 'Iluminación en aulas', zonas: ['salones', 'salones', 'laboratorio', 'salones', 'salones'] },
+                { tema: 'Ventilación de espacios', zonas: ['salones', 'laboratorio', 'cafeteria', 'salones', 'laboratorio'] },
+                { tema: 'Material didáctico seguro', zonas: ['salones', 'laboratorio', 'salones', 'laboratorio', 'salones'] },
+                { tema: 'Orden y limpieza aulas', zonas: ['salones', 'salones', 'salones', 'salones', 'salones'] },
+                { tema: 'Evaluación integral aulas', zonas: ['salones', 'laboratorio', 'patio', 'cafeteria', 'entrada'] }
+            ]
+        },
+        {
+            nombre: 'Comida y Bebidas',
+            icono: '<i class="fa-solid fa-utensils"></i>',
+            color: '#FF6B35',
+            bloques: [
+                { tema: 'Higiene en cafetería', zonas: ['cafeteria', 'cafeteria', 'cafeteria', 'cafeteria', 'cafeteria'] },
+                { tema: 'Almacenamiento de alimentos', zonas: ['cafeteria', 'cafeteria', 'cafeteria', 'cafeteria', 'cafeteria'] },
+                { tema: 'Fuentes de agua', zonas: ['patio', 'pasillos', 'cafeteria', 'canchas', 'entrada'] },
+                { tema: 'Zonas de comedor', zonas: ['cafeteria', 'cafeteria', 'cafeteria', 'cafeteria', 'cafeteria'] },
+                { tema: 'Residuos y reciclaje', zonas: ['cafeteria', 'patio', 'pasillos', 'canchas', 'entrada'] },
+                { tema: 'Señalización alimentaria', zonas: ['cafeteria', 'cafeteria', 'cafeteria', 'cafeteria', 'cafeteria'] },
+                { tema: 'Equipos de cocina', zonas: ['cafeteria', 'cafeteria', 'cafeteria', 'cafeteria', 'cafeteria'] },
+                { tema: 'Plagas y control sanitario', zonas: ['cafeteria', 'patio', 'baños', 'entrada', 'pasillos'] },
+                { tema: 'Manipulación de alimentos', zonas: ['cafeteria', 'cafeteria', 'cafeteria', 'cafeteria', 'cafeteria'] },
+                { tema: 'Evaluación integral cafetería', zonas: ['cafeteria', 'cafeteria', 'patio', 'baños', 'entrada'] }
+            ]
+        },
+        {
+            nombre: 'Casas y Hogar',
+            icono: '<i class="fa-solid fa-house"></i>',
+            color: '#2ECC71',
+            bloques: [
+                { tema: 'Infraestructura general', zonas: ['entrada', 'pasillos', 'escaleras', 'patio', 'salones'] },
+                { tema: 'Techos y cubiertas', zonas: ['salones', 'pasillos', 'cafeteria', 'canchas', 'entrada'] },
+                { tema: 'Pisos y superficies', zonas: ['pasillos', 'escaleras', 'baños', 'cafeteria', 'salones'] },
+                { tema: 'Paredes y muros', zonas: ['salones', 'pasillos', 'baños', 'entrada', 'patio'] },
+                { tema: 'Puertas y ventanas', zonas: ['salones', 'laboratorio', 'entrada', 'baños', 'cafeteria'] },
+                { tema: 'Instalaciones hidráulicas', zonas: ['baños', 'cafeteria', 'laboratorio', 'baños', 'patio'] },
+                { tema: 'Instalaciones eléctricas', zonas: ['salones', 'pasillos', 'laboratorio', 'cafeteria', 'entrada'] },
+                { tema: 'Áreas comunes', zonas: ['patio', 'canchas', 'pasillos', 'entrada', 'cafeteria'] },
+                { tema: 'Jardines y exteriores', zonas: ['patio', 'canchas', 'entrada', 'patio', 'canchas'] },
+                { tema: 'Evaluación integral infraestructura', zonas: ['entrada', 'escaleras', 'baños', 'laboratorio', 'patio'] }
+            ]
+        },
+        {
+            nombre: 'Tecnología',
+            icono: '<i class="fa-solid fa-microchip"></i>',
+            color: '#00BCD4',
+            bloques: [
+                { tema: 'Equipos de cómputo', zonas: ['laboratorio', 'laboratorio', 'laboratorio', 'salones', 'laboratorio'] },
+                { tema: 'Redes y conectividad', zonas: ['laboratorio', 'salones', 'pasillos', 'cafeteria', 'entrada'] },
+                { tema: 'Cámaras de seguridad', zonas: ['entrada', 'pasillos', 'patio', 'canchas', 'escaleras'] },
+                { tema: 'Sistemas de alarma', zonas: ['entrada', 'pasillos', 'salones', 'laboratorio', 'cafeteria'] },
+                { tema: 'Iluminación inteligente', zonas: ['pasillos', 'salones', 'patio', 'canchas', 'entrada'] },
+                { tema: 'Tableros eléctricos', zonas: ['pasillos', 'salones', 'laboratorio', 'cafeteria', 'entrada'] },
+                { tema: 'Equipos audiovisuales', zonas: ['salones', 'laboratorio', 'salones', 'salones', 'laboratorio'] },
+                { tema: 'Sensores y detectores', zonas: ['pasillos', 'salones', 'laboratorio', 'cafeteria', 'baños'] },
+                { tema: 'Comunicaciones internas', zonas: ['entrada', 'pasillos', 'salones', 'patio', 'cafeteria'] },
+                { tema: 'Evaluación integral tecnología', zonas: ['laboratorio', 'salones', 'entrada', 'pasillos', 'patio'] }
+            ]
+        },
+        {
+            nombre: 'Experiencias',
+            icono: '<i class="fa-solid fa-ticket"></i>',
+            color: '#E91E63',
+            bloques: [
+                { tema: 'Simulacros de evacuación', zonas: ['entrada', 'escaleras', 'patio', 'pasillos', 'salones'] },
+                { tema: 'Primeros auxilios', zonas: ['patio', 'canchas', 'salones', 'cafeteria', 'laboratorio'] },
+                { tema: 'Prevención de incendios', zonas: ['laboratorio', 'cafeteria', 'salones', 'pasillos', 'entrada'] },
+                { tema: 'Manejo de emergencias', zonas: ['entrada', 'patio', 'escaleras', 'pasillos', 'canchas'] },
+                { tema: 'Trabajo en equipo', zonas: ['patio', 'canchas', 'salones', 'cafeteria', 'laboratorio'] },
+                { tema: 'Liderazgo brigadista', zonas: ['salones', 'patio', 'entrada', 'pasillos', 'canchas'] },
+                { tema: 'Comunicación de riesgos', zonas: ['entrada', 'pasillos', 'salones', 'patio', 'cafeteria'] },
+                { tema: 'Protocolos de seguridad', zonas: ['entrada', 'escaleras', 'laboratorio', 'baños', 'patio'] },
+                { tema: 'Capacitación comunitaria', zonas: ['salones', 'patio', 'canchas', 'cafeteria', 'entrada'] },
+                { tema: 'Evaluación integral experiencias', zonas: ['entrada', 'patio', 'salones', 'laboratorio', 'canchas'] }
+            ]
+        }
     ];
 
     const titulos = {
@@ -54,50 +129,61 @@ function generarNiveles() {
         { q: '¿Hay señalización de emergencia visible?', opts: ['Sí, clara y visible', 'Sí, pero deteriorada', 'No hay señalización', 'Hay pero está mal ubicada'] },
         { q: '¿Cómo calificarías el estado general?', opts: ['Excelente estado', 'Buen estado con detalles menores', 'Estado regular, necesita atención', 'Mal estado, urgente'] },
         { q: '¿Existe ruta de evacuación señalizada?', opts: ['Sí, bien señalizada', 'Parcialmente señalizada', 'No existe señalización', 'Existe pero está obstruida'] },
-        { q: '¿Hay extintores o equipos de emergencia cerca?', opts: ['Sí, accesibles y vigentes', 'Sí, pero vencidos o inaccesibles', 'No hay equipos visibles', 'Hay pero están dañados'] }
+        { q: '¿Hay extintores o equipos de emergencia cerca?', opts: ['Sí, accesibles y vigentes', 'Sí, pero vencidos o inaccesibles', 'No hay equipos visibles', 'Hay pero están dañados'] },
+        { q: '¿El espacio permite evacuación rápida?', opts: ['Sí, sin obstáculos', 'Parcialmente, hay algunos obstáculos', 'No, está muy congestionado', 'Hay salida pero está bloqueada'] },
+        { q: '¿Hay elementos que puedan caer o desprenderse?', opts: ['No, todo está asegurado', 'Hay algunos elementos sueltos', 'Sí, hay riesgo de caída', 'Hay objetos pesados mal ubicados'] },
+        { q: '¿La zona tiene buena ventilación?', opts: ['Excelente ventilación', 'Ventilación aceptable', 'Poca ventilación', 'Sin ventilación'] },
+        { q: '¿Hay presencia de humedad o filtraciones?', opts: ['No hay humedad', 'Humedad leve', 'Humedad moderada', 'Filtraciones activas'] },
+        { q: '¿El acceso a esta zona es seguro?', opts: ['Totalmente seguro', 'Seguro con precauciones', 'Parcialmente inseguro', 'Muy inseguro'] }
     ];
 
     const niveles = [];
     let nivelNum = 1;
 
-    for (let b = 0; b < bloques.length; b++) {
-        const bloque = bloques[b];
-        for (let z = 0; z < bloque.zonas.length; z++) {
-            const zona = bloque.zonas[z];
-            const pregunta = preguntas[(nivelNum - 1) % preguntas.length];
+    for (let c = 0; c < categorias.length; c++) {
+        const categoria = categorias[c];
+        for (let b = 0; b < categoria.bloques.length; b++) {
+            const bloque = categoria.bloques[b];
+            for (let z = 0; z < bloque.zonas.length; z++) {
+                const zona = bloque.zonas[z];
+                const pregunta = preguntas[(nivelNum - 1) % preguntas.length];
 
-            niveles.push({
-                numero: nivelNum,
-                titulo: `${titulos[zona]} - ${bloque.tema}`,
-                descripcion: `Documenta y evalúa: ${titulos[zona]}`,
-                zona: zona,
-                tareas: [
-                    {
-                        id: `nivel${nivelNum}_tarea1`,
-                        tipo: 'foto',
-                        titulo: `Fotografía: ${titulos[zona]}`,
-                        descripcion: `Toma una foto clara del estado actual de ${titulos[zona].toLowerCase()}`,
-                        zona: zona,
-                        puntos: 2
-                    },
-                    {
-                        id: `nivel${nivelNum}_tarea2`,
-                        tipo: 'pregunta',
-                        titulo: pregunta.q,
-                        descripcion: 'Selecciona la opción que mejor describe lo que observas',
-                        opciones: pregunta.opts,
-                        puntos: 2
-                    },
-                    {
-                        id: `nivel${nivelNum}_tarea3`,
-                        tipo: 'ia',
-                        titulo: 'Reporta a la IA',
-                        descripcion: `Describe los riesgos que observas en ${titulos[zona].toLowerCase()} y pide recomendaciones de mejora`,
-                        puntos: 2
-                    }
-                ]
-            });
-            nivelNum++;
+                niveles.push({
+                    numero: nivelNum,
+                    categoria: categoria.nombre,
+                    categoriaIcono: categoria.icono,
+                    categoriaColor: categoria.color,
+                    titulo: `${titulos[zona]} - ${bloque.tema}`,
+                    descripcion: `${categoria.icono} ${categoria.nombre} | Documenta y evalúa: ${titulos[zona]}`,
+                    zona: zona,
+                    tareas: [
+                        {
+                            id: `nivel${nivelNum}_tarea1`,
+                            tipo: 'foto',
+                            titulo: `Fotografía: ${titulos[zona]}`,
+                            descripcion: `Toma una foto clara del estado actual de ${titulos[zona].toLowerCase()}`,
+                            zona: zona,
+                            puntos: 2
+                        },
+                        {
+                            id: `nivel${nivelNum}_tarea2`,
+                            tipo: 'pregunta',
+                            titulo: pregunta.q,
+                            descripcion: 'Selecciona la opción que mejor describe lo que observas',
+                            opciones: pregunta.opts,
+                            puntos: 2
+                        },
+                        {
+                            id: `nivel${nivelNum}_tarea3`,
+                            tipo: 'ia',
+                            titulo: 'Reporta a la IA',
+                            descripcion: `Describe los riesgos que observas en ${titulos[zona].toLowerCase()} y pide recomendaciones de mejora`,
+                            puntos: 2
+                        }
+                    ]
+                });
+                nivelNum++;
+            }
         }
     }
     return niveles;
@@ -116,6 +202,9 @@ async function cargarProgreso() {
             estadoUsuario.tareasCompletadas = data.tareasCompletadas || [];
             estadoUsuario.puntosKlasplus = data.puntosKlasplus || 0;
             estadoUsuario.nivelesCompletados = data.nivelesCompletados || [];
+
+            // Sincronizar puntos con localStorage para la tienda
+            localStorage.setItem('puntosKlasplus', estadoUsuario.puntosKlasplus.toString());
         }
     } catch (error) {
         console.error('Error cargando progreso:', error);
@@ -136,6 +225,9 @@ async function guardarProgreso() {
             nivelesCompletados: estadoUsuario.nivelesCompletados,
             ultimaActividad: new Date().toISOString()
         }, { merge: true });
+
+        // Sincronizar puntos con localStorage para la tienda
+        localStorage.setItem('puntosKlasplus', estadoUsuario.puntosKlasplus.toString());
     } catch (error) {
         console.error('Error guardando progreso:', error);
     }
@@ -205,15 +297,32 @@ async function actualizarZonaInstitucion(zona, fotoURL) {
     }
 }
 
+// Filtro de categorías (eliminado - se muestran separadores en el camino)
+
 // Render del camino de niveles - Camino uniforme y limpio
 function renderCamino() {
     const container = document.getElementById('caminoContainer');
     container.innerHTML = '';
 
+    // Mostrar todos los niveles (sin filtro)
+    const nivelesFiltrados = NIVELES_DATA;
+
     // Patrón tipo Duolingo real: el primer nodo centrado arriba,
     // luego baja en S suave — 2 a la derecha, 2 a la izquierda
     const nodoSpacing = 90;
-    const totalHeight = NIVELES_DATA.length * nodoSpacing + 100;
+    const separadorHeight = 60;
+
+    // Calcular cuántos separadores de categoría hay
+    let numSeparadores = 0;
+    let categoriaAnterior = '';
+    nivelesFiltrados.forEach((nivel) => {
+        if (nivel.categoria !== categoriaAnterior) {
+            numSeparadores++;
+            categoriaAnterior = nivel.categoria;
+        }
+    });
+
+    const totalHeight = nivelesFiltrados.length * nodoSpacing + (numSeparadores * separadorHeight) + 100;
 
     container.style.position = 'relative';
     container.style.height = totalHeight + 'px';
@@ -230,16 +339,30 @@ function renderCamino() {
     container.appendChild(svg);
 
     const posiciones = [];
+    let offsetY = 0;
+    let catActual = '';
 
-    NIVELES_DATA.forEach((nivel, index) => {
+    nivelesFiltrados.forEach((nivel, index) => {
+        // Separador de categoría
+        if (nivel.categoria !== catActual) {
+            catActual = nivel.categoria;
+            const separador = document.createElement('div');
+            separador.className = 'categoria-separador-camino';
+            separador.style.position = 'absolute';
+            separador.style.top = `${50 + (index * nodoSpacing) + offsetY - 10}px`;
+            separador.style.left = '50%';
+            separador.style.transform = 'translateX(-50%)';
+            separador.style.background = nivel.categoriaColor;
+            separador.innerHTML = `${nivel.categoriaIcono} <span>${nivel.categoria}</span>`;
+            container.appendChild(separador);
+            offsetY += separadorHeight;
+        }
+
         let xPercent;
 
         if (index === 0) {
-            // Primer nodo centrado
             xPercent = 50;
         } else {
-            // Patrón de S: ciclo de 6 posiciones
-            // centro → derecha → derecha → centro → izquierda → izquierda → (repite)
             const ciclo = (index - 1) % 6;
             if (ciclo === 0) xPercent = 62;
             else if (ciclo === 1) xPercent = 72;
@@ -249,7 +372,7 @@ function renderCamino() {
             else xPercent = 38;
         }
 
-        const yPos = 50 + (index * nodoSpacing);
+        const yPos = 50 + (index * nodoSpacing) + offsetY;
         const estado = getEstadoNivel(nivel.numero);
 
         posiciones.push({ x: xPercent, y: yPos, estado });
@@ -489,8 +612,9 @@ function actualizarUI() {
     document.getElementById('puntosTotal').textContent = estadoUsuario.puntosKlasplus;
     document.getElementById('nivelActualBadge').textContent = estadoUsuario.nivelActual;
     const completados = estadoUsuario.nivelesCompletados.length;
-    document.getElementById('progresoGeneral').style.width = `${(completados / 50) * 100}%`;
-    document.getElementById('progresoText').textContent = `${completados}/50 niveles`;
+    const totalNiveles = NIVELES_DATA.length;
+    document.getElementById('progresoGeneral').style.width = `${(completados / totalNiveles) * 100}%`;
+    document.getElementById('progresoText').textContent = `${completados}/${totalNiveles} niveles`;
 }
 
 // Convertir foto a base64 (para guardar como URL temporal)

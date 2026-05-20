@@ -132,6 +132,52 @@ body {
     font-weight: 600;
 }
 
+/* Filtro de categorías */
+.categorias-niveles-scroll {
+    position: fixed;
+    top: 130px;
+    left: 0;
+    right: 0;
+    z-index: 98;
+    display: flex;
+    gap: 8px;
+    padding: 10px 15px;
+    overflow-x: auto;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.categorias-niveles-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.cat-nivel-chip {
+    background: #F0F4F8;
+    color: #333;
+    border: 2px solid #E0E0E0;
+    padding: 7px 14px;
+    border-radius: 25px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.cat-nivel-chip.active {
+    background: #0047B3;
+    color: white;
+    border-color: #0047B3;
+}
+
+.cat-nivel-chip:not(.active):hover {
+    background: #E3F2FD;
+    border-color: #0047B3;
+    color: #0047B3;
+}
+
 /* Camino de niveles - Estilo serpentina con líneas diagonales */
 .camino-container {
     margin-top: 130px;
@@ -1079,4 +1125,27 @@ body {
     font-weight: 800;
     color: #1A1A2E;
     letter-spacing: -0.5px;
+}
+
+/* Separador de categoría en el camino */
+.categoria-separador-camino {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 20px;
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    white-space: nowrap;
+    z-index: 5;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+.categoria-separador-camino i {
+    font-size: 16px;
+}
+
+.categoria-separador-camino span {
+    font-size: 13px;
 }

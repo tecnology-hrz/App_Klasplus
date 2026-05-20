@@ -37,190 +37,349 @@
         </header>
 
         <div class="tienda-content">
-            <div class="tienda-header-section">
-                <i class="fa-solid fa-store"></i>
-                <h2>Tienda de Seguridad Escolar</h2>
+            <!-- Tabs principales -->
+            <div class="tienda-tabs">
+                <button class="tienda-tab active" id="tabTienda">
+                    <i class="fa-solid fa-store"></i> Tienda
+                </button>
+                <button class="tienda-tab" id="tabCanjear">
+                    <i class="fa-solid fa-gift"></i> Canjear Puntos
+                </button>
             </div>
 
-            <div class="categorias-scroll">
-                <button class="categoria-chip active" style="background:#0047B3;color:white;border-color:#0047B3;">Todos</button>
-                <button class="categoria-chip" style="background:#E3F2FD;color:#0047B3;border-color:#BBDEFB;">Señalización</button>
-                <button class="categoria-chip" style="background:#E3F2FD;color:#0047B3;border-color:#BBDEFB;">Emergencia</button>
-                <button class="categoria-chip" style="background:#E3F2FD;color:#0047B3;border-color:#BBDEFB;">Protección</button>
+            <!-- ========== SECCIÓN TIENDA ========== -->
+            <div class="seccion-tienda" id="seccionTienda">
+                <div class="tienda-grid">
+                    <div class="producto-card">
+                        <div class="producto-img-container">
+                            <img src="https://media.falabella.com/falabellaCO/126693294_01/w=1500,h=1500,fit=cover" alt="Silbato de Emergencia" class="producto-img">
+                        </div>
+                        <div class="producto-info">
+                            <span class="producto-badge">Mas vendido</span>
+                            <h3 class="producto-nombre">Silbato de Emergencia Escolar</h3>
+                            <p class="producto-descripcion">Silbato de alta potencia (120 dB) con cordón de seguridad.</p>
+                            <div class="producto-footer">
+                                <div class="producto-precio">$12.500 <span>COP</span></div>
+                                <button class="producto-btn" onclick="agregarCarrito('Silbato de Emergencia', 12500)"><i class="fa-solid fa-cart-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="producto-card">
+                        <div class="producto-img-container">
+                            <img src="https://www.electromanferonline.com/75-large_default/chaleco-reflectivo-en-malla.jpg" alt="Chaleco Reflectivo" class="producto-img">
+                        </div>
+                        <div class="producto-info">
+                            <span class="producto-badge" style="background:#E3F2FD;color:#0047B3;">Recomendado</span>
+                            <h3 class="producto-nombre">Chaleco Reflectivo Brigadista</h3>
+                            <p class="producto-descripcion">Chaleco de alta visibilidad con bandas reflectivas.</p>
+                            <div class="producto-footer">
+                                <div class="producto-precio">$35.000 <span>COP</span></div>
+                                <button class="producto-btn" onclick="agregarCarrito('Chaleco Reflectivo', 35000)"><i class="fa-solid fa-cart-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="producto-card">
+                        <div class="producto-img-container">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLmlExpzDYA-9RL_gxlEbjjbPGzPZgZet8JQ&s" alt="Botiquín Escolar" class="producto-img">
+                        </div>
+                        <div class="producto-info">
+                            <span class="producto-badge" style="background:#FFF3E0;color:#E65100;">Esencial</span>
+                            <h3 class="producto-nombre">Botiquín Primeros Auxilios</h3>
+                            <p class="producto-descripcion">Kit completo con vendas, gasas, alcohol y guantes.</p>
+                            <div class="producto-footer">
+                                <div class="producto-precio">$48.900 <span>COP</span></div>
+                                <button class="producto-btn" onclick="agregarCarrito('Botiquín Escolar', 48900)"><i class="fa-solid fa-cart-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="producto-card">
+                        <div class="producto-img-container">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiOF4gD7qPA3B2isnLk-aFHFO-6UEdcVcyVQ&s" alt="Kit Señalización" class="producto-img">
+                        </div>
+                        <div class="producto-info">
+                            <span class="producto-badge" style="background:#F3E5F5;color:#7B1FA2;">Pack x5</span>
+                            <h3 class="producto-nombre">Kit Señalización Evacuación</h3>
+                            <p class="producto-descripcion">Señales fotoluminiscentes de ruta y salida de emergencia.</p>
+                            <div class="producto-footer">
+                                <div class="producto-precio">$28.500 <span>COP</span></div>
+                                <button class="producto-btn" onclick="agregarCarrito('Kit Señalización', 28500)"><i class="fa-solid fa-cart-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="tienda-grid">
-                <div class="producto-card">
-                    <div class="producto-img-container">
-                        <img src="https://media.falabella.com/falabellaCO/126693294_01/w=1500,h=1500,fit=cover" alt="Silbato de Emergencia" class="producto-img">
+            <!-- ========== SECCIÓN CANJEAR PUNTOS ========== -->
+            <div class="seccion-canjear" id="seccionCanjear" style="display:none;">
+                <!-- Puntos del usuario -->
+                <div class="puntos-usuario-section">
+                    <div class="puntos-usuario-card">
+                        <div class="puntos-usuario-info">
+                            <i class="fa-solid fa-star"></i>
+                            <div>
+                                <span class="puntos-label">TUS PUNTOS</span>
+                                <span class="puntos-valor" id="puntosUsuario">0</span>
+                                <span class="puntos-suffix">pts</span>
+                            </div>
+                        </div>
+                        <p class="puntos-msg">¡Sigue sumando puntos y descubre más recompensas!</p>
                     </div>
-                    <div class="producto-info">
-                        <span class="producto-badge">Mas vendido</span>
-                        <h3 class="producto-nombre">Silbato de Emergencia Escolar</h3>
-                        <p class="producto-descripcion">Silbato de alta potencia (120 dB) con cordón de seguridad.</p>
-                        <div class="producto-footer">
-                            <div class="producto-precio">$12.500 <span>COP</span></div>
-                            <button class="producto-btn" onclick="agregarCarrito('Silbato de Emergencia', 12500)">
-                                <i class="fa-solid fa-cart-plus"></i>
-                            </button>
+                </div>
+
+                <!-- Cómo funciona -->
+                <div class="como-funciona-section">
+                    <h3>¿Cómo funciona?</h3>
+                    <div class="pasos-grid">
+                        <div class="paso-item">
+                            <div class="paso-icon" style="background:#E3F2FD;"><i class="fa-solid fa-star" style="color:#0047B3;"></i></div>
+                            <span>1. GANA PUNTOS</span>
+                            <small>Por tus misiones y tareas</small>
+                        </div>
+                        <div class="paso-item">
+                            <div class="paso-icon" style="background:#FFF3E0;"><i class="fa-solid fa-gift" style="color:#FF6B35;"></i></div>
+                            <span>2. ELIGE</span>
+                            <small>Explora las recompensas</small>
+                        </div>
+                        <div class="paso-item">
+                            <div class="paso-icon" style="background:#E8F5E9;"><i class="fa-solid fa-cart-shopping" style="color:#2E7D32;"></i></div>
+                            <span>3. REDIME</span>
+                            <small>Usa tus puntos</small>
                         </div>
                     </div>
                 </div>
 
-                <div class="producto-card">
-                    <div class="producto-img-container">
-                        <img src="https://www.electromanferonline.com/75-large_default/chaleco-reflectivo-en-malla.jpg" alt="Chaleco Reflectivo" class="producto-img">
+                <!-- Categorías de canje por secciones -->
+                <div class="canjear-categoria" id="catEstudiantes">
+                    <div class="canjear-categoria-header">
+                        <i class="fa-solid fa-backpack canjear-cat-icon" style="color:#6C63FF;"></i>
+                        <h3>Estudiantes</h3>
                     </div>
-                    <div class="producto-info">
-                        <span class="producto-badge" style="background:#E3F2FD;color:#0047B3;">Recomendado</span>
-                        <h3 class="producto-nombre">Chaleco Reflectivo Brigadista</h3>
-                        <p class="producto-descripcion">Chaleco de alta visibilidad con bandas reflectivas.</p>
-                        <div class="producto-footer">
-                            <div class="producto-precio">$35.000 <span>COP</span></div>
-                            <button class="producto-btn" onclick="agregarCarrito('Chaleco Reflectivo', 35000)">
-                                <i class="fa-solid fa-cart-plus"></i>
-                            </button>
-                        </div>
-                    </div>
+                    <div class="tienda-grid" id="gridEstudiantes"></div>
                 </div>
 
-                <div class="producto-card">
-                    <div class="producto-img-container">
-                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLmlExpzDYA-9RL_gxlEbjjbPGzPZgZet8JQ&s" alt="Botiquín Escolar" class="producto-img">
+                <div class="canjear-categoria" id="catComida">
+                    <div class="canjear-categoria-header">
+                        <i class="fa-solid fa-utensils canjear-cat-icon" style="color:#FF6B35;"></i>
+                        <h3>Comida y Bebidas</h3>
                     </div>
-                    <div class="producto-info">
-                        <span class="producto-badge" style="background:#FFF3E0;color:#E65100;">Esencial</span>
-                        <h3 class="producto-nombre">Botiquín Primeros Auxilios</h3>
-                        <p class="producto-descripcion">Kit completo con vendas, gasas, alcohol y guantes.</p>
-                        <div class="producto-footer">
-                            <div class="producto-precio">$48.900 <span>COP</span></div>
-                            <button class="producto-btn" onclick="agregarCarrito('Botiquín Escolar', 48900)">
-                                <i class="fa-solid fa-cart-plus"></i>
-                            </button>
-                        </div>
-                    </div>
+                    <div class="tienda-grid" id="gridComida"></div>
                 </div>
 
-                <div class="producto-card">
-                    <div class="producto-img-container">
-                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiOF4gD7qPA3B2isnLk-aFHFO-6UEdcVcyVQ&s" alt="Kit Señalización" class="producto-img">
+                <div class="canjear-categoria" id="catHogar">
+                    <div class="canjear-categoria-header">
+                        <i class="fa-solid fa-house canjear-cat-icon" style="color:#2ECC71;"></i>
+                        <h3>Casas y Hogar</h3>
                     </div>
-                    <div class="producto-info">
-                        <span class="producto-badge" style="background:#F3E5F5;color:#7B1FA2;">Pack x5</span>
-                        <h3 class="producto-nombre">Kit Señalización Evacuación</h3>
-                        <p class="producto-descripcion">Señales fotoluminiscentes de ruta y salida de emergencia.</p>
-                        <div class="producto-footer">
-                            <div class="producto-precio">$28.500 <span>COP</span></div>
-                            <button class="producto-btn" onclick="agregarCarrito('Kit Señalización', 28500)">
-                                <i class="fa-solid fa-cart-plus"></i>
-                            </button>
-                        </div>
+                    <div class="tienda-grid" id="gridHogar"></div>
+                </div>
+
+                <div class="canjear-categoria" id="catTecnologia">
+                    <div class="canjear-categoria-header">
+                        <i class="fa-solid fa-microchip canjear-cat-icon" style="color:#00BCD4;"></i>
+                        <h3>Tecnología</h3>
                     </div>
+                    <div class="tienda-grid" id="gridTecnologia"></div>
+                </div>
+
+                <div class="canjear-categoria" id="catExperiencias">
+                    <div class="canjear-categoria-header">
+                        <i class="fa-solid fa-ticket canjear-cat-icon" style="color:#E91E63;"></i>
+                        <h3>Experiencias</h3>
+                    </div>
+                    <div class="tienda-grid" id="gridExperiencias"></div>
                 </div>
             </div>
         </div>
 
         <nav class="bottom-nav">
-            <button class="nav-item active" data-section="inicio">
-                <i class="fa-solid fa-house nav-icon"></i>
-                <span class="nav-label">Inicio</span>
-            </button>
-            <button class="nav-item" data-section="brigada">
-                <i class="fa-solid fa-user-group nav-icon"></i>
-                <span class="nav-label">Brigada</span>
-            </button>
-            <button class="nav-item emergency" data-section="emergencia">
-                <i class="fa-solid fa-phone-volume nav-icon-emergency"></i>
-            </button>
-            <button class="nav-item" data-section="ia">
-                <i class="fa-solid fa-comment-dots nav-icon"></i>
-                <span class="nav-label">IA</span>
-            </button>
-            <button class="nav-item" data-section="perfil">
-                <i class="fa-solid fa-user nav-icon"></i>
-                <span class="nav-label">Perfil</span>
-            </button>
+            <button class="nav-item active" data-section="inicio"><i class="fa-solid fa-house nav-icon"></i><span class="nav-label">Inicio</span></button>
+            <button class="nav-item" data-section="brigada"><i class="fa-solid fa-user-group nav-icon"></i><span class="nav-label">Brigada</span></button>
+            <button class="nav-item emergency" data-section="emergencia"><i class="fa-solid fa-phone-volume nav-icon-emergency"></i></button>
+            <button class="nav-item" data-section="ia"><i class="fa-solid fa-comment-dots nav-icon"></i><span class="nav-label">IA</span></button>
+            <button class="nav-item" data-section="perfil"><i class="fa-solid fa-user nav-icon"></i><span class="nav-label">Perfil</span></button>
         </nav>
     </div>
 
     <script src="../js/modal.js"></script>
+    <script type="module">
+        import { db, doc, getDoc } from '../js/firebase-config.js';
+        // Cargar puntos desde Firebase al abrir la tienda
+        var userId = localStorage.getItem('userId');
+        if (userId) {
+            try {
+                var progresoRef = doc(db, 'progreso_usuario', userId);
+                var progresoDoc = await getDoc(progresoRef);
+                if (progresoDoc.exists()) {
+                    var puntos = progresoDoc.data().puntosKlasplus || 0;
+                    localStorage.setItem('puntosKlasplus', puntos.toString());
+                }
+            } catch(e) { console.error('Error cargando puntos:', e); }
+        }
+    </script>
     <script>
+        var productosRedimibles = {
+            estudiantes: [
+                { nombre: 'Kit Escolar Premium', puntos: 2500, icono: 'fa-solid fa-bag-shopping', badge: 'Popular' },
+                { nombre: 'Audífonos Inalámbricos', puntos: 5000, icono: 'fa-solid fa-headphones', badge: 'Premium' },
+                { nombre: 'Libros Best Sellers', puntos: 3000, icono: 'fa-solid fa-book', badge: 'Educativo' },
+                { nombre: 'Tarjeta Regalo Librería', puntos: 4500, icono: 'fa-solid fa-gift', badge: 'Regalo' },
+                { nombre: 'Mochila Deportiva', puntos: 3500, icono: 'fa-solid fa-suitcase', badge: 'Nuevo' },
+                { nombre: 'Set de Colores Profesional', puntos: 2000, icono: 'fa-solid fa-palette', badge: 'Creativo' },
+                { nombre: 'Calculadora Científica', puntos: 2800, icono: 'fa-solid fa-calculator', badge: 'Esencial' },
+                { nombre: 'Agenda Personalizada', puntos: 1500, icono: 'fa-solid fa-book-open', badge: 'Útil' },
+                { nombre: 'Termo para Bebidas', puntos: 1800, icono: 'fa-solid fa-bottle-water', badge: 'Eco' },
+                { nombre: 'Estuche Organizador', puntos: 1200, icono: 'fa-solid fa-pencil', badge: 'Práctico' }
+            ],
+            comida: [
+                { nombre: 'Combo Pizza + Bebida', puntos: 2000, icono: 'fa-solid fa-pizza-slice', badge: 'Favorito' },
+                { nombre: 'Combo Hamburguesa', puntos: 2200, icono: 'fa-solid fa-burger', badge: 'Popular' },
+                { nombre: 'Café + Postre', puntos: 1500, icono: 'fa-solid fa-mug-hot', badge: 'Dulce' },
+                { nombre: 'Helado Premium', puntos: 1200, icono: 'fa-solid fa-ice-cream', badge: 'Refrescante' },
+                { nombre: 'Combo Sushi x12', puntos: 3000, icono: 'fa-solid fa-fish', badge: 'Premium' },
+                { nombre: 'Smoothie + Wrap', puntos: 1800, icono: 'fa-solid fa-blender', badge: 'Saludable' },
+                { nombre: 'Caja de Donuts x6', puntos: 1600, icono: 'fa-solid fa-cookie', badge: 'Dulce' },
+                { nombre: 'Combo Pollo + Papas', puntos: 2000, icono: 'fa-solid fa-drumstick-bite', badge: 'Clásico' },
+                { nombre: 'Bono Restaurante', puntos: 4000, icono: 'fa-solid fa-utensils', badge: 'Especial' },
+                { nombre: 'Snack Box Saludable', puntos: 1000, icono: 'fa-solid fa-apple-whole', badge: 'Fit' }
+            ],
+            hogar: [
+                { nombre: 'Planta Decorativa', puntos: 2000, icono: 'fa-solid fa-leaf', badge: 'Natural' },
+                { nombre: 'Cojín Decorativo', puntos: 1500, icono: 'fa-solid fa-couch', badge: 'Confort' },
+                { nombre: 'Taza Personalizada', puntos: 1000, icono: 'fa-solid fa-mug-saucer', badge: 'Único' },
+                { nombre: 'Bocina Bluetooth', puntos: 3500, icono: 'fa-solid fa-volume-high', badge: 'Tech' },
+                { nombre: 'Lámpara LED', puntos: 2500, icono: 'fa-solid fa-lightbulb', badge: 'Ambiente' },
+                { nombre: 'Set de Velas Aromáticas', puntos: 1800, icono: 'fa-solid fa-fire', badge: 'Relax' },
+                { nombre: 'Organizador de Escritorio', puntos: 1200, icono: 'fa-solid fa-box-open', badge: 'Orden' },
+                { nombre: 'Cuadro Decorativo', puntos: 2200, icono: 'fa-solid fa-image', badge: 'Arte' },
+                { nombre: 'Reloj de Pared', puntos: 2800, icono: 'fa-solid fa-clock', badge: 'Clásico' },
+                { nombre: 'Set de Toallas', puntos: 1600, icono: 'fa-solid fa-bath', badge: 'Hogar' }
+            ],
+            tecnologia: [
+                { nombre: 'Cargador Portátil', puntos: 2500, icono: 'fa-solid fa-battery-full', badge: 'Esencial' },
+                { nombre: 'Smartband', puntos: 3000, icono: 'fa-solid fa-clock', badge: 'Fitness' },
+                { nombre: 'Audífonos Bluetooth', puntos: 4000, icono: 'fa-solid fa-headphones', badge: 'Premium' },
+                { nombre: 'Tarjeta Google Play', puntos: 5000, icono: 'fa-solid fa-gamepad', badge: 'Gaming' },
+                { nombre: 'Mouse Inalámbrico', puntos: 2000, icono: 'fa-solid fa-computer-mouse', badge: 'Tech' },
+                { nombre: 'Hub USB-C', puntos: 2800, icono: 'fa-solid fa-plug', badge: 'Útil' },
+                { nombre: 'Soporte para Celular', puntos: 1200, icono: 'fa-solid fa-mobile-screen', badge: 'Práctico' },
+                { nombre: 'Memoria USB 64GB', puntos: 1500, icono: 'fa-solid fa-hard-drive', badge: 'Storage' },
+                { nombre: 'Luz LED para Monitor', puntos: 3200, icono: 'fa-solid fa-desktop', badge: 'Pro' },
+                { nombre: 'Teclado Bluetooth', puntos: 3500, icono: 'fa-solid fa-keyboard', badge: 'Productivo' }
+            ],
+            experiencias: [
+                { nombre: 'Entrada al Cine', puntos: 2000, icono: 'fa-solid fa-film', badge: 'Diversión' },
+                { nombre: 'Sala de Juegos (1 hora)', puntos: 2500, icono: 'fa-solid fa-gamepad', badge: 'Gaming' },
+                { nombre: 'Clase de Cocina', puntos: 3000, icono: 'fa-solid fa-kitchen-set', badge: 'Aprender' },
+                { nombre: 'Día de Spa Escolar', puntos: 3500, icono: 'fa-solid fa-spa', badge: 'Relax' },
+                { nombre: 'Taller de Arte', puntos: 2000, icono: 'fa-solid fa-paint-brush', badge: 'Creativo' },
+                { nombre: 'Paseo en Bicicleta', puntos: 1500, icono: 'fa-solid fa-bicycle', badge: 'Aventura' },
+                { nombre: 'Clase de Baile', puntos: 1800, icono: 'fa-solid fa-music', badge: 'Ritmo' },
+                { nombre: 'Visita al Museo', puntos: 2200, icono: 'fa-solid fa-building-columns', badge: 'Cultura' },
+                { nombre: 'Taller de Robótica', puntos: 4000, icono: 'fa-solid fa-robot', badge: 'STEM' },
+                { nombre: 'Día de Camping', puntos: 4500, icono: 'fa-solid fa-campground', badge: 'Naturaleza' }
+            ]
+        };
+
+        function renderCategoria(gridId, productos) {
+            var grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            var puntosUsuario = parseInt(localStorage.getItem('puntosKlasplus') || '0');
+            productos.forEach(function(prod) {
+                var alcanzable = puntosUsuario >= prod.puntos;
+                var card = document.createElement('div');
+                card.className = 'producto-card redimible' + (alcanzable ? '' : ' insuficiente');
+                card.innerHTML = '<div class="producto-img-container redimible-icon"><i class="' + prod.icono + ' redimible-fa-icon"></i></div><div class="producto-info"><span class="producto-badge">' + prod.badge + '</span><h3 class="producto-nombre">' + prod.nombre + '</h3><div class="producto-footer"><div class="producto-puntos"><i class="fa-solid fa-star" style="color:#FFD700;"></i> ' + prod.puntos.toLocaleString('es-CO') + ' pts</div><button class="producto-btn redimir-btn" ' + (alcanzable ? '' : 'disabled') + ' onclick="redimirProducto(\'' + prod.nombre + '\', ' + prod.puntos + ')"><i class="fa-solid fa-gift"></i></button></div></div>';
+                grid.appendChild(card);
+            });
+        }
+
+        function renderTodosCanjear() {
+            renderCategoria('gridEstudiantes', productosRedimibles.estudiantes);
+            renderCategoria('gridComida', productosRedimibles.comida);
+            renderCategoria('gridHogar', productosRedimibles.hogar);
+            renderCategoria('gridTecnologia', productosRedimibles.tecnologia);
+            renderCategoria('gridExperiencias', productosRedimibles.experiencias);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            const userId = localStorage.getItem('userId');
+            var userId = localStorage.getItem('userId');
             if (!userId) { window.location.href = 'login.html'; return; }
 
-            // Botón volver
-            document.getElementById('backBtn').addEventListener('click', function() {
-                window.location.href = 'dashboard.html';
+            var puntos = localStorage.getItem('puntosKlasplus') || '0';
+            document.getElementById('puntosUsuario').textContent = parseInt(puntos).toLocaleString('es-CO');
+            renderTodosCanjear();
+
+            // Tabs
+            document.getElementById('tabTienda').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('tabCanjear').classList.remove('active');
+                document.getElementById('seccionTienda').style.display = 'block';
+                document.getElementById('seccionCanjear').style.display = 'none';
+            });
+            document.getElementById('tabCanjear').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('tabTienda').classList.remove('active');
+                document.getElementById('seccionCanjear').style.display = 'block';
+                document.getElementById('seccionTienda').style.display = 'none';
             });
 
-            // Logout
-            document.getElementById('logoutBtn').addEventListener('click', function() {
-                localStorage.clear();
-                window.location.href = 'login.html';
-            });
+            document.getElementById('backBtn').addEventListener('click', function() { window.location.href = 'dashboard.html'; });
+            document.getElementById('logoutBtn').addEventListener('click', function() { localStorage.clear(); window.location.href = 'login.html'; });
 
-            // Navegación inferior
             document.querySelectorAll('.nav-item').forEach(function(item) {
                 item.addEventListener('click', function() {
-                    const section = this.getAttribute('data-section');
-                    if (section === 'emergencia') {
-                        mostrarEmergencia();
-                        return;
-                    }
-                    const rutas = {
-                        'inicio': 'dashboard.html',
-                        'brigada': 'dashboard-brigada.html',
-                        'ia': 'dashboard-ia.html',
-                        'perfil': 'dashboard-perfil.html'
-                    };
+                    var section = this.getAttribute('data-section');
+                    if (section === 'emergencia') { mostrarEmergencia(); return; }
+                    var rutas = { 'inicio': 'dashboard.html', 'brigada': 'dashboard-brigada.html', 'ia': 'dashboard-ia.html', 'perfil': 'dashboard-perfil.html' };
                     if (rutas[section]) window.location.href = rutas[section];
                 });
             });
 
             function mostrarEmergencia() {
-                const overlay = document.createElement('div');
+                var overlay = document.createElement('div');
                 overlay.className = 'modal-overlay';
                 overlay.style.zIndex = '10000';
-                overlay.innerHTML = `
-                    <div class="emergency-modal-container">
-                        <button class="emergency-close-btn" onclick="this.closest('.modal-overlay').remove()">
-                            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FF0000"/><path d="M15 9L9 15M9 9L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
-                        </button>
-                        <div class="emergency-options">
-                            <button class="emergency-option" onclick="window.location.href='tel:125'">
-                                <img src="../img/ambulancia_cel.png" alt="Ambulancia">
-                            </button>
-                            <button class="emergency-option" onclick="window.location.href='tel:119'">
-                                <img src="../img/bomberos_cel.png" alt="Bomberos">
-                            </button>
-                        </div>
-                        <div class="emergency-arrows">
-                            <img src="../img/flechas.png" alt="Flechas" class="arrows-animation">
-                        </div>
-                    </div>`;
+                overlay.innerHTML = '<div class="emergency-modal-container"><button class="emergency-close-btn" onclick="this.closest(\'.modal-overlay\').remove()"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FF0000"/><path d="M15 9L9 15M9 9L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg></button><div class="emergency-options"><button class="emergency-option" onclick="window.location.href=\'tel:125\'"><img src="../img/ambulancia_cel.png" alt="Ambulancia"></button><button class="emergency-option" onclick="window.location.href=\'tel:119\'"><img src="../img/bomberos_cel.png" alt="Bomberos"></button></div><div class="emergency-arrows"><img src="../img/flechas.png" alt="Flechas" class="arrows-animation"></div></div>';
                 document.body.appendChild(overlay);
             }
         });
 
-        window.agregarCarrito = function(producto, precio) {
-            const overlay = document.createElement('div');
+        window.redimirProducto = function(nombre, puntos) {
+            var puntosActuales = parseInt(localStorage.getItem('puntosKlasplus') || '0');
+            if (puntosActuales < puntos) { alert('No tienes suficientes puntos.'); return; }
+            var overlay = document.createElement('div');
             overlay.className = 'modal-overlay';
             overlay.style.zIndex = '10000';
-            const container = document.createElement('div');
+            var container = document.createElement('div');
             container.className = 'development-modal-container';
             container.style.maxWidth = '400px';
-            container.innerHTML = `
-                <button class="development-close-btn" onclick="this.closest('.modal-overlay').remove()">
-                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#0047B3"/><path d="M15 9L9 15M9 9L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
-                </button>
-                <div class="development-content">
-                    <div class="development-icon"><i class="fa-solid fa-cart-shopping" style="color:#2E7D32;"></i></div>
-                    <h2 class="development-title" style="color:#2E7D32;">Producto Agregado</h2>
-                    <p class="development-message"><strong>${producto}</strong></p>
-                    <p class="development-submessage" style="font-size:20px;font-weight:700;color:#FF6B35;">$${precio.toLocaleString('es-CO')} COP</p>
-                    <p class="development-submessage">El módulo de pagos estará disponible próximamente.</p>
-                </div>`;
+            container.innerHTML = '<button class="development-close-btn" onclick="this.closest(\'.modal-overlay\').remove()"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#0047B3"/><path d="M15 9L9 15M9 9L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg></button><div class="development-content"><div class="development-icon"><i class="fa-solid fa-gift" style="color:#FF6B35;"></i></div><h2 class="development-title" style="color:#FF6B35;">¿Redimir Recompensa?</h2><p class="development-message"><strong>' + nombre + '</strong></p><p class="development-submessage" style="font-size:18px;font-weight:700;color:#0047B3;"><i class="fa-solid fa-star" style="color:#FFD700;"></i> ' + puntos.toLocaleString('es-CO') + ' puntos</p><p class="development-submessage">Puntos disponibles: ' + puntosActuales.toLocaleString('es-CO') + '</p><div style="display:flex;gap:10px;margin-top:15px;justify-content:center;"><button onclick="confirmarRedimir(\'' + nombre + '\', ' + puntos + '); this.closest(\'.modal-overlay\').remove();" style="background:#FF6B35;color:white;border:none;padding:12px 24px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;">Confirmar</button><button onclick="this.closest(\'.modal-overlay\').remove();" style="background:#E0E0E0;color:#333;border:none;padding:12px 24px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;">Cancelar</button></div></div>';
+            overlay.appendChild(container);
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        };
+
+        window.confirmarRedimir = function(nombre, puntos) {
+            var puntosActuales = parseInt(localStorage.getItem('puntosKlasplus') || '0');
+            puntosActuales -= puntos;
+            localStorage.setItem('puntosKlasplus', puntosActuales.toString());
+            document.getElementById('puntosUsuario').textContent = puntosActuales.toLocaleString('es-CO');
+            renderTodosCanjear();
+            var toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#2E7D32;color:white;padding:14px 24px;border-radius:12px;font-weight:600;z-index:99999;';
+            toast.innerHTML = '<i class="fa-solid fa-check-circle"></i> ¡' + nombre + ' redimido!';
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.remove(); }, 3000);
+        };
+
+        window.agregarCarrito = function(producto, precio) {
+            var overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.style.zIndex = '10000';
+            var container = document.createElement('div');
+            container.className = 'development-modal-container';
+            container.style.maxWidth = '400px';
+            container.innerHTML = '<button class="development-close-btn" onclick="this.closest(\'.modal-overlay\').remove()"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#0047B3"/><path d="M15 9L9 15M9 9L15 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg></button><div class="development-content"><div class="development-icon"><i class="fa-solid fa-cart-shopping" style="color:#2E7D32;"></i></div><h2 class="development-title" style="color:#2E7D32;">Producto Agregado</h2><p class="development-message"><strong>' + producto + '</strong></p><p class="development-submessage" style="font-size:20px;font-weight:700;color:#FF6B35;">' + precio.toLocaleString('es-CO') + ' COP</p><p class="development-submessage">El módulo de pagos estará disponible próximamente.</p></div>';
             overlay.appendChild(container);
             document.body.appendChild(overlay);
             overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
