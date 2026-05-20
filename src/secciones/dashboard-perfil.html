@@ -40,34 +40,17 @@
             <div class="profile-options">
                 <button class="profile-option" id="editarPerfilBtn">
                     <div class="option-icon edit">
-                        <i class="fa-solid fa-pen"></i>
+                        <i class="fa-solid fa-shield-halved"></i>
                     </div>
-                    <span class="option-text">Editar Perfil</span>
+                    <span class="option-text">Perfil de Riesgo</span>
                     <i class="fa-solid fa-chevron-right option-arrow"></i>
                 </button>
 
-                <button class="profile-option" id="estadisticasBtn">
-                    <div class="option-icon stats">
-                        <i class="fa-solid fa-chart-simple"></i>
+                <button class="profile-option" id="clasificacionBtn">
+                    <div class="option-icon clasificacion">
+                        <i class="fa-solid fa-ranking-star"></i>
                     </div>
-                    <span class="option-text">Estadísticas</span>
-                    <i class="fa-solid fa-chevron-right option-arrow"></i>
-                </button>
-
-                <button class="profile-option" id="notificacionesBtn">
-                    <div class="option-icon notifications">
-                        <i class="fa-solid fa-bell"></i>
-                    </div>
-                    <span class="option-text">Notificaciones</span>
-                    <span class="notification-count">5</span>
-                    <i class="fa-solid fa-chevron-right option-arrow"></i>
-                </button>
-
-                <button class="profile-option" id="configuracionBtn">
-                    <div class="option-icon config">
-                        <i class="fa-solid fa-gear"></i>
-                    </div>
-                    <span class="option-text">Configuración</span>
+                    <span class="option-text">Clasificación Klasplus</span>
                     <i class="fa-solid fa-chevron-right option-arrow"></i>
                 </button>
 
@@ -78,6 +61,28 @@
                     <span class="option-text">Cerrar Sesión</span>
                     <i class="fa-solid fa-chevron-right option-arrow"></i>
                 </button>
+            </div>
+
+            <!-- Panel de Clasificación Klasplus -->
+            <div class="clasificacion-panel" id="clasificacionPanel" style="display:none;">
+                <div class="clasificacion-header">
+                    <i class="fa-solid fa-ranking-star"></i>
+                    <h3>Clasificación Klasplus</h3>
+                    <p>Ranking de instituciones más seguras</p>
+                </div>
+                <div class="mi-institucion-rank" id="miInstitucionRank">
+                    <!-- Se genera dinámicamente -->
+                </div>
+                <div class="clasificacion-lista" id="clasificacionLista">
+                    <!-- Se genera dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Panel de Perfil de Riesgo -->
+            <div class="clasificacion-panel" id="perfilRiesgoPanel" style="display:none;">
+                <div id="perfilRiesgoContent">
+                    <!-- Se genera dinámicamente -->
+                </div>
             </div>
         </main>
 

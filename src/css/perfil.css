@@ -768,3 +768,483 @@ body {
         font-size: 14px;
     }
 }
+
+/* Clasificación Klasplus */
+.option-icon.clasificacion {
+    background: linear-gradient(135deg, #FFD700, #FF6B35);
+}
+
+.clasificacion-panel {
+    padding: 0 20px 100px;
+}
+
+.clasificacion-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding: 24px 16px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.clasificacion-header i {
+    font-size: 42px;
+    color: #FFD700;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 2px 8px rgba(255,215,0,0.4));
+}
+
+.clasificacion-header h3 {
+    color: #1a1a2e;
+    font-size: 22px;
+    font-weight: 800;
+    margin: 10px 0 6px;
+    letter-spacing: -0.3px;
+}
+
+.clasificacion-header p {
+    color: #666;
+    font-size: 13px;
+    margin: 0;
+}
+
+/* Mi institución - Card destacada */
+.mi-rank-card {
+    background: white;
+    border: none;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.mi-rank-card::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 100px;
+    height: 100px;
+    background: rgba(0,71,179,0.05);
+    border-radius: 50%;
+}
+
+.mi-rank-puesto {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+    background: #E3F2FD;
+    padding: 10px 8px;
+    border-radius: 14px;
+}
+
+.rank-numero {
+    font-size: 28px;
+    font-weight: 900;
+    color: #0047B3;
+    text-shadow: none;
+}
+
+.rank-de {
+    font-size: 11px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.mi-rank-info {
+    flex: 1;
+}
+
+.mi-rank-info h4 {
+    color: #1a1a2e;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    line-height: 1.3;
+}
+
+.mi-rank-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mi-rank-stats span {
+    color: #555;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mi-rank-stats i {
+    color: #0047B3;
+    font-size: 12px;
+}
+
+/* Lista de clasificación */
+.clasificacion-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.clasificacion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: white;
+    border-radius: 14px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.clasificacion-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+}
+
+.clasificacion-item.es-mia {
+    background: white;
+    border: 2px solid #0047B3;
+    box-shadow: 0 4px 14px rgba(0,71,179,0.15);
+}
+
+.clasificacion-item.vacio {
+    opacity: 0.45;
+    box-shadow: none;
+}
+
+.clasificacion-medal {
+    flex-shrink: 0;
+}
+
+.medal-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F0F4F8;
+    font-size: 14px;
+    font-weight: 800;
+    color: #888;
+}
+
+.medal-circle.gold {
+    background: linear-gradient(135deg, #FFF8E1, #FFD700);
+    color: #B8860B;
+    box-shadow: 0 2px 8px rgba(255,215,0,0.4);
+}
+
+.medal-circle.gold i { font-size: 16px; }
+
+.medal-circle.silver {
+    background: linear-gradient(135deg, #F5F5F5, #C0C0C0);
+    color: #666;
+    box-shadow: 0 2px 8px rgba(192,192,192,0.4);
+}
+
+.medal-circle.silver i { font-size: 15px; }
+
+.medal-circle.bronze {
+    background: linear-gradient(135deg, #FFF3E0, #CD7F32);
+    color: #8B4513;
+    box-shadow: 0 2px 8px rgba(205,127,50,0.3);
+}
+
+.medal-circle.bronze i { font-size: 15px; }
+
+.medal-circle span {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.rank-pos {
+    color: #888;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.clasificacion-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.clasificacion-nombre {
+    color: #1a1a2e;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.clasificacion-nombre.vacio-text {
+    color: #aaa;
+    font-style: italic;
+    font-weight: 500;
+}
+
+.clasificacion-ciudad {
+    color: #888;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.clasificacion-score {
+    font-size: 22px;
+    font-weight: 900;
+    flex-shrink: 0;
+    min-width: 44px;
+    text-align: right;
+}
+
+.clasificacion-score span {
+    font-size: 22px;
+    font-weight: 900;
+}
+
+/* Barra de progreso en mi-rank-card */
+.mi-rank-bar {
+    width: 100%;
+    height: 6px;
+    background: #E8ECF0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.mi-rank-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.6s ease;
+}
+
+/* Perfil de Riesgo */
+.riesgo-header-card {
+    text-align: center;
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.riesgo-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.riesgo-header-top i {
+    font-size: 28px;
+    color: #0047B3;
+}
+
+.riesgo-header-top h3 {
+    color: #1a1a2e;
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.riesgo-inst-name {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+.riesgo-score-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px 20px;
+    margin-bottom: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.riesgo-score-label {
+    margin: 0 0 8px;
+    font-size: 11px;
+    color: #888;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.riesgo-score-big {
+    font-size: 48px;
+    font-weight: 900;
+    color: #1a1a2e;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.riesgo-score-big span {
+    font-size: 20px;
+    color: #aaa;
+    font-weight: 600;
+}
+
+.riesgo-score-bar {
+    background: #E8ECF0;
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+    margin: 12px 0;
+}
+
+.riesgo-score-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.6s ease;
+}
+
+.riesgo-score-status {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.riesgo-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.riesgo-stat {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.riesgo-stat-num {
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.riesgo-stat-label {
+    font-size: 10px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.riesgo-zonas-section {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.riesgo-zonas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.riesgo-zonas-header i {
+    color: #0047B3;
+    margin-right: 6px;
+}
+
+.riesgo-zonas-header span:last-child {
+    font-size: 12px;
+    color: #888;
+    font-weight: 600;
+}
+
+.riesgo-zona-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.riesgo-zona-item:last-child {
+    border-bottom: none;
+}
+
+.riesgo-zona-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.riesgo-zona-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.riesgo-zona-left span {
+    font-size: 13px;
+    color: #333;
+    font-weight: 500;
+}
+
+.riesgo-zona-score {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.riesgo-sin-datos {
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+    padding: 16px 0;
+    margin: 0;
+}
+
+.riesgo-puntos-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.riesgo-puntos-card i {
+    font-size: 24px;
+    color: #FFD700;
+}
+
+.riesgo-puntos-label {
+    font-size: 12px;
+    color: #888;
+    display: block;
+}
+
+.riesgo-puntos-valor {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0047B3;
+    display: block;
+}

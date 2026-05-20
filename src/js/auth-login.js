@@ -78,6 +78,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('userRole', userData.tipoUsuario || 'estudiante');
                 localStorage.setItem('userName', userData.nombreCompleto || user.displayName);
                 localStorage.setItem('userPhoto', user.photoURL || '');
+                localStorage.setItem('userInstitution', userData.institucionId || 'default');
+                localStorage.setItem('userInstitutionName', userData.institucionNombre || '');
 
                 // Redirigir según el rol
                 setTimeout(() => {
@@ -184,6 +186,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('userDocument', userData.numeroDocumento || '');
                 localStorage.setItem('userPhone', userData.telefono || '');
                 localStorage.setItem('userPhoto', userData.fotoPerfil || '');
+                localStorage.setItem('userInstitution', userData.institucionId || 'default');
+                localStorage.setItem('userInstitutionName', userData.institucionNombre || '');
 
                 // Mostrar mensaje de éxito y redirigir
                 window.showSuccess(`Bienvenido ${userName}`, 'Inicio de sesión exitoso');
