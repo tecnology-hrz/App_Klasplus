@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', function() {
         userNameElement.textContent = userName;
     }
 
+    // ===== COFRE DIARIO =====
+    setupDailyReward();
+
     // Mostrar foto del usuario o iniciales
     const userAvatar = document.getElementById('userAvatar');
     const userAvatarPlaceholder = document.getElementById('userAvatarPlaceholder');
@@ -486,3 +489,152 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// ===== COFRE DIARIO - 25 puntos cada 24 horas =====
+function setupDailyReward() {
+    var section = document.getElementById('dailyRewardSection');
+    var btn = document.getElementById('dailyRewardBtn');
+    var icon = document.getElementById('dailyRewardIcon');
+    var title = document.getElementById('dailyRewardTitle');
+    var desc = document.getElementById('dailyRewardDesc');
+
+    if (!section || !btn) return;
+
+    // Verificar si hay claim guardado
+    var lastClaim = localStorage.getItem('dailyRewardLastClaim');
+    var now = Date.now();
+
+    if (lastClaim) {
+        var diff = now - parseInt(lastClaim);
+        var hoursPassed = diff / (1000 * 60 * 60);
+        if (hoursPassed < 24) {
+            // Ya reclamó - mostrar countdown
+            btn.disabled = true;
+            btn.classList.add('claimed');
+            icon.innerHTML = '<i class="fa-solid fa-box"></i>';
+            title.textContent = 'Cofre reclamado';
+            section.classList.add('claimed');
+            startCountdown(parseInt(lastClaim));
+            return;
+        }
+    }
+
+    // Disponible - agregar animación de shake al icono
+    icon.classList.add('reward-shake');
+
+    btn.addEventListener('click', function() {
+        claimDailyReward();
+    });
+}
+
+function startCountdown(claimTime) {
+    var btn = document.getElementById('dailyRewardBtn');
+    var desc = document.getElementById('dailyRewardDesc');
+
+    function updateTimer() {
+        var now = Date.now();
+        var target = claimTime + (24 * 60 * 60 * 1000);
+        var remaining = target - now;
+
+        if (remaining <= 0) {
+            // Tiempo cumplido - recargar para mostrar cofre disponible
+            location.reload();
+            return;
+        }
+
+        var hours = Math.floor(remaining / (1000 * 60 * 60));
+        var minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+        var timeStr = pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
+        btn.innerHTML = '<i class="fa-solid fa-clock"></i> ' + timeStr;
+        desc.textContent = 'Disponible en ' + timeStr;
+    }
+
+    function pad(n) { return n < 10 ? '0' + n : n; }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+}
+
+function claimDailyReward() {
+    localStorage.setItem('dailyRewardLastClaim', Date.now().toString());
+
+    var puntos = parseInt(localStorage.getItem('puntosKlasplus') || '0');
+    puntos += 25;
+    localStorage.setItem('puntosKlasplus', puntos.toString());
+
+    var puntosBadge = document.getElementById('puntosActualesBadge');
+    if (puntosBadge) puntosBadge.textContent = puntos + ' pts';
+
+    var icon = document.getElementById('dailyRewardIcon');
+    var btn = document.getElementById('dailyRewardBtn');
+    var title = document.getElementById('dailyRewardTitle');
+    var desc = document.getElementById('dailyRewardDesc');
+    var section = document.getElementById('dailyRewardSection');
+    var card = document.getElementById('dailyRewardCard');
+
+    // Animación de apertura
+    icon.classList.remove('reward-shake');
+    icon.classList.add('reward-open-anim');
+    icon.innerHTML = '<i class="fa-solid fa-gift-open"></i>';
+    card.classList.add('opening');
+
+    // Mostrar confetti/partículas
+    showRewardParticles(card);
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> ¡Listo!';
+    btn.classList.add('claimed');
+    title.textContent = '¡+25 Puntos!';
+    desc.textContent = 'Puntos agregados a tu cuenta';
+
+    // Toast flotante de puntos
+    var toast = document.createElement('div');
+    toast.className = 'reward-toast';
+    toast.innerHTML = '<i class="fa-solid fa-star"></i> +25 puntos Klasplus';
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.classList.add('visible'); }, 50);
+    setTimeout(function() {
+        toast.classList.remove('visible');
+        setTimeout(function() { toast.remove(); }, 300);
+    }, 2500);
+
+    // Después de la animación, cambiar a estado reclamado
+    setTimeout(function() {
+        card.classList.remove('opening');
+        icon.classList.remove('reward-open-anim');
+        icon.innerHTML = '<i class="fa-solid fa-box"></i>';
+        title.textContent = 'Cofre reclamado';
+        btn.innerHTML = '<i class="fa-solid fa-clock"></i> 23:59:59';
+        section.classList.add('claimed');
+        startCountdown(Date.now());
+    }, 3000);
+
+    // Guardar en Firebase
+    (async function() {
+        try {
+            const { db, doc, updateDoc, increment } = await import('./firebase-config.js');
+            var userId = localStorage.getItem('userId');
+            if (userId) {
+                await updateDoc(doc(db, 'progreso_usuario', userId), {
+                    puntosKlasplus: increment(25)
+                });
+            }
+        } catch(e) { console.error('Error guardando puntos diarios:', e); }
+    })();
+}
+
+function showRewardParticles(container) {
+    var colors = ['#FFD700', '#FF6B35', '#4CAF50', '#00BCD4', '#E91E63', '#fff'];
+    for (var i = 0; i < 20; i++) {
+        var particle = document.createElement('div');
+        particle.className = 'reward-particle';
+        particle.style.left = (Math.random() * 100) + '%';
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.animationDelay = (Math.random() * 0.3) + 's';
+        particle.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
+        container.appendChild(particle);
+        setTimeout(function(p) { p.remove(); }, 2000, particle);
+    }
+}
