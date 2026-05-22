@@ -45,6 +45,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Botón de ayuda/guía
+    const helpBtn = document.getElementById('helpBtn');
+    if (helpBtn) {
+        helpBtn.addEventListener('click', function() {
+            document.getElementById('guiaOverlay').style.display = 'flex';
+        });
+    }
+
+    // Cerrar guía
+    const guiaClose = document.getElementById('guiaClose');
+    if (guiaClose) {
+        guiaClose.addEventListener('click', function() {
+            document.getElementById('guiaOverlay').style.display = 'none';
+        });
+    }
+    const guiaOverlay = document.getElementById('guiaOverlay');
+    if (guiaOverlay) {
+        guiaOverlay.addEventListener('click', function(e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+    }
+
+    // Tabs de la guía
+    document.querySelectorAll('.guia-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.guia-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.guia-content').forEach(function(c) { c.classList.remove('active'); });
+            tab.classList.add('active');
+            var target = document.getElementById('tab-' + tab.dataset.tab);
+            if (target) target.classList.add('active');
+        });
+    });
+
     // Botón de cerrar sesión
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
@@ -574,42 +607,45 @@ function claimDailyReward() {
     var section = document.getElementById('dailyRewardSection');
     var card = document.getElementById('dailyRewardCard');
 
-    // Animación de apertura
+    // Deshabilitar botón inmediatamente
     icon.classList.remove('reward-shake');
-    icon.classList.add('reward-open-anim');
-    icon.innerHTML = '<i class="fa-solid fa-gift-open"></i>';
-    card.classList.add('opening');
-
-    // Mostrar confetti/partículas
-    showRewardParticles(card);
-
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-check"></i> ¡Listo!';
+
+    // Mostrar ventana emergente de recompensa
+    var overlay = document.createElement('div');
+    overlay.className = 'reward-modal-overlay';
+    overlay.innerHTML = '<div class="reward-modal"><div class="reward-modal-confetti" id="rewardConfetti"></div><div class="reward-modal-content"><div class="reward-modal-icon"><i class="fa-solid fa-box-open"></i></div><h2>¡Cofre Abierto!</h2><div class="reward-modal-points"><i class="fa-solid fa-star"></i><span>+25</span></div><p>Puntos Klasplus agregados a tu cuenta</p><div class="reward-modal-total">Total: <strong>' + puntos + ' pts</strong></div><button class="reward-modal-btn" id="rewardModalBtn">¡Genial!</button></div></div>';
+    document.body.appendChild(overlay);
+
+    // Animación de entrada
+    setTimeout(function() { overlay.classList.add('visible'); }, 50);
+
+    // Confetti en el modal
+    var confettiContainer = document.getElementById('rewardConfetti');
+    var colors = ['#FFD700', '#FF6B35', '#4CAF50', '#00BCD4', '#E91E63', '#6C63FF', '#fff'];
+    for (var i = 0; i < 40; i++) {
+        var conf = document.createElement('div');
+        conf.className = 'reward-confetti-piece';
+        conf.style.left = Math.random() * 100 + '%';
+        conf.style.background = colors[Math.floor(Math.random() * colors.length)];
+        conf.style.animationDelay = (Math.random() * 0.5) + 's';
+        conf.style.animationDuration = (1 + Math.random() * 1.5) + 's';
+        confettiContainer.appendChild(conf);
+    }
+
+    // Cerrar modal
+    document.getElementById('rewardModalBtn').addEventListener('click', function() {
+        overlay.classList.remove('visible');
+        setTimeout(function() { overlay.remove(); }, 300);
+    });
+
+    // Actualizar card a estado reclamado
+    icon.innerHTML = '<i class="fa-solid fa-box"></i>';
+    btn.innerHTML = '<i class="fa-solid fa-clock"></i> 23:59:59';
     btn.classList.add('claimed');
-    title.textContent = '¡+25 Puntos!';
-    desc.textContent = 'Puntos agregados a tu cuenta';
-
-    // Toast flotante de puntos
-    var toast = document.createElement('div');
-    toast.className = 'reward-toast';
-    toast.innerHTML = '<i class="fa-solid fa-star"></i> +25 puntos Klasplus';
-    document.body.appendChild(toast);
-    setTimeout(function() { toast.classList.add('visible'); }, 50);
-    setTimeout(function() {
-        toast.classList.remove('visible');
-        setTimeout(function() { toast.remove(); }, 300);
-    }, 2500);
-
-    // Después de la animación, cambiar a estado reclamado
-    setTimeout(function() {
-        card.classList.remove('opening');
-        icon.classList.remove('reward-open-anim');
-        icon.innerHTML = '<i class="fa-solid fa-box"></i>';
-        title.textContent = 'Cofre reclamado';
-        btn.innerHTML = '<i class="fa-solid fa-clock"></i> 23:59:59';
-        section.classList.add('claimed');
-        startCountdown(Date.now());
-    }, 3000);
+    title.textContent = 'Cofre reclamado';
+    section.classList.add('claimed');
+    startCountdown(Date.now());
 
     // Guardar en Firebase
     (async function() {
@@ -626,15 +662,5 @@ function claimDailyReward() {
 }
 
 function showRewardParticles(container) {
-    var colors = ['#FFD700', '#FF6B35', '#4CAF50', '#00BCD4', '#E91E63', '#fff'];
-    for (var i = 0; i < 20; i++) {
-        var particle = document.createElement('div');
-        particle.className = 'reward-particle';
-        particle.style.left = (Math.random() * 100) + '%';
-        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-        particle.style.animationDelay = (Math.random() * 0.3) + 's';
-        particle.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
-        container.appendChild(particle);
-        setTimeout(function(p) { p.remove(); }, 2000, particle);
-    }
+    // Ya no se usa - reemplazado por modal
 }

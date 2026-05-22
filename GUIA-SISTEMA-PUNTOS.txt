@@ -1,0 +1,191 @@
+================================================================
+         GUÍA DEL SISTEMA DE PUNTOS - KLASPLUS BRIGADA
+================================================================
+
+¿QUÉ SON LOS PUNTOS KLASPLUS?
+-------------------------------
+Los puntos Klasplus son la moneda de recompensa de la app.
+Los ganas completando misiones, entrando cada día y participando
+en la brigada de seguridad de tu institución educativa.
+Con ellos puedes canjear productos y experiencias reales en la Tienda.
+
+
+================================================================
+CÓMO GANAR PUNTOS
+================================================================
+
+1. COFRE DIARIO (+25 puntos)
+   ─────────────────────────
+   Cada vez que abres la app y entras a la sección de Brigada,
+   aparece un "Cofre Diario" naranja en la parte superior.
+   
+   - Toca el botón "Abrir" para reclamar tus 25 puntos.
+   - Solo puedes abrirlo UNA VEZ cada 24 horas.
+   - Después de abrirlo, aparece un contador regresivo (HH:MM:SS)
+     que te muestra cuánto tiempo falta para el próximo cofre.
+   - Cuando el contador llega a 00:00:00, la página se recarga
+     automáticamente y el cofre vuelve a estar disponible.
+   - Si no abres el cofre un día, no se acumula. Cada día es uno.
+
+   CONSEJO: Entra a la app todos los días para no perder tus 25 puntos.
+
+
+2. COMPLETAR TAREAS DE MISIONES (+2 puntos por tarea)
+   ────────────────────────────────────────────────────
+   Cada nivel tiene 3 tareas. Cada tarea completada te da 2 puntos:
+
+   Tarea 1 - FOTO (+2 pts)
+     Toma una foto de la zona indicada de tu institución
+     (baños, escaleras, cafetería, laboratorio, etc.)
+     y selecciona a qué zona pertenece.
+
+   Tarea 2 - PREGUNTA (+2 pts)
+     Responde una pregunta de opción múltiple (A/B/C/D)
+     sobre el estado de la zona que fotografiaste.
+     No hay respuesta incorrecta, es para dar contexto.
+
+   Tarea 3 - REPORTE IA (+2 pts)
+     Escribe un reporte describiendo los riesgos que observas
+     y pide recomendaciones a la IA de seguridad.
+     Mínimo 10 caracteres para poder enviar.
+
+
+3. COMPLETAR UN NIVEL COMPLETO (+6 puntos en total)
+   ──────────────────────────────────────────────────
+   Al terminar las 3 tareas de un nivel ganas:
+   - 2 pts por la foto
+   - 2 pts por la pregunta
+   - 2 pts por el reporte IA
+   = 6 puntos Klasplus por nivel completado + badge de nivel
+
+
+================================================================
+RESUMEN DE PUNTOS POR ACCIÓN
+================================================================
+
+   Acción                          Puntos
+   ─────────────────────────────────────────
+   Abrir cofre diario              +25 pts
+   Tomar foto de zona              + 2 pts
+   Responder pregunta              + 2 pts
+   Reportar a la IA                + 2 pts
+   Completar nivel (3 tareas)      + 6 pts
+   ─────────────────────────────────────────
+   Máximo por día (cofre + 1 niv)  +31 pts
+
+
+================================================================
+LAS 5 CATEGORÍAS DE MISIONES (50 niveles cada una = 250 total)
+================================================================
+
+1. ESTUDIANTES (niveles 1-50)
+   Zonas: Aulas, laboratorios, espacios de estudio, mobiliario.
+   Temas: Iluminación, ventilación, orden, accesibilidad.
+
+2. COMIDA Y BEBIDAS (niveles 51-100)
+   Zonas: Cafetería, fuentes de agua, zona de comedor.
+   Temas: Higiene, almacenamiento, residuos, plagas.
+
+3. CASAS Y HOGAR (niveles 101-150)
+   Zonas: Techos, pisos, paredes, puertas, instalaciones.
+   Temas: Infraestructura, humedad, electricidad, jardines.
+
+4. TECNOLOGÍA (niveles 151-200)
+   Zonas: Laboratorio de cómputo, cámaras, tableros eléctricos.
+   Temas: Equipos, redes, alarmas, sensores, comunicaciones.
+
+5. EXPERIENCIAS (niveles 201-250)
+   Zonas: Patio, canchas, entrada, pasillos, salones.
+   Temas: Simulacros, primeros auxilios, evacuación, liderazgo.
+
+   NOTA: En el camino de misiones, cuando cambias de categoría
+   aparece un banner de color con el nombre de la nueva categoría.
+
+
+================================================================
+CÓMO CANJEAR TUS PUNTOS EN LA TIENDA
+================================================================
+
+1. Ve a la sección de Brigada y toca "Canjear".
+2. En la Tienda, toca la pestaña "Canjear Puntos".
+3. Filtra por categoría o ve todos los productos disponibles.
+4. Toca el botón de regalo (🎁) en el producto que quieres.
+5. Confirma el canje en la ventana que aparece.
+6. Los puntos se descuentan automáticamente de tu cuenta.
+
+CATEGORÍAS DE RECOMPENSAS:
+   - Estudiantes: Kits escolares, audífonos, libros, mochilas
+   - Comida y Bebidas: Combos de comida, bebidas, snacks
+   - Casas y Hogar: Plantas, lámparas, bocinas, decoración
+   - Tecnología: Cargadores, smartbands, teclados, gadgets
+   - Experiencias: Cine, talleres de arte, clases, camping
+
+   NOTA: Los productos en gris requieren más puntos de los que
+   tienes actualmente. Sigue completando misiones para alcanzarlos.
+
+
+================================================================
+CLASIFICACIÓN KLASPLUS
+================================================================
+
+Tu institución compite con otras en el ranking de seguridad.
+El score se calcula según las zonas evaluadas y su puntuación:
+
+   - Puntuación 8-10: Zona Segura (verde)
+   - Puntuación 6-8:  Zona Moderada (amarillo)
+   - Puntuación 4-6:  Zona en Riesgo (naranja)
+   - Puntuación 2-4:  Zona Peligrosa (rojo oscuro)
+   - Puntuación 0-2:  Zona Crítica (rojo)
+
+Cuantas más zonas seguras tenga tu institución, mejor posición
+ocupa en el ranking. Puedes ver el ranking en Perfil > Clasificación Klasplus.
+
+IMPORTANTE: La puntuación la asigna la IA de Klasplus basándose
+en las fotos, respuestas y reportes de TODOS los estudiantes
+brigadistas de tu institución. Entre más participen, más preciso
+es el análisis.
+
+
+================================================================
+PERFIL DE RIESGO
+================================================================
+
+En Perfil > Perfil de Riesgo puedes ver:
+   - Puntuación de seguridad promedio de tu institución (0-10)
+   - Cuántas zonas han sido evaluadas (de 9 posibles)
+   - Cuántas zonas están en estado seguro
+   - Cuántas misiones has completado
+   - Lista de zonas con su puntuación individual
+   - Tus puntos Klasplus acumulados
+
+
+================================================================
+PREGUNTAS FRECUENTES
+================================================================
+
+¿Puedo perder mis puntos?
+   No. Los puntos solo se descuentan cuando tú decides canjearlos.
+
+¿El cofre diario se acumula si no lo abro?
+   No. Cada día es un cofre nuevo. Si no lo abres, se pierde.
+
+¿Cuándo se reinicia el cofre?
+   Exactamente 24 horas después de haberlo abierto.
+   El contador en pantalla te muestra el tiempo exacto restante.
+
+¿Las respuestas de las preguntas pueden ser incorrectas?
+   No. Las preguntas son de contexto, no de evaluación.
+   Todas las opciones son válidas y suman puntos igual.
+
+¿Qué pasa con las fotos que subo?
+   Se guardan en la base de datos de tu institución.
+   La IA las analiza para calcular la puntuación de peligro
+   de cada zona y actualizar el mapa de peligro.
+
+¿Puedo ver las fotos de otros estudiantes?
+   Sí. En el Mapa de Peligro, al tocar una zona puedes ver
+   hasta 3 fotos recientes reportadas por otros brigadistas.
+
+================================================================
+                    KLASPLUS - ESCUELAS SEGURAS
+================================================================

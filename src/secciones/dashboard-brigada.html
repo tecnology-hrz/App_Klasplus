@@ -18,11 +18,8 @@
             </div>
             
             <div class="header-actions">
-                <button class="notification-btn" id="notificationBtn">
-                    <svg class="notification-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                <button class="help-btn" id="helpBtn" title="¿Cómo funciona?">
+                    <i class="fa-solid fa-circle-question"></i>
                 </button>
                 
                 <button id="logoutBtn" class="logout-btn">
@@ -147,5 +144,250 @@
 
     <script src="../js/modal.js"></script>
     <script src="../js/dashboard-brigada.js"></script>
+
+    <!-- Modal de Guía Klasplus -->
+    <div class="guia-overlay" id="guiaOverlay" style="display:none;">
+        <div class="guia-modal">
+            <div class="guia-header">
+                <div class="guia-header-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h2>Guía Klasplus</h2>
+                    <p>Todo lo que necesitas saber</p>
+                </div>
+                <button class="guia-close" id="guiaClose"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Tabs de navegación -->
+            <div class="guia-tabs">
+                <button class="guia-tab active" data-tab="puntos"><i class="fa-solid fa-star"></i> Puntos</button>
+                <button class="guia-tab" data-tab="misiones"><i class="fa-solid fa-map-location-dot"></i> Misiones</button>
+                <button class="guia-tab" data-tab="categorias"><i class="fa-solid fa-layer-group"></i> Categorías</button>
+                <button class="guia-tab" data-tab="canjear"><i class="fa-solid fa-gift"></i> Canjear</button>
+            </div>
+
+            <!-- Tab: Puntos -->
+            <div class="guia-content active" id="tab-puntos">
+                <div class="guia-section-title">¿Cómo ganar puntos?</div>
+                <div class="guia-item">
+                    <div class="guia-item-icon" style="background:#E3F2FD;color:#0047B3;">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <div class="guia-item-info">
+                        <h4>Tomar foto de zona</h4>
+                        <p>Fotografía una zona de tu institución</p>
+                    </div>
+                    <span class="guia-pts">+2 pts</span>
+                </div>
+                <div class="guia-item">
+                    <div class="guia-item-icon" style="background:#FFF3E0;color:#FF6B35;">
+                        <i class="fa-solid fa-clipboard-question"></i>
+                    </div>
+                    <div class="guia-item-info">
+                        <h4>Responder pregunta</h4>
+                        <p>Evalúa el estado de la zona</p>
+                    </div>
+                    <span class="guia-pts">+2 pts</span>
+                </div>
+                <div class="guia-item">
+                    <div class="guia-item-icon" style="background:#F3E5F5;color:#7B1FA2;">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="guia-item-info">
+                        <h4>Reportar a la IA</h4>
+                        <p>Describe riesgos y pide recomendaciones</p>
+                    </div>
+                    <span class="guia-pts">+2 pts</span>
+                </div>
+                <div class="guia-item">
+                    <div class="guia-item-icon" style="background:#E8F5E9;color:#2E7D32;">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <div class="guia-item-info">
+                        <h4>Completar nivel</h4>
+                        <p>Termina las 3 tareas de un nivel</p>
+                    </div>
+                    <span class="guia-pts">+6 pts</span>
+                </div>
+                <div class="guia-item">
+                    <div class="guia-item-icon" style="background:#FFF8E1;color:#F57F17;">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                    <div class="guia-item-info">
+                        <h4>Cofre diario</h4>
+                        <p>Abre el cofre cada 24 horas</p>
+                    </div>
+                    <span class="guia-pts">+25 pts</span>
+                </div>
+                <div class="guia-tip">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span>Cada nivel tiene 3 tareas. Completa todas para ganar el bonus de nivel.</span>
+                </div>
+            </div>
+
+            <!-- Tab: Misiones -->
+            <div class="guia-content" id="tab-misiones">
+                <div class="guia-section-title">¿Cómo funcionan las misiones?</div>
+                <div class="guia-flow">
+                    <div class="guia-flow-step">
+                        <div class="guia-flow-num">1</div>
+                        <div class="guia-flow-info">
+                            <h4>Elige un nivel</h4>
+                            <p>Toca cualquier nodo disponible en el camino de misiones</p>
+                        </div>
+                    </div>
+                    <div class="guia-flow-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                    <div class="guia-flow-step">
+                        <div class="guia-flow-num">2</div>
+                        <div class="guia-flow-info">
+                            <h4>Toma una foto</h4>
+                            <p>Fotografía la zona indicada de tu institución con tu cámara</p>
+                        </div>
+                    </div>
+                    <div class="guia-flow-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                    <div class="guia-flow-step">
+                        <div class="guia-flow-num">3</div>
+                        <div class="guia-flow-info">
+                            <h4>Responde la pregunta</h4>
+                            <p>Evalúa el estado de la zona con las opciones A, B, C o D</p>
+                        </div>
+                    </div>
+                    <div class="guia-flow-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                    <div class="guia-flow-step">
+                        <div class="guia-flow-num">4</div>
+                        <div class="guia-flow-info">
+                            <h4>Reporta a la IA</h4>
+                            <p>Describe los riesgos que ves y la IA te dará recomendaciones</p>
+                        </div>
+                    </div>
+                    <div class="guia-flow-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                    <div class="guia-flow-step completed">
+                        <div class="guia-flow-num"><i class="fa-solid fa-check"></i></div>
+                        <div class="guia-flow-info">
+                            <h4>¡Nivel completado!</h4>
+                            <p>Ganas puntos y el mapa de peligro se actualiza</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="guia-tip">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span>Hay 250 niveles en total. Las tareas se desbloquean en orden dentro de cada nivel.</span>
+                </div>
+            </div>
+
+            <!-- Tab: Categorías -->
+            <div class="guia-content" id="tab-categorias">
+                <div class="guia-section-title">5 categorías · 50 niveles cada una</div>
+                <div class="guia-cat-item">
+                    <div class="guia-cat-icon" style="background:#EDE7F6;color:#6C63FF;"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <div class="guia-cat-info">
+                        <h4>Estudiantes</h4>
+                        <p>Aulas, laboratorios, espacios de estudio y mobiliario escolar</p>
+                    </div>
+                    <span class="guia-cat-lvl">50 niv.</span>
+                </div>
+                <div class="guia-cat-item">
+                    <div class="guia-cat-icon" style="background:#FBE9E7;color:#FF6B35;"><i class="fa-solid fa-utensils"></i></div>
+                    <div class="guia-cat-info">
+                        <h4>Comida y Bebidas</h4>
+                        <p>Cafetería, fuentes de agua, higiene alimentaria y residuos</p>
+                    </div>
+                    <span class="guia-cat-lvl">50 niv.</span>
+                </div>
+                <div class="guia-cat-item">
+                    <div class="guia-cat-icon" style="background:#E8F5E9;color:#2ECC71;"><i class="fa-solid fa-house"></i></div>
+                    <div class="guia-cat-info">
+                        <h4>Casas y Hogar</h4>
+                        <p>Infraestructura, pisos, techos, puertas e instalaciones</p>
+                    </div>
+                    <span class="guia-cat-lvl">50 niv.</span>
+                </div>
+                <div class="guia-cat-item">
+                    <div class="guia-cat-icon" style="background:#E0F7FA;color:#00BCD4;"><i class="fa-solid fa-microchip"></i></div>
+                    <div class="guia-cat-info">
+                        <h4>Tecnología</h4>
+                        <p>Equipos, cámaras, alarmas, tableros eléctricos y redes</p>
+                    </div>
+                    <span class="guia-cat-lvl">50 niv.</span>
+                </div>
+                <div class="guia-cat-item">
+                    <div class="guia-cat-icon" style="background:#FCE4EC;color:#E91E63;"><i class="fa-solid fa-ticket"></i></div>
+                    <div class="guia-cat-info">
+                        <h4>Experiencias</h4>
+                        <p>Simulacros, primeros auxilios, evacuación y liderazgo</p>
+                    </div>
+                    <span class="guia-cat-lvl">50 niv.</span>
+                </div>
+                <div class="guia-tip">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span>Cada categoría tiene un separador visual en el camino para que sepas cuándo cambias de tema.</span>
+                </div>
+            </div>
+
+            <!-- Tab: Canjear -->
+            <div class="guia-content" id="tab-canjear">
+                <div class="guia-section-title">¿Para qué sirven los puntos?</div>
+                <div class="guia-canjear-intro">
+                    <i class="fa-solid fa-star" style="color:#FFD700;font-size:32px;"></i>
+                    <p>Tus puntos Klasplus se pueden canjear por recompensas reales en la Tienda</p>
+                </div>
+                <div class="guia-section-title" style="margin-top:16px;">Categorías de recompensas</div>
+                <div class="guia-reward-grid">
+                    <div class="guia-reward-item">
+                        <i class="fa-solid fa-graduation-cap" style="color:#6C63FF;"></i>
+                        <span>Estudiantes</span>
+                        <small>Kits, libros, mochilas</small>
+                    </div>
+                    <div class="guia-reward-item">
+                        <i class="fa-solid fa-utensils" style="color:#FF6B35;"></i>
+                        <span>Comida</span>
+                        <small>Combos, bebidas</small>
+                    </div>
+                    <div class="guia-reward-item">
+                        <i class="fa-solid fa-house" style="color:#2ECC71;"></i>
+                        <span>Hogar</span>
+                        <small>Decoración, lámparas</small>
+                    </div>
+                    <div class="guia-reward-item">
+                        <i class="fa-solid fa-microchip" style="color:#00BCD4;"></i>
+                        <span>Tecnología</span>
+                        <small>Gadgets, accesorios</small>
+                    </div>
+                    <div class="guia-reward-item">
+                        <i class="fa-solid fa-ticket" style="color:#E91E63;"></i>
+                        <span>Experiencias</span>
+                        <small>Cine, talleres, clases</small>
+                    </div>
+                </div>
+                <div class="guia-section-title" style="margin-top:16px;">¿Cómo canjear?</div>
+                <div class="guia-item">
+                    <div class="guia-item-icon" style="background:#E3F2FD;color:#0047B3;"><i class="fa-solid fa-store"></i></div>
+                    <div class="guia-item-info">
+                        <h4>Ve a la Tienda</h4>
+                        <p>Toca "Canjear" en el menú de Brigada</p>
+                    </div>
+                </div>
+                <div class="guia-item">
+                    <div class="guia-item-icon" style="background:#E8F5E9;color:#2E7D32;"><i class="fa-solid fa-hand-pointer"></i></div>
+                    <div class="guia-item-info">
+                        <h4>Elige tu recompensa</h4>
+                        <p>Filtra por categoría y selecciona lo que quieres</p>
+                    </div>
+                </div>
+                <div class="guia-item">
+                    <div class="guia-item-icon" style="background:#FFF3E0;color:#FF6B35;"><i class="fa-solid fa-gift"></i></div>
+                    <div class="guia-item-info">
+                        <h4>Confirma el canje</h4>
+                        <p>Los puntos se descuentan automáticamente</p>
+                    </div>
+                </div>
+                <div class="guia-tip">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span>Los productos en gris requieren más puntos de los que tienes. ¡Sigue completando misiones!</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
