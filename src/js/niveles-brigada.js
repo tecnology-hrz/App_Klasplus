@@ -445,7 +445,9 @@ function abrirNivel(nivel) {
     const modal = document.getElementById('nivelModal');
     document.getElementById('modalNivelNumero').textContent = nivel.numero;
     document.getElementById('modalNivelTitulo').textContent = nivel.titulo;
-    document.getElementById('modalNivelDesc').textContent = nivel.descripcion;
+    // La descripción incluye el ícono de la categoría como HTML (ej. <i class="fa-solid ...">),
+    // por eso se usa innerHTML en lugar de textContent (que lo mostraría como texto literal).
+    document.getElementById('modalNivelDesc').innerHTML = nivel.descripcion;
 
     const tareasContainer = document.getElementById('modalTareas');
     tareasContainer.innerHTML = '';

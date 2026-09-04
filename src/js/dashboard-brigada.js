@@ -216,32 +216,33 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Cargar puntos y nivel de cada brigadista desde progreso_usuario
-            const todosLosDocs = [];
-            for (const docSnap of querySnapshot.docs) {
+            // en paralelo (antes se hacía un getDoc por brigadista, uno tras otro,
+            // lo cual era la causa principal de la lentitud con muchos brigadistas)
+            const { doc, getDoc } = await import('../js/firebase-config.js');
+            const todosLosDocs = await Promise.all(querySnapshot.docs.map(async (docSnap) => {
                 const data = docSnap.data();
                 let puntos = 0;
                 let nivel = 1;
                 try {
-                    const { doc, getDoc } = await import('../js/firebase-config.js');
                     const progresoSnap = await getDoc(doc(db, 'progreso_usuario', docSnap.id));
                     if (progresoSnap.exists()) {
                         puntos = progresoSnap.data().puntosKlasplus || 0;
                         nivel = progresoSnap.data().nivelActual || 1;
                     }
-                } catch(e) {}
-                todosLosDocs.push({ id: docSnap.id, data: { ...data, puntosKlasplus: puntos, nivelActual: nivel } });
-            }
+                } catch (e) {}
+                return { id: docSnap.id, data: { ...data, puntosKlasplus: puntos, nivelActual: nivel } };
+            }));
 
-            // Ordenar por puntos descendente
+            // Ordenar por puntos descendente y quedarnos solo con el Top 10.
+            // No tiene sentido cargar/renderizar 40 brigadistas si solo mostramos 10.
             todosLosDocs.sort((a, b) => b.data.puntosKlasplus - a.data.puntosKlasplus);
-
-            let mostrandoTodos = false;
+            const top10 = todosLosDocs.slice(0, 10);
 
             function renderBrigadistas() {
                 brigadistasContainer.innerHTML = '';
 
                 // Podio top 3
-                const top3 = todosLosDocs.slice(0, 3);
+                const top3 = top10.slice(0, 3);
                 if (top3.length >= 2) {
                     const podio = document.createElement('div');
                     podio.className = 'podio-container';
@@ -267,8 +268,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     brigadistasContainer.appendChild(podio);
                 }
 
-                // Resto de la lista (desde posición 4 en adelante)
-                const resto = mostrandoTodos ? todosLosDocs.slice(3) : todosLosDocs.slice(3, 6);
+                // Resto de la lista: posiciones 4 a 10 (máximo 7 más)
+                const resto = top10.slice(3);
                 if (resto.length > 0) {
                     const listaResto = document.createElement('div');
                     listaResto.className = 'brigadistas-lista-resto';
@@ -277,17 +278,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         listaResto.appendChild(card);
                     });
                     brigadistasContainer.appendChild(listaResto);
-                }
-
-                if (todosLosDocs.length > 6) {
-                    const verMasBtn = document.createElement('button');
-                    verMasBtn.className = 'ver-mas-btn';
-                    verMasBtn.textContent = mostrandoTodos ? 'Ver menos' : `Ver más (${todosLosDocs.length - 6} más)`;
-                    verMasBtn.addEventListener('click', () => {
-                        mostrandoTodos = !mostrandoTodos;
-                        renderBrigadistas();
-                    });
-                    brigadistasContainer.appendChild(verMasBtn);
                 }
             }
 
@@ -311,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
         const avatarHTML = brigadista.fotoPerfil
-            ? `<img src="${brigadista.fotoPerfil}" class="podio-avatar-img" alt="${iniciales}">`
+            ? `<img src="${brigadista.fotoPerfil}" class="podio-avatar-img" alt="${iniciales}" loading="lazy">`
             : `<div class="podio-avatar-placeholder">${iniciales}</div>`;
 
         const coronas = { 1: '🥇', 2: '🥈', 3: '🥉' };
@@ -339,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let avatarHTML = '';
         if (brigadista.fotoPerfil && brigadista.fotoPerfil !== '') {
-            avatarHTML = `<img src="${brigadista.fotoPerfil}" alt="${brigadista.nombreCompleto || brigadista.nombre}" class="brigadista-avatar">`;
+            avatarHTML = `<img src="${brigadista.fotoPerfil}" alt="${brigadista.nombreCompleto || brigadista.nombre}" class="brigadista-avatar" loading="lazy">`;
         } else {
             const iniciales = (brigadista.nombreCompleto || brigadista.nombre || 'U')
                 .split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();

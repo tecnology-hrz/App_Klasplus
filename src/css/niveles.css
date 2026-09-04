@@ -1012,6 +1012,8 @@ body {
 .niveles-webrtc-overlay {
     position: fixed;
     inset: 0;
+    height: 100vh;
+    height: 100dvh; /* usa la altura visual real en móvil, evita que el overlay/botón de captura queden cortados */
     background: #000;
     z-index: 4000;
     display: flex;
@@ -1062,12 +1064,13 @@ body {
 }
 
 .niveles-webrtc-overlay .webrtc-controls {
-    height: 100px;
+    min-height: 100px;
     background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-bottom: 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    flex-shrink: 0;
 }
 
 /* ===== Toast de puntos ganados ===== */

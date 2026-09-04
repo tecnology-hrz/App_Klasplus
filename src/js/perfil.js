@@ -151,6 +151,12 @@ document.getElementById('clasificacionBtn').addEventListener('click', () => {
     }
 });
 
+// Cache en memoria de la clasificación: evita volver a descargar toda la
+// colección "zonas_institucion" cada vez que el usuario abre/cierra el panel.
+// Se refresca solo si pasaron más de 60s desde la última carga.
+var _clasificacionCache = { ranking: null, timestamp: 0 };
+var CLASIFICACION_CACHE_TTL = 60000; // 60s
+
 // Clasificación basada en instituciones reales registradas en Firebase
 async function renderClasificacion() {
     var nombreInstitucion = localStorage.getItem('userInstitutionName') || '';
@@ -173,34 +179,45 @@ async function renderClasificacion() {
     }
     if (!nombreInstitucion) nombreInstitucion = 'Mi Institución';
 
-    // Cargar todas las instituciones que tienen zonas registradas en Firebase
+    // Cargar todas las instituciones que tienen zonas registradas en Firebase.
+    // Se usa una caché en memoria (ver CLASIFICACION_CACHE_TTL) para no repetir
+    // esta descarga completa cada vez que el usuario abre el panel.
     var ranking = [];
-    try {
-        const { db, collection, getDocs } = await import('../js/firebase-config.js');
-        const zonasSnap = await getDocs(collection(db, 'zonas_institucion'));
+    var ahora = Date.now();
+    if (_clasificacionCache.ranking && (ahora - _clasificacionCache.timestamp) < CLASIFICACION_CACHE_TTL) {
+        // Copia superficial para no mutar la caché con esMia/nombre en cada render
+        ranking = _clasificacionCache.ranking.map(function(inst) { return Object.assign({}, inst); });
+    } else {
+        try {
+            const { db, collection, getDocs } = await import('../js/firebase-config.js');
+            const zonasSnap = await getDocs(collection(db, 'zonas_institucion'));
 
-        var instMap = {};
-        zonasSnap.forEach(function(docSnap) {
-            var data = docSnap.data();
-            var instId = data.institucionId || 'default';
-            if (!instMap[instId]) {
-                instMap[instId] = { id: instId, nombre: data.institucionNombre || instId, zonas: 0, seguras: 0, totalScore: 0 };
-            }
-            instMap[instId].zonas++;
-            instMap[instId].totalScore += (data.puntuacionPeligro || 5);
-            if ((data.puntuacionPeligro || 5) >= 7) {
-                instMap[instId].seguras++;
-            }
-        });
+            var instMap = {};
+            zonasSnap.forEach(function(docSnap) {
+                var data = docSnap.data();
+                var instId = data.institucionId || 'default';
+                if (!instMap[instId]) {
+                    instMap[instId] = { id: instId, nombre: data.institucionNombre || instId, zonas: 0, seguras: 0, totalScore: 0 };
+                }
+                instMap[instId].zonas++;
+                instMap[instId].totalScore += (data.puntuacionPeligro || 5);
+                if ((data.puntuacionPeligro || 5) >= 7) {
+                    instMap[instId].seguras++;
+                }
+            });
 
-        Object.values(instMap).forEach(function(inst) {
-            inst.score = inst.zonas > 0 ? Math.round((inst.totalScore / inst.zonas) * 10) : 0;
-            ranking.push(inst);
-        });
+            Object.values(instMap).forEach(function(inst) {
+                inst.score = inst.zonas > 0 ? Math.round((inst.totalScore / inst.zonas) * 10) : 0;
+                ranking.push(inst);
+            });
 
-        ranking.sort(function(a, b) { return b.score - a.score; });
-    } catch(e) {
-        console.error('Error cargando clasificación:', e);
+            ranking.sort(function(a, b) { return b.score - a.score; });
+
+            _clasificacionCache.ranking = ranking.map(function(inst) { return Object.assign({}, inst); });
+            _clasificacionCache.timestamp = ahora;
+        } catch(e) {
+            console.error('Error cargando clasificación:', e);
+        }
     }
 
     // Asegurar que la institución del usuario esté en el ranking

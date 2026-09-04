@@ -651,6 +651,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh; /* usa la altura visual real en móvil, evita que el overlay se corte con barras del navegador/gestos */
     background: #000;
     z-index: 3000;
     display: flex;
@@ -705,12 +706,13 @@ body {
 }
 
 .webrtc-controls {
-    height: 100px;
+    min-height: 100px;
     background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-bottom: 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    flex-shrink: 0;
 }
 
 .webrtc-capture-btn {
