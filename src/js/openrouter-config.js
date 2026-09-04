@@ -53,7 +53,10 @@ const OPENROUTER_VISION_MODELS = [
     'openrouter/free'                        // Router automático de OpenRouter
 ];
 
-async function processImageWithOpenRouter(base64Image, userMessage = "¿Qué ves en esta imagen? Describe brevemente.") {
+// Helper: recorre todas las combinaciones de API key + modelo de visión
+// gratuito hasta que una responda con éxito. Exclusivo para análisis de
+// imágenes; el texto plano se maneja siempre con Mistral (mistral-config.js).
+async function callOpenRouterWithFallback(messages) {
     for (const apiKey of OPENROUTER_API_KEYS) {
         for (const model of OPENROUTER_VISION_MODELS) {
             try {
@@ -64,47 +67,52 @@ async function processImageWithOpenRouter(base64Image, userMessage = "¿Qué ves
                         "Authorization": `Bearer ${apiKey}`,
                         "Content-Type": "application/json"
                     },
-                body: JSON.stringify({
-                    "model": model,
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": "Analiza la imagen. Detecta cualquier riesgo, peligro o condición insegura visible para estudiantes dentro de una institución educativa. Sé sumamente breve, usa máximo un párrafo corto o viñetas. REGLA ESTRICTA: NO uses emojis ni símbolos decorativos. NO saludes, NO menciones tu rol, NO des explicaciones. Solo lista los riesgos escolares detectados. Si no hay, responde ÚNICAMENTE: 'No detecte ningun riesgo en el entorno para los estudiantes'. Responde muy brevemente a cualquier duda extra del usuario."
-                        },
-                        {
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": userMessage
-                                },
-                                {
-                                    "type": "image_url",
-                                    "image_url": {
-                                        "url": base64Image
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                })
-            });
+                    body: JSON.stringify({
+                        "model": model,
+                        "messages": messages
+                    })
+                });
 
-            if (!response.ok) {
-                console.warn(`El modelo ${model} falló con status: ${response.status}`);
-                continue; // Probar siguiente modelo
-            }
+                if (!response.ok) {
+                    console.warn(`El modelo ${model} falló con status: ${response.status}`);
+                    continue; // Probar siguiente modelo
+                }
 
-            const data = await response.json();
-            if (data && data.choices && data.choices.length > 0) {
-                return data.choices[0].message.content; // Retorna si fue exitoso
-            }
+                const data = await response.json();
+                if (data && data.choices && data.choices.length > 0) {
+                    return data.choices[0].message.content; // Retorna si fue exitoso
+                }
             } catch (error) {
                 console.warn(`Error con el modelo ${model}:`, error);
             }
         }
     }
-    
+
     // Si todos fallan
     throw new Error("Todos los modelos gratuitos fallaron. Por favor, intenta de nuevo más tarde.");
+}
+
+async function processImageWithOpenRouter(base64Image, userMessage = "¿Qué ves en esta imagen? Describe brevemente.") {
+    const messages = [
+        {
+            "role": "system",
+            "content": "Analiza la imagen. Detecta cualquier riesgo, peligro o condición insegura visible para estudiantes dentro de una institución educativa. Sé sumamente breve, usa máximo un párrafo corto o viñetas. REGLA ESTRICTA: NO uses emojis ni símbolos decorativos. NO saludes, NO menciones tu rol, NO des explicaciones. Solo lista los riesgos escolares detectados. Si no hay, responde ÚNICAMENTE: 'No detecte ningun riesgo en el entorno para los estudiantes'. Responde muy brevemente a cualquier duda extra del usuario."
+        },
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": userMessage
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": base64Image
+                    }
+                }
+            ]
+        }
+    ];
+    return callOpenRouterWithFallback(messages);
 }
