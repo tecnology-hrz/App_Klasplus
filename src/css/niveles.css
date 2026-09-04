@@ -1033,6 +1033,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 20px;
+    /* con viewport-fit=cover el contenido llega bajo la barra de estado/notch */
+    padding-top: calc(20px + env(safe-area-inset-top));
     background: rgba(0,0,0,0.5);
     color: white;
     font-size: 18px;
@@ -1040,6 +1042,7 @@ body {
     position: absolute;
     top: 0;
     width: 100%;
+    box-sizing: border-box;
     z-index: 10;
 }
 
@@ -1071,6 +1074,36 @@ body {
     justify-content: center;
     padding-bottom: calc(20px + env(safe-area-inset-bottom));
     flex-shrink: 0;
+}
+
+/* Botón circular de disparo. Sin estas reglas el <button> quedaba con los
+   estilos por defecto del navegador y se veía como un punto blanco diminuto. */
+.niveles-webrtc-overlay .webrtc-capture-btn {
+    width: 72px;
+    height: 72px;
+    padding: 0;
+    border-radius: 50%;
+    background: transparent;
+    border: 4px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+    transition: transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.niveles-webrtc-overlay .webrtc-capture-btn:active {
+    transform: scale(0.92);
+}
+
+.niveles-webrtc-overlay .webrtc-capture-inner {
+    width: 58px;
+    height: 58px;
+    background: #fff;
+    border-radius: 50%;
 }
 
 /* ===== Toast de puntos ganados ===== */
