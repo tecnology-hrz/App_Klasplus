@@ -1035,216 +1035,1448 @@ body {
     transition: width 0.6s ease;
 }
 
-/* Perfil de Riesgo */
-.riesgo-header-card {
-    text-align: center;
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+/* ==========================================================
+   PERFIL DE RIESGO / PLAN DE ACCIÓN — estilo informe técnico
+   ========================================================== */
+
+.option-icon.plan-accion {
+    background: linear-gradient(135deg, #1B3A6B 0%, #0047B3 100%);
 }
 
-.riesgo-header-top {
+/* ----- Hoja blanca: saca los paneles del fondo azul y los ensancha -----
+   Se posicionan fijos justo debajo del header (que también es fixed),
+   en vez de usar márgenes negativos para "cancelar" el margin-top del
+   padre: ese truco dejaba un hueco azul visible entre el header y la
+   hoja porque el margen negativo no llegaba a cubrir el margin-top
+   real de .perfil-content. Con position:fixed la hoja arranca siempre
+   pegada al header, sin depender del padding/margen de sus ancestros. */
+#perfilRiesgoPanel,
+#planAccionPanel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    /* Fondo gris claro: contrasta con el blanco puro del header y la nav */
+    background: #EEF1F6;
+    /* Arranca en el borde superior de la pantalla y queda por DEBAJO del
+       header (z-index menor). El padding-top usa la altura real del header,
+       medida en JS, de modo que nunca puede aparecer una franja azul del
+       body entre ambos: la hoja siempre cubre hasta arriba. */
+    padding: calc(var(--header-h, 90px) + 14px) 16px 130px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    z-index: 900;
+}
+
+@media (max-width: 768px) {
+    #perfilRiesgoPanel,
+    #planAccionPanel {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    #perfilRiesgoPanel,
+    #planAccionPanel {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+
+/* ----- Barra de acciones (imprimir / PDF) ----- */
+.informe-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.informe-btn-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid #DCE6F5;
+    background: #F2F6FC;
+    color: #0047B3;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.informe-btn-pdf:hover {
+    background: #E6EEFA;
+}
+
+.informe-btn-pdf i {
+    font-size: 13px;
+}
+
+/* Estado de carga de los paneles */
+.panel-cargando {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 48px 20px;
+    background: #FFFFFF;
+    border: 1px solid #E4E9F1;
+    border-radius: 16px;
+    color: #6B7A90;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* ----- Estado de error de conexión ----- */
+.panel-error {
+    background: #FFFFFF;
+    border: 1px solid #E4E9F1;
+    border-radius: 16px;
+    padding: 34px 22px;
+    text-align: center;
+}
+
+.panel-error-icono {
+    font-size: 34px;
+    color: #E9A23B;
+    margin-bottom: 14px;
+}
+
+.panel-error-titulo {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0B2545;
+}
+
+.panel-error-texto {
+    margin: 0 0 18px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #7C8899;
+}
+
+.panel-error-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border: none;
+    border-radius: 999px;
+    background: #0047B3;
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.panel-error-btn:active {
+    transform: scale(0.97);
+}
+
+.panel-cargando i {
+    font-size: 24px;
+    color: #0047B3;
+}
+
+/* ----- Encabezado tipo informe ----- */
+.informe-header {
+    position: relative;
+    background: linear-gradient(140deg, #0B2545 0%, #12386B 55%, #0047B3 100%);
+    border-radius: 20px;
+    padding: 22px 20px 18px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(11, 37, 69, 0.28);
+}
+
+.informe-header::after {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -30px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.informe-header.plan-header {
+    background: linear-gradient(140deg, #1B1207 0%, #7A3B12 55%, #FF6B35 100%);
+    box-shadow: 0 10px 24px rgba(122, 59, 18, 0.28);
+}
+
+.informe-header-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+}
+
+.informe-sello {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 8px;
+    flex-shrink: 0;
 }
 
-.riesgo-header-top i {
-    font-size: 28px;
-    color: #0047B3;
+.informe-sello i {
+    font-size: 21px;
+    color: #fff;
 }
 
-.riesgo-header-top h3 {
-    color: #1a1a2e;
-    font-size: 20px;
-    font-weight: 800;
-    margin: 0;
+.informe-titulos {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
-.riesgo-inst-name {
-    color: #666;
-    font-size: 14px;
-    margin: 0;
-}
-
-.riesgo-score-card {
-    background: white;
-    border-radius: 16px;
-    padding: 24px 20px;
-    margin-bottom: 16px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.riesgo-score-label {
-    margin: 0 0 8px;
-    font-size: 11px;
-    color: #888;
-    letter-spacing: 1px;
-    font-weight: 600;
-}
-
-.riesgo-score-big {
-    font-size: 48px;
-    font-weight: 900;
-    color: #1a1a2e;
-    line-height: 1;
-    margin-bottom: 8px;
-}
-
-.riesgo-score-big span {
-    font-size: 20px;
-    color: #aaa;
-    font-weight: 600;
-}
-
-.riesgo-score-bar {
-    background: #E8ECF0;
-    border-radius: 10px;
-    height: 8px;
-    overflow: hidden;
-    margin: 12px 0;
-}
-
-.riesgo-score-fill {
-    height: 100%;
-    border-radius: 10px;
-    transition: width 0.6s ease;
-}
-
-.riesgo-score-status {
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.riesgo-stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-}
-
-.riesgo-stat {
-    background: white;
-    border-radius: 14px;
-    padding: 14px 10px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.riesgo-stat-num {
-    font-size: 24px;
-    font-weight: 900;
-}
-
-.riesgo-stat-label {
+.informe-eyebrow {
     font-size: 10px;
-    color: #888;
-    margin-top: 4px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
 }
 
-.riesgo-zonas-section {
-    background: white;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+.informe-titulo {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
 }
 
-.riesgo-zonas-header {
+.informe-inst {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    position: relative;
+    z-index: 1;
+}
+
+.informe-inst i {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.informe-inst span {
     font-size: 14px;
     font-weight: 700;
-    color: #1a1a2e;
+    color: #fff;
 }
 
-.riesgo-zonas-header i {
-    color: #0047B3;
-    margin-right: 6px;
+.informe-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    position: relative;
+    z-index: 1;
 }
 
-.riesgo-zonas-header span:last-child {
-    font-size: 12px;
-    color: #888;
-    font-weight: 600;
+.informe-meta span {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.66);
+    font-weight: 500;
 }
 
-.riesgo-zona-item {
+.informe-meta i {
+    margin-right: 4px;
+}
+
+.informe-meta-sep {
+    width: 1px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.28);
+}
+
+/* ----- Tarjetas del informe ----- */
+.informe-card {
+    background: #FFFFFF;
+    border: 1px solid #E4E9F1;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 12px;
+}
+
+.informe-card-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #f0f2f5;
+    gap: 10px;
+    margin-bottom: 14px;
 }
 
-.riesgo-zona-item:last-child {
-    border-bottom: none;
+.informe-card-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #8C9AAD;
 }
 
-.riesgo-zona-left {
+.informe-card-titulo {
+    font-size: 14px;
+    font-weight: 800;
+    color: #0B2545;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.riesgo-zona-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.riesgo-zona-left span {
+.informe-card-titulo i {
+    color: #0047B3;
     font-size: 13px;
-    color: #333;
-    font-weight: 500;
 }
 
-.riesgo-zona-score {
-    font-size: 12px;
+.informe-card-valor {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0047B3;
+}
+
+.informe-card-sub {
+    font-size: 11px;
+    color: #8C9AAD;
+    font-weight: 600;
+}
+
+.informe-card-pie {
+    margin: 10px 0 0;
+    font-size: 11.5px;
+    color: #6B7A90;
+    line-height: 1.5;
+}
+
+/* ----- Gauge del índice ----- */
+.informe-indice {
+    text-align: center;
+}
+
+.riesgo-gauge-wrap {
+    position: relative;
+    max-width: 210px;
+    margin: 0 auto;
+}
+
+.riesgo-gauge {
+    width: 100%;
+    display: block;
+}
+
+.riesgo-gauge-fill {
+    transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.riesgo-gauge-centro {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 6px;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 3px;
+}
+
+.riesgo-gauge-valor {
+    font-size: 40px;
+    font-weight: 900;
+    color: #0B2545;
+    line-height: 1;
+    letter-spacing: -1.5px;
+}
+
+.riesgo-gauge-total {
+    font-size: 13px;
+    font-weight: 700;
+    color: #A9B4C4;
+}
+
+.riesgo-estado-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 12.5px;
     font-weight: 700;
 }
 
-.riesgo-sin-datos {
-    text-align: center;
-    color: #999;
-    font-size: 13px;
-    padding: 16px 0;
-    margin: 0;
+.riesgo-indice-nota {
+    margin: 14px 0 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #6B7A90;
+    text-align: left;
+    background: #F6F8FB;
+    border-left: 3px solid #0047B3;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 12px;
 }
 
-.riesgo-puntos-card {
+/* ----- KPIs ----- */
+.informe-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.informe-kpi {
+    background: #FFFFFF;
+    border: 1px solid #E4E9F1;
+    border-radius: 14px;
+    padding: 15px 8px;
+    text-align: center;
+}
+
+.informe-kpi > i {
+    font-size: 16px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.informe-kpi-num {
+    display: block;
+    font-size: 22px;
+    font-weight: 900;
+    color: #0B2545;
+    line-height: 1;
+}
+
+.informe-kpi-num small {
+    font-size: 12px;
+    font-weight: 700;
+    color: #A9B4C4;
+}
+
+.informe-kpi-label {
+    display: block;
+    margin-top: 5px;
+    font-size: 9.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #8C9AAD;
+}
+
+/* ----- Barra de progreso ----- */
+.informe-progress {
+    height: 7px;
+    background: #EDF1F6;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.informe-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #0047B3, #2E7BE0);
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ----- Distribución de zonas ----- */
+.informe-dist {
+    margin-bottom: 16px;
+}
+
+.dist-barra {
+    display: flex;
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #EDF1F6;
+    gap: 2px;
+}
+
+.dist-barra span {
+    display: block;
+    height: 100%;
+}
+
+/* ----- Lista de zonas ----- */
+.zona-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.zona-fila {
+    background: #F7F9FC;
+    border: 1px solid #E9EEF5;
+    border-left: 3px solid var(--zona-color, #0047B3);
+    border-radius: 12px;
+    padding: 12px 13px;
+}
+
+.zona-fila-top {
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: white;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    justify-content: space-between;
+    gap: 10px;
 }
 
-.riesgo-puntos-card i {
-    font-size: 24px;
-    color: #FFD700;
+.zona-fila-nombre {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
 }
 
-.riesgo-puntos-label {
-    font-size: 12px;
-    color: #888;
-    display: block;
-}
-
-.riesgo-puntos-valor {
-    font-size: 20px;
+.zona-indice {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    background: #E9EEF5;
+    color: #6B7A90;
+    font-size: 10px;
     font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.zona-nombre {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #0B2545;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.zona-score {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--zona-color, #0047B3);
+    flex-shrink: 0;
+}
+
+.zona-barra {
+    height: 5px;
+    background: #E9EEF5;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 10px 0 8px;
+}
+
+.zona-barra-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--zona-color, #0047B3);
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.zona-fila-pie {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.zona-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--zona-color, #0047B3);
+}
+
+.zona-fotos {
+    font-size: 10.5px;
+    color: #97A3B4;
+    font-weight: 600;
+}
+
+.zona-fotos i {
+    margin-right: 3px;
+}
+
+/* ----- Leyenda ----- */
+.zona-leyenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed #E4EAF2;
+}
+
+.leyenda-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #7C8899;
+}
+
+.leyenda-item i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* ----- Link al mapa ----- */
+.informe-link-mapa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 12px;
+    background: #F2F6FC;
+    border: 1px solid #DCE6F5;
     color: #0047B3;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.informe-link-mapa:hover {
+    background: #E6EEFA;
+}
+
+/* ----- Estado vacío ----- */
+.informe-vacio {
+    text-align: center;
+    padding: 26px 12px 8px;
+}
+
+.informe-vacio > i {
+    font-size: 34px;
+    color: #C9D4E3;
+}
+
+.informe-vacio-titulo {
+    margin: 14px 0 4px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #0B2545;
+}
+
+.informe-vacio-texto {
+    margin: 0 0 16px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #8C9AAD;
+}
+
+.informe-vacio-btn {
+    display: inline-block;
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: #0047B3;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+/* ----- Aporte del brigadista ----- */
+.aporte-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.aporte-item {
+    background: #F7F9FC;
+    border: 1px solid #E9EEF5;
+    border-radius: 12px;
+    padding: 13px 10px;
+    text-align: center;
+}
+
+.aporte-num {
     display: block;
+    font-size: 20px;
+    font-weight: 900;
+    color: #0047B3;
+    line-height: 1;
+}
+
+.aporte-label {
+    display: block;
+    margin-top: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #8C9AAD;
+}
+
+/* ----- CTA al plan ----- */
+.informe-cta {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 15px 16px;
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+    box-shadow: 0 8px 20px rgba(255, 107, 53, 0.28);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: transform 0.15s ease;
+}
+
+.informe-cta:active {
+    transform: scale(0.98);
+}
+
+.informe-cta-icono {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.informe-cta-icono i {
+    color: #fff;
+    font-size: 17px;
+}
+
+.informe-cta-texto {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.informe-cta-titulo {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #fff;
+}
+
+.informe-cta-sub {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.informe-cta > i {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+}
+
+/* ==========================================================
+   PLAN DE ACCIÓN
+   ========================================================== */
+
+.plan-header .informe-sello.plan-sello {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.plan-resumen-texto {
+    margin: 0 0 14px;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: #52627A;
+}
+
+.plan-resumen-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.plan-rk {
+    background: #F7F9FC;
+    border: 1px solid #E9EEF5;
+    border-radius: 12px;
+    padding: 12px 6px;
+    text-align: center;
+}
+
+.plan-rk-num {
+    display: block;
+    font-size: 21px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.plan-rk-label {
+    display: block;
+    margin-top: 5px;
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #8C9AAD;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+/* ----- Documento unificado del plan -----
+   Todas las etapas viven en un solo bloque continuo, unidas por una
+   línea de tiempo vertical y un único color de acento. */
+.plan-doc {
+    --fase-color: #0047B3;
+    background: #FFFFFF;
+    border: 1px solid #E4E9F1;
+    border-radius: 16px;
+    padding: 20px 18px 6px;
+    margin-bottom: 12px;
+}
+
+.plan-etapa {
+    position: relative;
+    padding-left: 40px;
+    padding-bottom: 26px;
+}
+
+/* Rail de la línea de tiempo */
+.plan-etapa::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #CBD9EE, #E4EAF2);
+}
+
+.plan-etapa:last-child {
+    padding-bottom: 4px;
+}
+
+.plan-etapa:last-child::before {
+    display: none;
+}
+
+.plan-etapa-head {
+    margin-bottom: 13px;
+}
+
+.plan-etapa-num {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--fase-color);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 4px #FFFFFF;
+    z-index: 1;
+}
+
+.plan-etapa-marco {
+    display: block;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #8C9AAD;
+    margin-bottom: 3px;
+}
+
+.plan-etapa-nombre {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0B2545;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    line-height: 1.3;
+}
+
+.plan-etapa-nombre i {
+    font-size: 13px;
+    color: var(--fase-color);
+}
+
+.plan-etapa-objetivo {
+    margin: 5px 0 0;
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: #7C8899;
+}
+
+/* ----- Pasos (acordeón) ----- */
+.plan-pasos {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.plan-paso {
+    background: #F7F9FC;
+    border: 1px solid #E9EEF5;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.plan-paso.abierto {
+    background: #FFFFFF;
+    border-color: #CBD9EE;
+    box-shadow: 0 2px 10px rgba(11, 37, 69, 0.06);
+}
+
+.plan-paso-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+}
+
+.plan-paso-orden {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--fase-color, #0047B3);
+    background: #EDF2FA;
+    border-radius: 6px;
+    padding: 3px 6px;
+    flex-shrink: 0;
+}
+
+.plan-paso-titulos {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.plan-paso-titulo {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0B2545;
+    line-height: 1.35;
+}
+
+.plan-paso-zona {
+    font-size: 10px;
+    font-weight: 600;
+    color: #97A3B4;
+}
+
+.plan-chip {
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 4px 9px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.plan-paso-flecha {
+    font-size: 11px;
+    color: #B4C0D0;
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+}
+
+.plan-paso.abierto .plan-paso-flecha {
+    transform: rotate(180deg);
+}
+
+.plan-paso-cuerpo {
+    display: none;
+    padding: 0 13px 14px;
+}
+
+.plan-paso.abierto .plan-paso-cuerpo {
+    display: block;
+}
+
+.plan-paso-desc {
+    margin: 0 0 10px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #52627A;
+}
+
+.plan-paso-plazo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #6B7A90;
+    background: #F2F6FC;
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin-bottom: 12px;
+}
+
+.plan-paso-plazo strong {
+    color: #0B2545;
+}
+
+.plan-medidas {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.plan-medidas li {
+    position: relative;
+    padding-left: 30px;
+    min-height: 18px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #3D4C61;
+}
+
+/* Casilla de verificación marcable */
+.plan-medidas li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 1px;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1.5px solid #A9BFDD;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+/* ----- Nota de cierre ----- */
+.plan-nota {
+    display: flex;
+    gap: 10px;
+    background: #F6F8FB;
+    border: 1px solid #E4EAF2;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.plan-nota i {
+    color: #8C9AAD;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.plan-nota p {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.6;
+    color: #7C8899;
+}
+
+/* ==========================================================
+   DOCUMENTO FORMAL (solo impresión) — Perfil de Riesgo
+   Oculto en pantalla; se activa dentro de @media print.
+   ========================================================== */
+.doc-print {
+    display: none;
+}
+
+.doc-cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 8pt;
+    border-bottom: 2pt solid #0B2545;
+    margin-bottom: 12pt;
+}
+
+.doc-cab-marca {
+    display: flex;
+    flex-direction: column;
+}
+
+.doc-cab-logo {
+    font-size: 15pt;
+    font-weight: 800;
+    letter-spacing: 1.5pt;
+    color: #0B2545;
+    line-height: 1.1;
+}
+
+.doc-cab-sub {
+    font-size: 7.5pt;
+    color: #5A6A80;
+    letter-spacing: 0.2pt;
+}
+
+.doc-cab-tipo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+}
+
+.doc-cab-tipo span {
+    font-size: 7pt;
+    text-transform: uppercase;
+    letter-spacing: 1pt;
+    color: #5A6A80;
+}
+
+.doc-cab-tipo strong {
+    font-size: 12pt;
+    font-weight: 800;
+    color: #0B2545;
+    letter-spacing: 0.4pt;
+}
+
+/* Ficha de identificación */
+.doc-ficha,
+.doc-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10pt;
+    font-size: 9pt;
+}
+
+.doc-ficha th,
+.doc-ficha td,
+.doc-tabla th,
+.doc-tabla td {
+    border: 0.6pt solid #B8C4D4;
+    padding: 4.5pt 6pt;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.doc-ficha th,
+.doc-tabla tbody th {
+    background: #EEF2F7;
+    font-weight: 700;
+    color: #33445C;
+    width: 26%;
+    font-size: 8.5pt;
+}
+
+.doc-tabla thead th {
+    background: #0B2545;
+    color: #fff;
+    font-weight: 700;
+    font-size: 8.5pt;
+    letter-spacing: 0.2pt;
+    border-color: #0B2545;
+}
+
+.doc-tabla tbody tr:nth-child(even) td {
+    background: #F7F9FC;
+}
+
+.doc-c {
+    text-align: center !important;
+}
+
+.doc-num {
+    font-variant-numeric: tabular-nums;
+}
+
+.doc-destacado {
+    font-weight: 800;
+    color: #0B2545;
+}
+
+.doc-vacio {
+    color: #7C8899;
+    font-style: italic;
+    padding: 8pt !important;
+}
+
+.doc-tabla-zonas tbody th,
+.doc-tabla-escala tbody th {
+    width: auto;
+}
+
+.doc-titulo-sec {
+    margin: 12pt 0 6pt;
+    font-size: 9.5pt;
+    font-weight: 800;
+    color: #0B2545;
+    text-transform: uppercase;
+    letter-spacing: 0.5pt;
+    padding-bottom: 3pt;
+    border-bottom: 0.6pt solid #C3CCDA;
+}
+
+.doc-parrafo {
+    margin: 0 0 10pt;
+    font-size: 9pt;
+    line-height: 1.6;
+    color: #33445C;
+    text-align: justify;
+}
+
+.doc-nota-tabla {
+    margin: -6pt 0 10pt;
+    font-size: 7.5pt;
+    font-style: italic;
+    color: #7C8899;
+}
+
+/* Firmas */
+.doc-firmas {
+    display: flex;
+    gap: 30pt;
+    margin-top: 26pt;
+}
+
+.doc-firma {
+    flex: 1;
+    text-align: center;
+}
+
+.doc-firma-linea {
+    display: block;
+    border-top: 0.8pt solid #33445C;
+    margin-bottom: 4pt;
+}
+
+.doc-firma p {
+    margin: 0;
+    font-size: 8pt;
+    color: #5A6A80;
+}
+
+.doc-pie {
+    margin-top: 18pt;
+    padding-top: 6pt;
+    border-top: 0.6pt solid #C3CCDA;
+    font-size: 7pt;
+    line-height: 1.5;
+    color: #7C8899;
+    text-align: justify;
+}
+
+/* ==========================================================
+   IMPRESIÓN / EXPORTAR A PDF
+   Solo se imprime el panel visible (informe o plan). El resto
+   de la interfaz se oculta y el contenido se expande.
+   ========================================================== */
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 14mm 12mm;
+    }
+
+    body {
+        background: #fff !important;
+        min-height: 0 !important;
+    }
+
+    .perfil-container {
+        padding-bottom: 0 !important;
+        min-height: 0 !important;
+    }
+
+    /* Ocultar todo lo que no es el informe */
+    .perfil-header,
+    .bottom-nav,
+    .profile-photo-section,
+    .profile-options,
+    .informe-acciones,
+    .informe-cta,
+    .informe-link-mapa,
+    .informe-vacio-btn,
+    .plan-paso-flecha,
+    .modal-overlay {
+        display: none !important;
+    }
+
+    .perfil-content {
+        margin-top: 0 !important;
+        padding: 0 !important;
+        gap: 0 !important;
+    }
+
+    /* La hoja ocupa la página completa. Se pasa a "static" porque un
+       elemento fixed solo pintaría una pantalla dentro del PDF en
+       lugar de fluir por todas las páginas del documento impreso. */
+    #perfilRiesgoPanel,
+    #planAccionPanel {
+        position: static !important;
+        inset: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        background: #fff !important;
+    }
+
+    /* Los degradados no se imprimen bien: se pasan a texto sobre blanco */
+    .informe-header,
+    .informe-header.plan-header {
+        background: #fff !important;
+        color: #0B2545 !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-bottom: 2px solid #0B2545 !important;
+        border-radius: 0 !important;
+        padding: 0 0 12px !important;
+        margin-bottom: 16px !important;
+    }
+
+    .informe-header::after {
+        display: none !important;
+    }
+
+    .informe-sello {
+        background: #0B2545 !important;
+        border: none !important;
+    }
+
+    .informe-eyebrow,
+    .informe-meta span {
+        color: #5A6A80 !important;
+    }
+
+    .informe-titulo,
+    .informe-inst span {
+        color: #0B2545 !important;
+    }
+
+    .informe-inst {
+        border-top-color: #D8DFE9 !important;
+    }
+
+    .informe-inst i {
+        color: #5A6A80 !important;
+    }
+
+    .informe-meta-sep {
+        background: #C3CCDA !important;
+    }
+
+    /* ----- Perfil de Riesgo: se imprime el documento formal, no la UI ----- */
+    .doc-print {
+        display: block !important;
+    }
+
+    #perfilRiesgoPanel .informe-acciones,
+    #perfilRiesgoPanel .informe-header,
+    #perfilRiesgoPanel .informe-card,
+    #perfilRiesgoPanel .informe-kpis,
+    #perfilRiesgoPanel .informe-cta {
+        display: none !important;
+    }
+
+    .doc-cab,
+    .doc-ficha,
+    .doc-titulo-sec,
+    .doc-firmas {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .doc-tabla thead {
+        display: table-header-group;
+    }
+
+    .doc-tabla tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Expandir todos los pasos del plan al imprimir */
+    .plan-paso-cuerpo {
+        display: block !important;
+    }
+
+    /* ----- Casillas marcables a mano en el PDF del plan ----- */
+    .plan-medidas {
+        gap: 13pt !important;
+    }
+
+    .plan-medidas li {
+        padding-left: 24pt !important;
+        min-height: 14pt !important;
+        font-size: 9.5pt !important;
+        line-height: 1.5 !important;
+        color: #263445 !important;
+    }
+
+    .plan-medidas li::before {
+        left: 0 !important;
+        top: 0 !important;
+        width: 13pt !important;
+        height: 13pt !important;
+        border: 0.9pt solid #55657C !important;
+        border-radius: 1.5pt !important;
+        background: #fff !important;
+    }
+
+    /* Evitar cortes desprolijos entre páginas */
+    .informe-card,
+    .informe-kpi,
+    .zona-fila,
+    .plan-paso,
+    .plan-nota,
+    .plan-etapa-head {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .plan-etapa {
+        break-inside: auto;
+    }
+
+    /* Forzar impresión de colores de fondo en navegadores que lo soportan */
+    .informe-card,
+    .informe-kpi,
+    .zona-fila,
+    .plan-doc,
+    .plan-paso,
+    .plan-rk,
+    .aporte-item,
+    .dist-barra span,
+    .zona-barra-fill,
+    .informe-progress-fill,
+    .riesgo-estado-chip,
+    .plan-chip,
+    .plan-etapa-num,
+    .informe-sello {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 }

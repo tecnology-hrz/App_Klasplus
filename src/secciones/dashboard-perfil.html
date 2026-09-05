@@ -4,8 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Klasplus - Perfil</title>
+
+    <!-- Adelanta DNS + TLS hacia Firestore: la primera consulta pagaba ~1s
+         solo en establecer la conexión. Con esto ese costo ocurre en paralelo
+         a la carga de la página, no cuando el usuario abre la sección. -->
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+
     <link rel="stylesheet" href="../css/perfil.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Descarga anticipada del módulo de lectura REST -->
+    <link rel="modulepreload" href="../js/firestore-rest.js">
+    <link rel="modulepreload" href="../js/firebase-keys.js">
 </head>
 <body>
     <div class="perfil-container">
@@ -46,6 +57,14 @@
                     <i class="fa-solid fa-chevron-right option-arrow"></i>
                 </button>
 
+                <button class="profile-option" id="planAccionBtn">
+                    <div class="option-icon plan-accion">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+                    <span class="option-text">Plan de Acción</span>
+                    <i class="fa-solid fa-chevron-right option-arrow"></i>
+                </button>
+
                 <button class="profile-option" id="clasificacionBtn">
                     <div class="option-icon clasificacion">
                         <i class="fa-solid fa-ranking-star"></i>
@@ -81,6 +100,13 @@
             <!-- Panel de Perfil de Riesgo -->
             <div class="clasificacion-panel" id="perfilRiesgoPanel" style="display:none;">
                 <div id="perfilRiesgoContent">
+                    <!-- Se genera dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Panel de Plan de Acción -->
+            <div class="clasificacion-panel" id="planAccionPanel" style="display:none;">
+                <div id="planAccionContent">
                     <!-- Se genera dinámicamente -->
                 </div>
             </div>

@@ -459,8 +459,6 @@ body {
     font-size: 11px;
     color: rgba(255,255,255,0.35);
 }
-    font-size: 13px;
-}
 
 @media (max-width: 480px) {
     .mapa-title { font-size: 15px; }
