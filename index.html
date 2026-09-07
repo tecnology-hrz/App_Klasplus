@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Klasplus - Cargando...</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1565C0">
+    <meta name="description" content="Klasplus: brigada escolar, zonas de peligro, tienda de puntos y asistente IA.">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Klasplus">
+    <link rel="apple-touch-icon" href="src/img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="src/img/favicon-64.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="src/img/icon-192.png">
+    <link rel="stylesheet" href="src/css/mobile-frame.css">
+    <script src="src/js/pwa.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -48,13 +63,20 @@
             font-weight: 600;
             letter-spacing: 0.5px;
         }
+
+        .splash-logo {
+            width: 240px;
+            max-width: 70vw;
+            height: auto;
+        }
     </style>
 </head>
 <body>
     <div class="loader-container">
+        <img src="src/img/logo-klasplus.png" alt="Klasplus - Escuelas Seguras" class="splash-logo">
         <div class="spinner"></div>
         <div class="loading-text">Cargando...</div>
-    </div>
+    </img>
 
     <script>
         // Verificar si hay sesión activa
