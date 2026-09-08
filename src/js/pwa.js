@@ -27,8 +27,6 @@
   })();
 
   var MEDIA_DESKTOP = '(min-width: 768px)';
-  var DISMISS_KEY = 'kpInstallDismissedAt';
-  var DISMISS_DAYS = 7;
 
   // =========================================================
   // 1. MARCO MÓVIL EN PANTALLAS GRANDES
@@ -85,21 +83,25 @@
   // =========================================================
   var deferredPrompt = null;
 
-  function dismissedRecently() {
-    try {
-      var ts = parseInt(localStorage.getItem(DISMISS_KEY) || '0', 10);
-      if (!ts) return false;
-      return Date.now() - ts < DISMISS_DAYS * 24 * 60 * 60 * 1000;
-    } catch (e) {
-      return false;
-    }
-  }
-
   function isIos() {
     return (
       /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
     );
+  }
+
+  // Coloca el aviso por encima de las barras fijas inferiores
+  // (nav de la app, input del chat) para no taparlas.
+  function placeBanner(banner) {
+    var bars = document.querySelectorAll('.bottom-nav, .chat-input-container');
+    var offset = 12;
+    for (var i = 0; i < bars.length; i++) {
+      var style = window.getComputedStyle(bars[i]);
+      if (style.display === 'none' || style.visibility === 'hidden') continue;
+      var h = bars[i].getBoundingClientRect().height;
+      if (h > offset) offset = h + 12;
+    }
+    banner.style.bottom = offset + 'px';
   }
 
   function buildBanner() {
@@ -121,14 +123,12 @@
       '</div>';
 
     document.body.appendChild(banner);
+    placeBanner(banner);
 
     document.getElementById('kpInstallBtn').addEventListener('click', triggerInstall);
-    document.getElementById('kpDismissBtn').addEventListener('click', function () {
-      hideBanner();
-      try {
-        localStorage.setItem(DISMISS_KEY, String(Date.now()));
-      } catch (e) {}
-    });
+    // Cerrar solo lo oculta en esta vista: vuelve a aparecer al recargar
+    // o al pasar a otra pantalla de la app.
+    document.getElementById('kpDismissBtn').addEventListener('click', hideBanner);
 
     return banner;
   }
@@ -164,8 +164,11 @@
   }
 
   function showBanner() {
-    if (isStandalone() || dismissedRecently()) return;
+    // Solo se oculta si la app YA se está usando instalada (ahí no hay
+    // nada que instalar). En el navegador siempre se muestra.
+    if (isStandalone()) return;
     var banner = buildBanner();
+    placeBanner(banner);
     setTimeout(function () {
       banner.classList.add('kp-visible');
     }, 900);
@@ -211,9 +214,6 @@
   window.addEventListener('appinstalled', function () {
     deferredPrompt = null;
     hideBanner();
-    try {
-      localStorage.setItem(DISMISS_KEY, String(Date.now()));
-    } catch (e) {}
   });
 
   // =========================================================
@@ -241,13 +241,22 @@
       else if (mq.addListener) mq.addListener(syncFrame);
     }
 
-    // Si el navegador no dispara beforeinstallprompt (iOS, Firefox),
-    // igual ofrecemos las instrucciones manuales.
+    // El aviso se muestra SIEMPRE que la app se abra en el navegador.
+    // Si el navegador no dispara beforeinstallprompt (iOS, Firefox, o
+    // porque la app ya está instalada) igual mostramos el aviso con las
+    // instrucciones manuales.
     setTimeout(function () {
-      if (!deferredPrompt && !isStandalone() && !dismissedRecently()) {
-        if (isIos() || !('onbeforeinstallprompt' in window)) showBanner();
-      }
-    }, 2500);
+      showBanner();
+    }, 2000);
+
+    // Al volver a la pestaña o navegar con el historial, vuelve a salir.
+    window.addEventListener('pageshow', function () {
+      showBanner();
+    });
+
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) showBanner();
+    });
 
     registerSW();
   }
