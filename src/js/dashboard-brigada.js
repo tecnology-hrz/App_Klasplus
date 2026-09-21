@@ -12,10 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Mostrar nombre del usuario
+    // Mostrar nombre del usuario (solo el primer nombre para no saturar el menú superior)
     const userNameElement = document.getElementById('userName');
     if (userNameElement && userName) {
-        userNameElement.textContent = userName;
+        userNameElement.textContent = userName.trim().split(' ')[0];
     }
 
     // ===== COFRE DIARIO =====
