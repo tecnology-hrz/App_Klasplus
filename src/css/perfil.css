@@ -2480,3 +2480,478 @@ body {
         print-color-adjust: exact;
     }
 }
+
+/* ==========================================================
+   PLAN DE ACCIÓN — Mapa de calor, matriz de riesgos y recursos
+   ========================================================== */
+.calor-wrap {
+    margin-top: 8px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.calor-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: inherit;
+}
+
+.calor-leyenda {
+    margin-top: 10px;
+}
+
+.calor-escala {
+    display: block;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #C0392B, #E74C3C, #FF6B35, #F39C12, #2ECC71);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.calor-escala-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 9.5px;
+    color: #7C8899;
+}
+
+.matriz-riesgo {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 3px;
+    table-layout: fixed;
+    margin-top: 8px;
+}
+
+.matriz-riesgo td {
+    height: 34px;
+    border-radius: 6px;
+    text-align: center;
+    vertical-align: middle;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.matriz-riesgo th {
+    font-size: 8.5px;
+    font-weight: 600;
+    color: #5A6A80;
+    line-height: 1.2;
+}
+
+.matriz-riesgo th span {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: #0B2545;
+}
+
+.matriz-eje-y {
+    width: 64px;
+    text-align: right;
+    padding-right: 4px;
+}
+
+.matriz-eje-x {
+    padding-top: 3px;
+    text-align: center;
+}
+
+.matriz-zona {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 19px;
+    height: 19px;
+    margin: 1px;
+    border-radius: 50%;
+    background: #fff;
+    color: #0B2545;
+    font-size: 10px;
+    font-weight: 800;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.matriz-ejes {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #5A6A80;
+}
+
+.matriz-ref {
+    margin: 10px 0 0;
+    padding-left: 22px;
+    font-size: 12px;
+    color: #33445C;
+}
+
+.matriz-ref li {
+    padding: 3px 0;
+}
+
+.matriz-ref li span {
+    margin-right: 6px;
+}
+
+.matriz-ref li strong {
+    float: right;
+    font-size: 11px;
+}
+
+.plan-paso-recursos {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #F4F7FB;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 12px;
+    color: #33445C;
+}
+
+.plan-paso-recursos i {
+    width: 14px;
+    color: #0047B3;
+    margin-right: 4px;
+}
+
+.plan-recursos-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 3px;
+}
+
+.plan-recursos-chips span {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid #D8DFE9;
+    font-size: 11px;
+    color: #33445C;
+}
+
+/* --- Elementos exclusivos del documento impreso del plan --- */
+.doc-kpis td {
+    text-align: center;
+    width: 25%;
+}
+
+.doc-kpis td strong {
+    display: block;
+    font-size: 13pt;
+    color: #0B2545;
+}
+
+.doc-kpis td span {
+    font-size: 7.5pt;
+    color: #5A6A80;
+}
+
+.doc-calor {
+    max-width: 125mm;
+    margin: 0 auto 6pt;
+}
+
+.doc-matriz {
+    max-width: 135mm;
+    margin: 0 auto;
+}
+
+.doc-matriz .zona-leyenda {
+    justify-content: center;
+}
+
+.doc-nivel {
+    color: #fff;
+    font-weight: 800;
+}
+
+.doc-fase {
+    margin: 10pt 0 5pt;
+    padding: 5pt 7pt;
+    background: #EEF2F7;
+    border-left: 3pt solid #0B2545;
+}
+
+.doc-fase-titulo {
+    margin: 0;
+    font-size: 9.5pt;
+    font-weight: 800;
+    color: #0B2545;
+}
+
+.doc-fase-titulo span {
+    float: right;
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #5A6A80;
+}
+
+.doc-fase-obj {
+    margin: 2pt 0 0;
+    font-size: 8pt;
+    color: #33445C;
+}
+
+.doc-tabla-plan {
+    font-size: 8pt;
+}
+
+.doc-tabla-plan td {
+    vertical-align: top !important;
+}
+
+.doc-zona-tag {
+    display: block;
+    margin-top: 1pt;
+    font-size: 7pt;
+    color: #5A6A80;
+}
+
+.doc-medidas {
+    margin: 3pt 0 0;
+    padding-left: 11pt;
+    font-size: 7.5pt;
+    line-height: 1.4;
+    color: #33445C;
+}
+
+.doc-prio {
+    display: inline-block;
+    padding: 1pt 4pt;
+    border: 0.8pt solid;
+    border-radius: 3pt;
+    font-size: 7pt;
+    font-weight: 800;
+}
+
+.doc-costo {
+    display: block;
+    margin-top: 2pt;
+    font-size: 7pt;
+    font-weight: 700;
+    color: #5A6A80;
+}
+
+.doc-check {
+    display: inline-block;
+    width: 10pt;
+    height: 10pt;
+    border: 0.9pt solid #55657C;
+    border-radius: 1.5pt;
+    background: #fff;
+}
+
+.doc-tabla-seg td {
+    height: 18pt;
+}
+
+@media print {
+    /* Plan de Acción: se imprime el documento formal, no la UI */
+    #planAccionPanel .informe-header,
+    #planAccionPanel .informe-card,
+    #planAccionPanel .plan-doc,
+    #planAccionPanel .plan-nota {
+        display: none !important;
+    }
+
+    .doc-bloque,
+    .doc-fase,
+    .doc-calor,
+    .doc-matriz,
+    .doc-kpis {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .doc-fase {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    .doc-print,
+    .doc-print * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .matriz-zona {
+        box-shadow: none;
+        border: 0.6pt solid #0B2545;
+    }
+}
+
+/* --- Logo, zonas prioritarias y cronograma del documento impreso --- */
+.doc-cab-logo-img {
+    display: block;
+    height: 30pt;
+    width: auto;
+    margin-bottom: 3pt;
+}
+
+.doc-calor {
+    max-width: 160mm;
+}
+
+.doc-calor .calor-svg {
+    border: 0.6pt solid #D8DFE9;
+    border-radius: 6pt;
+}
+
+.doc-top {
+    margin: 0 0 10pt;
+}
+
+.doc-top-titulo {
+    margin: 0 0 5pt;
+    font-size: 8.5pt;
+    font-weight: 800;
+    color: #0B2545;
+    text-transform: uppercase;
+    letter-spacing: 0.4pt;
+}
+
+.doc-top-grid {
+    display: flex;
+    gap: 6pt;
+}
+
+.doc-top-item {
+    flex: 1;
+    display: flex;
+    gap: 6pt;
+    align-items: flex-start;
+    padding: 6pt;
+    border: 0.8pt solid;
+    border-left-width: 3pt;
+    border-radius: 3pt;
+    background: #FAFBFD;
+}
+
+.doc-top-num {
+    flex: 0 0 auto;
+    width: 14pt;
+    height: 14pt;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 8pt;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doc-top-item strong {
+    display: block;
+    font-size: 8.5pt;
+    color: #0B2545;
+}
+
+.doc-top-item span {
+    display: block;
+    font-size: 7pt;
+    color: #5A6A80;
+}
+
+.doc-gantt {
+    font-size: 7.5pt;
+}
+
+.doc-gantt th.doc-c {
+    width: 11%;
+}
+
+.doc-gantt-celda {
+    padding: 2pt 0 !important;
+}
+
+.doc-gantt-celda span {
+    display: block;
+    height: 7pt;
+    margin: 0 -1pt;
+}
+
+@media print {
+    /* Aviso de instalación de la PWA y su ayuda: nunca en el PDF */
+    #kpInstallBanner,
+    #kpInstallHelp,
+    .kp-install-banner {
+        display: none !important;
+    }
+}
+
+.doc-top-item .doc-top-num {
+    display: inline-flex;
+    color: #fff;
+    font-size: 8pt;
+}
+
+/* --- Mapa de calor 3D sobre imagen satelital --- */
+.mapa3d-wrap {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #1E2B22;
+}
+
+.mapa3d {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: linear-gradient(180deg, #0B2545 0%, #24402F 30%, #1E2B22 100%);
+}
+
+.mapa3d-plano {
+    position: absolute;
+    left: 0;
+    overflow: hidden;
+    transform-origin: 50% 50%;
+    background: #2B3A2E;
+}
+
+.mapa3d-tesela {
+    position: absolute;
+    width: 256px !important;
+    height: 256px !important;
+    max-width: none !important;
+    display: block;
+}
+
+.mapa3d-suelo,
+.mapa3d-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+}
+
+.doc-calor {
+    max-width: none;
+}
+
+.doc-calor .mapa3d-wrap {
+    width: 600px;
+    margin: 0 auto 6pt;
+    border-radius: 6pt;
+}
+
+@media print {
+    .mapa3d-wrap,
+    .mapa3d,
+    .mapa3d-plano,
+    .mapa3d-tesela {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

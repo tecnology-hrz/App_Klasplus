@@ -120,7 +120,7 @@ function gaugeSeguridad(score, color) {
 
 var _riesgoCache = { datos: null, timestamp: 0 };
 var RIESGO_CACHE_TTL = 120000; // 2 min
-var RIESGO_CACHE_KEY = 'klasplus_riesgo_cache';
+var RIESGO_CACHE_KEY = 'klasplus_riesgo_cache_v2';
 
 // Evita que dos llamadas simultáneas (por ejemplo la precarga y el clic del
 // usuario) disparen dos veces las mismas consultas de red.
@@ -218,19 +218,45 @@ async function cargarDatosRiesgo() {
             localStorage.setItem('userInstitutionName', nombreInst);
         }
 
-        var totalScore = 0;
+        // Una misma zona puede existir en varios documentos (registros
+        // creados en paralelo). Se agrupan por slug: puntuación promedio,
+        // evidencias sumadas y recomendaciones sin repetir.
+        var porSlug = {};
+        var ordenSlugs = [];
         zonas.forEach(function(data) {
             var score = typeof data.puntuacionPeligro === 'number' ? data.puntuacionPeligro : 5;
+            var clave = String(data.slug || data.nombre || 'zona').toLowerCase();
+            var z = porSlug[clave];
+            if (!z) {
+                z = porSlug[clave] = {
+                    nombre: data.nombre || data.slug || 'Zona sin nombre',
+                    slug: data.slug || '',
+                    suma: 0, n: 0, fotos: 0, recomendaciones: []
+                };
+                ordenSlugs.push(clave);
+            }
+            z.suma += score;
+            z.n++;
+            z.fotos += (data.totalFotos || 0);
+            (Array.isArray(data.recomendaciones) ? data.recomendaciones : []).forEach(function(r) {
+                if (z.recomendaciones.indexOf(r) === -1) z.recomendaciones.push(r);
+            });
+        });
+
+        var totalScore = 0;
+        ordenSlugs.forEach(function(clave) {
+            var z = porSlug[clave];
+            var score = z.suma / z.n;
             datos.zonasEvaluadas++;
             totalScore += score;
             if (score >= 7) datos.zonasSeguras++;
-            datos.totalFotos += (data.totalFotos || 0);
+            datos.totalFotos += z.fotos;
             datos.zonas.push({
-                nombre: data.nombre || data.slug || 'Zona sin nombre',
-                slug: data.slug || '',
+                nombre: z.nombre,
+                slug: z.slug,
                 score: score,
-                fotos: data.totalFotos || 0,
-                recomendaciones: Array.isArray(data.recomendaciones) ? data.recomendaciones : []
+                fotos: z.fotos,
+                recomendaciones: z.recomendaciones
             });
         });
 
@@ -497,10 +523,23 @@ function activarBotonImprimir(contenedor, nombreDoc) {
         }
         window.addEventListener('afterprint', restaurar);
 
-        window.print();
+        // Se espera a que carguen las imágenes (teselas satelitales del mapa
+        // 3D, logo) para que no salgan en blanco en el PDF. Máximo 5 s.
+        var pendientes = Array.prototype.filter.call(contenedor.querySelectorAll('img'), function(img) {
+            return !img.complete;
+        });
+        var espera = Promise.all(pendientes.map(function(img) {
+            return new Promise(function(ok) { img.addEventListener('load', ok); img.addEventListener('error', ok); });
+        }));
+        var tope = new Promise(function(ok) { setTimeout(ok, 5000); });
 
-        // Respaldo por si el navegador no dispara afterprint.
-        setTimeout(restaurar, 1500);
+        btn.disabled = true;
+        Promise.race([espera, tope]).then(function() {
+            btn.disabled = false;
+            window.print();
+            // Respaldo por si el navegador no dispara afterprint.
+            setTimeout(restaurar, 1500);
+        });
     });
 }
 
@@ -544,7 +583,7 @@ function documentoImpresionRiesgo(datos, clase, cobertura, sinDatos) {
     '<div class="doc-print" aria-hidden="true">' +
         '<header class="doc-cab">' +
             '<div class="doc-cab-marca">' +
-                '<span class="doc-cab-logo">KLASPLUS</span>' +
+                '<img class="doc-cab-logo-img" src="../img/logo-klasplus.png" alt="Klasplus">' +
                 '<span class="doc-cab-sub">Sistema de gestión de seguridad escolar</span>' +
             '</div>' +
             '<div class="doc-cab-tipo">' +
@@ -932,11 +971,395 @@ function medidasParaZona(nombreZona) {
 }
 
 var PRIORIDADES = {
-    critica:    { label: 'Inmediata',  color: '#C0392B', plazo: 'Ejecutar ya' },
-    alta:       { label: 'Alta',       color: '#E74C3C', plazo: '30 días' },
-    media:      { label: 'Media',      color: '#F39C12', plazo: '90 días' },
-    preventiva: { label: 'Preventiva', color: '#0047B3', plazo: 'Permanente' }
+    critica:    { label: 'Inmediata',  color: '#C0392B', plazo: '7 días',     dias: 7 },
+    alta:       { label: 'Alta',       color: '#E74C3C', plazo: '30 días',    dias: 30 },
+    media:      { label: 'Media',      color: '#F39C12', plazo: '90 días',    dias: 90 },
+    preventiva: { label: 'Preventiva', color: '#0047B3', plazo: 'Permanente', dias: null }
 };
+
+// Perfil técnico por tipo de zona: impacto potencial (1-5) de un evento
+// en la zona, responsable sugerido, recursos y costo estimado.
+var PERFIL_TECNICO_ZONA = [
+    { claves: ['baño', 'bano', 'sanitario', 'lavamanos'], impacto: 3, responsable: 'Mantenimiento / Servicios generales', costo: 'Medio',
+      recursos: ['Señal de piso mojado', 'Cinta antideslizante', 'Plomería y repuestos', 'Insumos de aseo'] },
+    { claves: ['escalera', 'rampa', 'grada', 'peldaño'], impacto: 5, responsable: 'Mantenimiento', costo: 'Medio',
+      recursos: ['Cinta antideslizante', 'Pintura de demarcación', 'Pasamanos', 'Luminarias de emergencia'] },
+    { claves: ['salon', 'salón', 'aula', 'clase'], impacto: 3, responsable: 'Coordinación académica / Docentes', costo: 'Bajo',
+      recursos: ['Anclajes y herrajes', 'Planos de evacuación impresos', 'Revisión de mobiliario'] },
+    { claves: ['laboratorio', 'lab', 'quimica', 'química'], impacto: 5, responsable: 'Docente de ciencias / Rectoría', costo: 'Alto',
+      recursos: ['Ducha y lavaojos', 'Gabinete con llave', 'Extintor y EPP', 'Hojas de seguridad'] },
+    { claves: ['cafeteria', 'cafetería', 'comedor', 'tienda', 'restaurante', 'cocina'], impacto: 4, responsable: 'Administración / Concesionario', costo: 'Medio',
+      recursos: ['Extintor tipo K', 'Revisión de gas', 'Control de plagas', 'Canecas con tapa'] },
+    { claves: ['pasillo', 'corredor', 'circulacion', 'circulación', 'entrada', 'acceso', 'porteria', 'portería'], impacto: 4, responsable: 'Mantenimiento / Brigada', costo: 'Medio',
+      recursos: ['Señalización fotoluminiscente', 'Luminarias de emergencia', 'Herrajes antipánico'] },
+    { claves: ['patio', 'cancha', 'deportiv', 'gimnasio', 'zona verde', 'jardin', 'jardín'], impacto: 3, responsable: 'Mantenimiento / Educación física', costo: 'Medio',
+      recursos: ['Reparación de piso', 'Anclajes para estructuras', 'Pintura de demarcación', 'Puntos de hidratación'] },
+    { claves: ['electric', 'eléctric', 'tablero', 'tecnolog', 'computo', 'cómputo', 'sistemas'], impacto: 5, responsable: 'Rectoría / Técnico electricista', costo: 'Alto',
+      recursos: ['Electricista certificado', 'Rotulado de tableros', 'Protecciones diferenciales'] },
+    { claves: ['techo', 'cubierta', 'muro', 'pared', 'estructura', 'fachada', 'azotea', 'terraza'], impacto: 5, responsable: 'Rectoría / Secretaría de Educación', costo: 'Alto',
+      recursos: ['Ingeniero estructural', 'Materiales de cubierta', 'Cinta de restricción'] }
+];
+
+var PERFIL_TECNICO_GENERICO = { impacto: 3, responsable: 'Coordinador de brigada', costo: 'Medio',
+    recursos: ['Señalización temporal', 'Mantenimiento general'] };
+
+function perfilTecnicoZona(nombreZona) {
+    var nombre = String(nombreZona || '').toLowerCase();
+    for (var i = 0; i < PERFIL_TECNICO_ZONA.length; i++) {
+        var g = PERFIL_TECNICO_ZONA[i];
+        for (var j = 0; j < g.claves.length; j++) {
+            if (nombre.indexOf(g.claves[j]) !== -1) return g;
+        }
+    }
+    return PERFIL_TECNICO_GENERICO;
+}
+
+// Probabilidad (1-5) de que se materialice un evento, inferida de la
+// puntuación de seguridad: a menor puntuación, mayor probabilidad.
+function probabilidadPorScore(score) {
+    if (score < 2) return 5;
+    if (score < 4) return 4;
+    if (score < 6) return 3;
+    if (score < 8) return 2;
+    return 1;
+}
+
+var ETIQUETAS_PROB = ['', 'Rara', 'Improbable', 'Posible', 'Probable', 'Casi segura'];
+var ETIQUETAS_IMPACTO = ['', 'Insignificante', 'Menor', 'Moderado', 'Mayor', 'Catastrófico'];
+
+// Nivel de riesgo = probabilidad × impacto (matriz 5×5).
+function nivelRiesgo(valor) {
+    if (valor >= 15) return { label: 'Extremo', color: '#C0392B' };
+    if (valor >= 10) return { label: 'Alto',    color: '#E74C3C' };
+    if (valor >= 5)  return { label: 'Medio',   color: '#F39C12' };
+    return                  { label: 'Bajo',    color: '#2ECC71' };
+}
+
+function evaluarRiesgoZona(z) {
+    var perfil = perfilTecnicoZona(z.nombre);
+    var p = probabilidadPorScore(z.score);
+    var i = perfil.impacto;
+    return { prob: p, impacto: i, valor: p * i, nivel: nivelRiesgo(p * i), perfil: perfil };
+}
+
+function fechaLimite(prioridad) {
+    var pr = PRIORIDADES[prioridad];
+    if (!pr || !pr.dias) return 'Permanente';
+    var f = new Date();
+    f.setDate(f.getDate() + pr.dias);
+    return f.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+// ---------- Mapa de calor 3D (maqueta de la institución) ----------
+// Las zonas se ubican con las mismas coordenadas de la imagen satelital
+// del mapa de peligro (mapa-peligro.html), convertidas a metros respecto
+// al centro de la institución. Norte arriba, como en el mapa.
+// Cada zona es un volumen: cuanto más baja la puntuación, más alto y más
+// rojo el bloque, y mayor la mancha de calor sobre el terreno.
+// Si cambian las coordenadas en mapa-peligro.html, actualizarlas aquí.
+var MAPA_ESCUELA = { lat: 3.4518, lng: -76.5688 };
+var ZONAS_MAPA = [
+    { slug: 'baños',       nombre: 'Baños',       dLat:  0.00015, dLng: -0.00012, w: 7,  d: 6,  tipo: 'edif',    claves: ['baño', 'bano', 'sanitario'] },
+    { slug: 'escaleras',   nombre: 'Escaleras',   dLat:  0.00008, dLng:  0.00015, w: 5,  d: 5,  tipo: 'torre',   claves: ['escalera'] },
+    { slug: 'patio',       nombre: 'Patio',       dLat: -0.00012, dLng:  0.00005, w: 14, d: 10, tipo: 'abierto', claves: ['patio'] },
+    { slug: 'laboratorio', nombre: 'Laboratorio', dLat:  0.00018, dLng:  0.00008, w: 10, d: 7,  tipo: 'edif',    claves: ['laboratorio', 'lab'] },
+    { slug: 'cafeteria',   nombre: 'Cafetería',   dLat: -0.00008, dLng: -0.00018, w: 10, d: 7,  tipo: 'edif',    claves: ['cafeter', 'comedor', 'tienda'] },
+    { slug: 'pasillos',    nombre: 'Pasillos',    dLat:  0.00005, dLng: -0.00005, w: 12, d: 4,  tipo: 'bajo',    claves: ['pasillo', 'corredor'] },
+    { slug: 'entrada',     nombre: 'Entrada',     dLat: -0.00020, dLng:  0.00000, w: 8,  d: 4,  tipo: 'bajo',    claves: ['entrada', 'acceso', 'porter'] },
+    { slug: 'canchas',     nombre: 'Canchas',     dLat: -0.00015, dLng:  0.00018, w: 12, d: 10, tipo: 'cancha',  claves: ['cancha', 'deportiv'] },
+    { slug: 'salones',     nombre: 'Salones',     dLat:  0.00010, dLng: -0.00020, w: 9,  d: 12, tipo: 'edif',    claves: ['salon', 'salón', 'aula'] }
+];
+
+// Proyección axonométrica: giro PHI del plano, compresión vertical K y
+// escala S (px por metro). Unidades de entrada en metros: x = este, y = sur.
+var ISO = { S: 3.9, K: 0.55, OX: 165, OY: 150, PHI: 20 * Math.PI / 180 };
+
+function isoPt(x, y, z) {
+    var c = Math.cos(ISO.PHI), s = Math.sin(ISO.PHI);
+    var xr = x * c - y * s, yr = x * s + y * c;
+    return [ISO.OX + xr * ISO.S, ISO.OY + yr * ISO.K * ISO.S - z * ISO.S];
+}
+
+function profundidad(x, y) {
+    return x * Math.sin(ISO.PHI) + y * Math.cos(ISO.PHI);
+}
+
+function isoPoly(puntos, fill, extra) {
+    return '<polygon points="' + puntos.map(function(p) {
+        var q = isoPt(p[0], p[1], p[2]);
+        return q[0].toFixed(1) + ',' + q[1].toFixed(1);
+    }).join(' ') + '" fill="' + fill + '"' + (extra || '') + '/>';
+}
+
+// Aclara (f > 0) u oscurece (f < 0) un color hexadecimal.
+function tono(hex, f) {
+    var n = parseInt(hex.slice(1), 16);
+    var c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function(v) {
+        v = f >= 0 ? v + (255 - v) * f : v * (1 + f);
+        return Math.round(Math.max(0, Math.min(255, v)));
+    });
+    return '#' + c.map(function(v) { return ('0' + v.toString(16)).slice(-2); }).join('');
+}
+
+function zonaEnPlano(slot, zonas) {
+    for (var i = 0; i < zonas.length; i++) {
+        if (zonas[i].slug && zonas[i].slug === slot.slug) return { zona: zonas[i], indice: i };
+    }
+    for (var k = 0; k < zonas.length; k++) {
+        var n = String(zonas[k].nombre || '').toLowerCase();
+        for (var c = 0; c < slot.claves.length; c++) {
+            if (n.indexOf(slot.claves[c]) !== -1) return { zona: zonas[k], indice: k };
+        }
+    }
+    return null;
+}
+
+// Prisma con techo, fachadas sur y este visibles, y ventanas.
+function isoBloque(s, h, color, conVentanas) {
+    var x = s.x, y = s.y, w = s.w, d = s.d;
+    var borde = ' stroke="' + tono(color, -0.45) + '" stroke-width="0.6" stroke-linejoin="round"';
+    var out = '';
+    out += isoPoly([[x, y + d, 0], [x + w, y + d, 0], [x + w, y + d, h], [x, y + d, h]], tono(color, -0.15), borde);
+    out += isoPoly([[x + w, y, 0], [x + w, y + d, 0], [x + w, y + d, h], [x + w, y, h]], tono(color, -0.35), borde);
+
+    if (conVentanas && h >= 3.5) {
+        var pisos = Math.max(1, Math.floor((h - 0.8) / 3));
+        for (var p = 0; p < pisos; p++) {
+            var z0 = 1.1 + p * 3;
+            for (var u = 1; u + 1.1 <= w - 0.6; u += 2.2) {
+                out += isoPoly([[x + u, y + d, z0], [x + u + 1.1, y + d, z0], [x + u + 1.1, y + d, z0 + 1.2], [x + u, y + d, z0 + 1.2]], '#FFFFFF', ' fill-opacity="0.6"');
+            }
+            for (var v = 1; v + 1.1 <= d - 0.6; v += 2.2) {
+                out += isoPoly([[x + w, y + v, z0], [x + w, y + v + 1.1, z0], [x + w, y + v + 1.1, z0 + 1.2], [x + w, y + v, z0 + 1.2]], '#FFFFFF', ' fill-opacity="0.45"');
+            }
+        }
+    }
+    out += isoPoly([[x, y, h], [x + w, y, h], [x + w, y + d, h], [x, y + d, h]], tono(color, 0.12), borde);
+    if (w > 3 && d > 3) {
+        out += isoPoly([[x + 0.7, y + 0.7, h], [x + w - 0.7, y + 0.7, h], [x + w - 0.7, y + d - 0.7, h], [x + 0.7, y + d - 0.7, h]], tono(color, 0.3), ' fill-opacity="0.7"');
+    }
+    return out;
+}
+
+// Superficie abierta (patio / cancha) con demarcaciones.
+function isoSuperficie(s, h, color, esCancha) {
+    var x = s.x, y = s.y, w = s.w, d = s.d;
+    var out = isoBloque(s, h, color, false);
+    var linea = ' fill="none" stroke="#FFFFFF" stroke-width="0.9" stroke-opacity="0.85"';
+    function seg(a, b) {
+        var p = isoPt(a[0], a[1], h), q = isoPt(b[0], b[1], h);
+        return '<line x1="' + p[0].toFixed(1) + '" y1="' + p[1].toFixed(1) + '" x2="' + q[0].toFixed(1) + '" y2="' + q[1].toFixed(1) + '"' + linea + '/>';
+    }
+    if (esCancha) {
+        out += seg([x + 1, y + 1], [x + w - 1, y + 1]) + seg([x + w - 1, y + 1], [x + w - 1, y + d - 1]) +
+               seg([x + w - 1, y + d - 1], [x + 1, y + d - 1]) + seg([x + 1, y + d - 1], [x + 1, y + 1]) +
+               seg([x + w / 2, y + 1], [x + w / 2, y + d - 1]);
+        var c = isoPt(x + w / 2, y + d / 2, h);
+        out += '<ellipse cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" rx="' + (1.8 * ISO.S).toFixed(1) + '" ry="' + (1.8 * ISO.S * ISO.K).toFixed(1) + '"' + linea + '/>';
+    } else {
+        for (var i = 1; i < 4; i++) out += seg([x + 0.8, y + (d * i) / 4], [x + w - 0.8, y + (d * i) / 4]);
+    }
+    return out;
+}
+
+function isoArbol(x, y) {
+    var b = isoPt(x, y, 0), t = isoPt(x, y, 3);
+    return '<ellipse cx="' + b[0].toFixed(1) + '" cy="' + b[1].toFixed(1) + '" rx="6" ry="3" fill="#0B2545" fill-opacity="0.15"/>' +
+        '<line x1="' + b[0].toFixed(1) + '" y1="' + b[1].toFixed(1) + '" x2="' + t[0].toFixed(1) + '" y2="' + t[1].toFixed(1) + '" stroke="#7A5537" stroke-width="1.6"/>' +
+        '<circle cx="' + t[0].toFixed(1) + '" cy="' + (t[1] - 3).toFixed(1) + '" r="6" fill="#3E9B5F"/>' +
+        '<circle cx="' + (t[0] - 1.8).toFixed(1) + '" cy="' + (t[1] - 5).toFixed(1) + '" r="3" fill="#6CC28A"/>';
+}
+
+function svgMapaCalor(datos, idSufijo) {
+    var filtro = 'calorBlur' + idSufijo;
+    var R = 32; // medio lado del terreno, en metros
+    var mLat = 111320, mLng = 111320 * Math.cos(MAPA_ESCUELA.lat * Math.PI / 180);
+
+    // Terreno: losa con espesor y cuadrícula cada 4 m
+    var suelo = '' +
+        isoPoly([[-R, R, 0], [R, R, 0], [R, R, -2], [-R, R, -2]], '#B9C4D3') +
+        isoPoly([[R, -R, 0], [R, R, 0], [R, R, -2], [R, -R, -2]], '#9AA7B8') +
+        isoPoly([[-R, -R, 0], [R, -R, 0], [R, R, 0], [-R, R, 0]], '#EEF2F7', ' stroke="#C3CCDA" stroke-width="0.8"');
+    var grid = '';
+    for (var g = -R + 4; g < R; g += 4) {
+        var a = isoPt(g, -R, 0), b = isoPt(g, R, 0), c1 = isoPt(-R, g, 0), c2 = isoPt(R, g, 0);
+        grid += '<line x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) + '" x2="' + b[0].toFixed(1) + '" y2="' + b[1].toFixed(1) + '"/>' +
+                '<line x1="' + c1[0].toFixed(1) + '" y1="' + c1[1].toFixed(1) + '" x2="' + c2[0].toFixed(1) + '" y2="' + c2[1].toFixed(1) + '"/>';
+    }
+    suelo += '<g stroke="#DCE3EC" stroke-width="0.5">' + grid + '</g>';
+
+    // Perímetro de 30 m de la institución (el mismo círculo del mapa)
+    var centro = isoPt(0, 0, 0);
+    suelo += '<ellipse cx="' + centro[0].toFixed(1) + '" cy="' + centro[1].toFixed(1) + '" rx="' + (30 * ISO.S).toFixed(1) + '" ry="' + (30 * ISO.S * ISO.K).toFixed(1) +
+        '" fill="#FF5722" fill-opacity="0.05" stroke="#FF5722" stroke-width="1.2" stroke-dasharray="5 4"/>';
+
+    var manchas = '';
+    var bloques = '';
+    var etiquetas = '';
+    var rotulos = [];
+
+    // Posición real (m) de cada zona a partir de su lat/lng.
+    var zonasPos = ZONAS_MAPA.map(function(z) {
+        var cx = z.dLng * mLng, cy = -z.dLat * mLat;
+        return { slug: z.slug, nombre: z.nombre, claves: z.claves, tipo: z.tipo,
+                 w: z.w, d: z.d, x: cx - z.w / 2, y: cy - z.d / 2, cx: cx, cy: cy };
+    });
+
+    // Se pinta de atrás hacia adelante para que los volúmenes se tapen bien.
+    zonasPos.sort(function(p, q) { return profundidad(p.cx, p.cy) - profundidad(q.cx, q.cy); });
+
+    zonasPos.forEach(function(s) {
+        var m = zonaEnPlano(s, datos.zonas);
+        var evaluada = !!m;
+        var intensidad = evaluada ? (10 - m.zona.score) / 10 : 0;
+        var color = evaluada ? clasificarZona(m.zona.score).color : '#D5DCE5';
+        var abierta = s.tipo === 'abierto' || s.tipo === 'cancha';
+
+        var factor = s.tipo === 'torre' ? 1.3 : s.tipo === 'bajo' ? 0.55 : 1;
+        var h = abierta ? 0.4 + intensidad * 1.2 : (evaluada ? 3 + intensidad * 11 : 3) * factor;
+
+        if (evaluada) {
+            var gc = isoPt(s.cx, s.cy, 0);
+            var r = 6 + intensidad * 9;
+            manchas += '<ellipse cx="' + gc[0].toFixed(1) + '" cy="' + gc[1].toFixed(1) + '" rx="' + (r * ISO.S).toFixed(1) + '" ry="' + (r * ISO.S * ISO.K).toFixed(1) +
+                '" fill="' + color + '" fill-opacity="' + (0.4 + intensidad * 0.5).toFixed(2) + '"/>';
+        }
+
+        bloques += abierta
+            ? isoSuperficie(s, h, evaluada ? color : '#C9D2DD', s.tipo === 'cancha')
+            : isoBloque(s, h, color, true);
+
+        var top = isoPt(s.cx, s.cy, h);
+        var titulo = (evaluada ? (m.indice + 1) + '. ' : '') + s.nombre;
+        rotulos.push({
+            top: top, ly: top[1] - 16, ancho: Math.max(titulo.length * 4.4 + 14, 58),
+            titulo: titulo, evaluada: evaluada, color: color, m: m
+        });
+    });
+
+    // Etiquetas sin superposición: se busca el hueco libre más cercano.
+    rotulos.sort(function(a, b) { return b.top[1] - a.top[1]; });
+    var colocados = [];
+    rotulos.forEach(function(r) {
+        var base = Math.max(r.ly, 40);
+        var elegido = base;
+        for (var k = 0; k < 24; k++) {
+            var ly = base + Math.ceil(k / 2) * 4 * (k % 2 ? -1 : 1);
+            if (ly < 40) continue;
+            var choca = colocados.some(function(o) {
+                return Math.abs(o.top[0] - r.top[0]) < (o.ancho + r.ancho) / 2 + 2 && Math.abs(o.ly - ly) < 20;
+            });
+            if (!choca) { elegido = ly; break; }
+        }
+        r.ly = elegido;
+        colocados.push(r);
+    });
+
+    rotulos.forEach(function(r) {
+        var top = r.top, ly = r.ly, ancho = r.ancho, titulo = r.titulo;
+        var evaluada = r.evaluada, color = r.color, m = r.m;
+        var guia = evaluada ? tono(color, -0.3) : '#AEB8C6';
+        etiquetas += '' +
+            '<line x1="' + top[0].toFixed(1) + '" y1="' + top[1].toFixed(1) + '" x2="' + top[0].toFixed(1) + '" y2="' + (ly + (ly < top[1] ? 9 : -9)).toFixed(1) + '" stroke="' + guia + '" stroke-width="0.8"/>' +
+            '<circle cx="' + top[0].toFixed(1) + '" cy="' + top[1].toFixed(1) + '" r="1.6" fill="' + guia + '"/>' +
+            '<g transform="translate(' + top[0].toFixed(1) + ',' + ly.toFixed(1) + ')">' +
+                '<rect x="' + (-ancho / 2).toFixed(1) + '" y="-9" width="' + ancho.toFixed(1) + '" height="18" rx="9" fill="#FFFFFF" stroke="' + (evaluada ? color : '#AEB8C6') + '" stroke-width="1.1"' + (evaluada ? '' : ' stroke-dasharray="2.5 2"') + '/>' +
+                '<text y="-1.2" text-anchor="middle" font-size="6.6" font-weight="800" fill="' + (evaluada ? '#0B2545' : '#7C8899') + '">' + escapeHTML(titulo) + '</text>' +
+                '<text y="6" text-anchor="middle" font-size="5.8" font-weight="800" fill="' + (evaluada ? tono(color, -0.15) : '#8C9AAD') + '">' +
+                    (evaluada ? m.zona.score.toFixed(1) + '/10 · ' + clasificarZona(m.zona.score).label : 'Sin evaluar') +
+                '</text>' +
+            '</g>';
+    });
+
+    var arboles = isoArbol(-29, 29) + isoArbol(-29, -29) + isoArbol(29, -29) + isoArbol(29, 29) +
+                  isoArbol(-10, 29) + isoArbol(12, 29) + isoArbol(-29, 0) + isoArbol(29, 2);
+
+    // Pin de la institución en el centro (como en el mapa)
+    var pb = isoPt(0, 0, 0), pt = isoPt(0, 0, 7);
+    var pin = '' +
+        '<line x1="' + pb[0].toFixed(1) + '" y1="' + pb[1].toFixed(1) + '" x2="' + pt[0].toFixed(1) + '" y2="' + pt[1].toFixed(1) + '" stroke="#0B2545" stroke-width="1.4"/>' +
+        '<g transform="translate(' + pt[0].toFixed(1) + ',' + (pt[1] - 6).toFixed(1) + ')">' +
+            '<circle r="6.5" fill="#0047B3" stroke="#FFFFFF" stroke-width="1.4"/>' +
+            '<path d="M0,-3.6 L3,-2.4 L3,0 C3,1.8 1.5,3 0,3.6 C-1.5,3 -3,1.8 -3,0 L-3,-2.4 Z" fill="#FFFFFF"/>' +
+        '</g>';
+
+    // Brújula: el norte del mapa satelital (girado PHI en la maqueta)
+    var nx = Math.sin(-ISO.PHI) * -1, ny = -Math.cos(ISO.PHI) * ISO.K;
+    var nl = Math.sqrt(nx * nx + ny * ny); nx /= nl; ny /= nl;
+    var brujula = '' +
+        '<g transform="translate(306,28)">' +
+            '<circle r="11" fill="#FFFFFF" stroke="#C3CCDA" stroke-width="0.8"/>' +
+            '<g transform="rotate(' + (Math.atan2(nx, -ny) * 180 / Math.PI).toFixed(1) + ')">' +
+                '<path d="M0,-8 L3,1 L0,-1 L-3,1 Z" fill="#E74C3C"/>' +
+                '<path d="M0,8 L3,-1 L0,1 L-3,-1 Z" fill="#8C9AAD"/>' +
+                '<text y="-12.5" text-anchor="middle" font-size="6" font-weight="800" fill="#0B2545">N</text>' +
+            '</g>' +
+        '</g>';
+
+    var nota = '<text x="12" y="18" font-size="6.5" font-weight="800" fill="#0B2545" letter-spacing="0.5">MAQUETA 3D · UBICACIÓN SEGÚN IMAGEN SATELITAL</text>' +
+        '<text x="12" y="27" font-size="5.8" fill="#5A6A80">Altura y color del volumen = nivel de riesgo · Perímetro de 30 m</text>';
+
+    return '' +
+        '<svg class="calor-svg" viewBox="0 0 330 262" role="img" aria-label="Mapa de calor 3D de las zonas de la institución" font-family="Poppins, Segoe UI, Arial, sans-serif">' +
+            '<defs>' +
+                '<filter id="' + filtro + '" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>' +
+                '<linearGradient id="cielo' + idSufijo + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EAF1FA"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>' +
+            '</defs>' +
+            '<rect x="0" y="0" width="330" height="262" rx="12" fill="url(#cielo' + idSufijo + ')"/>' +
+            nota + brujula +
+            suelo +
+            '<g filter="url(#' + filtro + ')">' + manchas + '</g>' +
+            arboles +
+            bloques +
+            pin +
+            etiquetas +
+        '</svg>';
+}
+
+function leyendaCalor() {
+    return '' +
+        '<div class="calor-leyenda">' +
+            '<span class="calor-escala"></span>' +
+            '<div class="calor-escala-labels"><span>Crítica</span><span>Peligrosa</span><span>En riesgo</span><span>Moderada</span><span>Segura</span></div>' +
+        '</div>';
+}
+
+// ---------- Matriz de riesgos 5×5 (probabilidad × impacto) ----------
+function matrizRiesgosHTML(datos) {
+    // Agrupa los números de zona por celda
+    var celdas = {};
+    datos.zonas.forEach(function(z, idx) {
+        var ev = evaluarRiesgoZona(z);
+        var k = ev.prob + '-' + ev.impacto;
+        (celdas[k] = celdas[k] || []).push(idx + 1);
+    });
+
+    var html = '<table class="matriz-riesgo"><tbody>';
+    for (var p = 5; p >= 1; p--) {
+        html += '<tr><th class="matriz-eje-y"><span>' + p + '</span>' + ETIQUETAS_PROB[p] + '</th>';
+        for (var i = 1; i <= 5; i++) {
+            var nv = nivelRiesgo(p * i);
+            var zonasCelda = celdas[p + '-' + i] || [];
+            html += '<td style="background:' + nv.color + (zonasCelda.length ? '' : '55') + ';">' +
+                zonasCelda.map(function(n) { return '<span class="matriz-zona">' + n + '</span>'; }).join('') +
+            '</td>';
+        }
+        html += '</tr>';
+    }
+    html += '<tr><th></th>';
+    for (var j = 1; j <= 5; j++) {
+        html += '<th class="matriz-eje-x"><span>' + j + '</span>' + ETIQUETAS_IMPACTO[j] + '</th>';
+    }
+    html += '</tr></tbody></table>' +
+        '<div class="matriz-ejes"><span>↑ Probabilidad</span><span>Impacto →</span></div>' +
+        '<div class="zona-leyenda">' +
+            leyendaItem('#2ECC71', 'Bajo 1-4') +
+            leyendaItem('#F39C12', 'Medio 5-9') +
+            leyendaItem('#E74C3C', 'Alto 10-14') +
+            leyendaItem('#C0392B', 'Extremo 15-25') +
+        '</div>';
+    return html;
+}
 
 function prioridadPorScore(score) {
     if (score < 2) return 'critica';
@@ -1023,12 +1446,18 @@ function construirPlanAccion(datos) {
         if (z.recomendaciones.length > 0) {
             medidas = z.recomendaciones.slice(0, 4).concat(medidas).slice(0, 6);
         }
+        var ev = evaluarRiesgoZona(z);
         pasos2.push({
             titulo: z.nombre,
             prioridad: prioridadPorScore(z.score),
-            etiquetaZona: c.label + ' · ' + z.score.toFixed(1) + '/10',
-            descripcion: 'Zona clasificada como ' + c.label.toLowerCase() + '. Intervenir las condiciones que sostienen la puntuación baja.',
-            medidas: medidas
+            etiquetaZona: c.label + ' · ' + z.score.toFixed(1) + '/10 · Riesgo ' + ev.nivel.label.toLowerCase(),
+            descripcion: 'Zona clasificada como ' + c.label.toLowerCase() + ' (probabilidad ' + ETIQUETAS_PROB[ev.prob].toLowerCase() +
+                ', impacto ' + ETIQUETAS_IMPACTO[ev.impacto].toLowerCase() + '). Intervenir las condiciones que sostienen la puntuación baja.',
+            medidas: medidas,
+            responsable: ev.perfil.responsable,
+            recursos: ev.perfil.recursos,
+            costo: ev.perfil.costo,
+            riesgo: ev
         });
     });
 
@@ -1124,7 +1553,63 @@ function construirPlanAccion(datos) {
         pasos: pasos3
     });
 
+    // Responsable y recursos de las acciones que no dependen de una zona.
+    fases.forEach(function(f) {
+        f.pasos.forEach(function(p) {
+            if (p.recursos) return;
+            var r = recursosAccionGeneral(p.titulo);
+            p.responsable = r.responsable;
+            p.recursos = r.recursos;
+            p.costo = r.costo;
+        });
+    });
+
     return fases;
+}
+
+var RECURSOS_ACCIONES = [
+    { prefijo: 'Completar el diagnóstico',     responsable: 'Coordinador de brigada', costo: 'Bajo',
+      recursos: ['Brigadistas activos', 'Celular con cámara', 'App Klasplus'] },
+    { prefijo: 'Mantener el diagnóstico',      responsable: 'Coordinador de brigada', costo: 'Bajo',
+      recursos: ['Brigadistas activos', 'App Klasplus'] },
+    { prefijo: 'Reforzar la evidencia',        responsable: 'Brigadistas', costo: 'Bajo',
+      recursos: ['Celular con cámara', 'App Klasplus'] },
+    { prefijo: 'Consolidar y socializar',      responsable: 'Comité escolar de gestión del riesgo', costo: 'Bajo',
+      recursos: ['Matriz de riesgos', 'Espacio de reunión', 'Material de socialización'] },
+    { prefijo: 'Sostener los controles',       responsable: 'Mantenimiento', costo: 'Medio',
+      recursos: ['Personal de mantenimiento', 'Lista de chequeo mensual'] },
+    { prefijo: 'Consolidar la brigada',        responsable: 'Rectoría / Comité de gestión del riesgo', costo: 'Bajo',
+      recursos: ['Distintivos de brigada', 'Acta de roles', 'Tiempo de reunión'] },
+    { prefijo: 'Plan de evacuación',           responsable: 'Coordinador de brigada', costo: 'Bajo',
+      recursos: ['Silbatos / megáfono', 'Cronómetro', 'Planos de la sede'] },
+    { prefijo: 'Señalización y rutas',         responsable: 'Rectoría / Mantenimiento', costo: 'Medio',
+      recursos: ['Señalización fotoluminiscente', 'Luminarias de emergencia', 'Planos de evacuación'] },
+    { prefijo: 'Dotación para emergencias',    responsable: 'Rectoría / Administración', costo: 'Alto',
+      recursos: ['Extintores', 'Botiquín', 'Camilla de inmovilización', 'Sistema de alarma'] },
+    { prefijo: 'Formación y articulación',     responsable: 'Rectoría / Coordinador de brigada', costo: 'Bajo',
+      recursos: ['Capacitador (Bomberos / Cruz Roja)', 'Directorio de emergencia'] }
+];
+
+function recursosAccionGeneral(titulo) {
+    for (var i = 0; i < RECURSOS_ACCIONES.length; i++) {
+        if (String(titulo).indexOf(RECURSOS_ACCIONES[i].prefijo) === 0) return RECURSOS_ACCIONES[i];
+    }
+    return PERFIL_TECNICO_GENERICO;
+}
+
+// Consolida los recursos de todo el plan: cuántas acciones requieren cada uno.
+function consolidarRecursos(fases) {
+    var mapa = {};
+    var orden = [];
+    fases.forEach(function(f) {
+        f.pasos.forEach(function(p, idx) {
+            (p.recursos || []).forEach(function(r) {
+                if (!mapa[r]) { mapa[r] = []; orden.push(r); }
+                mapa[r].push(f.numero + '.' + (idx + 1));
+            });
+        });
+    });
+    return orden.map(function(r) { return { recurso: r, acciones: mapa[r] }; });
 }
 
 async function renderPlanAccion() {
@@ -1199,6 +1684,33 @@ async function renderPlanAccion() {
             '</div>' +
         '</div>';
 
+    // --- Mapa de calor y matriz de riesgos ---
+    if (!sinDatos) {
+        html += '' +
+            '<div class="informe-card">' +
+                '<div class="informe-card-head">' +
+                    '<span class="informe-card-titulo"><i class="fa-solid fa-fire"></i> Mapa de calor</span>' +
+                    '<span class="informe-card-sub">Maqueta 3D</span>' +
+                '</div>' +
+                '<div class="calor-wrap">' + svgMapaCalor(datos, 'Pant') + '</div>' +
+                leyendaCalor() +
+                '<a class="informe-link-mapa" href="mapa-peligro.html"><i class="fa-solid fa-map-location-dot"></i> Ver mapa satelital <i class="fa-solid fa-arrow-right"></i></a>' +
+            '</div>' +
+            '<div class="informe-card">' +
+                '<div class="informe-card-head">' +
+                    '<span class="informe-card-titulo"><i class="fa-solid fa-table-cells"></i> Matriz de riesgos</span>' +
+                    '<span class="informe-card-sub">Probabilidad × Impacto</span>' +
+                '</div>' +
+                matrizRiesgosHTML(datos) +
+                '<ol class="matriz-ref">' +
+                    datos.zonas.map(function(z) {
+                        var ev = evaluarRiesgoZona(z);
+                        return '<li><span>' + escapeHTML(z.nombre) + '</span><strong style="color:' + ev.nivel.color + ';">' + ev.nivel.label + ' (' + ev.valor + ')</strong></li>';
+                    }).join('') +
+                '</ol>' +
+            '</div>';
+    }
+
     // --- Documento unificado con las 3 etapas ---
     html += '<div class="plan-doc">';
 
@@ -1232,8 +1744,16 @@ async function renderPlanAccion() {
                     '</button>' +
                     '<div class="plan-paso-cuerpo">' +
                         '<p class="plan-paso-desc">' + escapeHTML(paso.descripcion) + '</p>' +
-                        '<div class="plan-paso-plazo"><i class="fa-regular fa-clock"></i> Plazo sugerido: <strong>' + pr.plazo + '</strong></div>' +
+                        '<div class="plan-paso-plazo"><i class="fa-regular fa-clock"></i> Plazo sugerido: <strong>' + pr.plazo + '</strong>' +
+                            (pr.dias ? ' · hasta ' + fechaLimite(paso.prioridad) : '') + '</div>' +
                         '<ul class="plan-medidas">' + medidasHTML + '</ul>' +
+                        '<div class="plan-paso-recursos">' +
+                            '<div><i class="fa-solid fa-user-tie"></i> Responsable: <strong>' + escapeHTML(paso.responsable) + '</strong></div>' +
+                            '<div><i class="fa-solid fa-coins"></i> Costo estimado: <strong>' + escapeHTML(paso.costo) + '</strong></div>' +
+                            '<div class="plan-recursos-chips">' +
+                                (paso.recursos || []).map(function(r) { return '<span>' + escapeHTML(r) + '</span>'; }).join('') +
+                            '</div>' +
+                        '</div>' +
                     '</div>' +
                 '</div>';
         });
@@ -1251,6 +1771,9 @@ async function renderPlanAccion() {
             'Es una guía de priorización y no reemplaza la inspección técnica profesional ni el concepto de las autoridades competentes.</p>' +
         '</div>';
 
+    // Documento formal que reemplaza la vista de pantalla al imprimir.
+    html += documentoImpresionPlan(datos, fases, clase, sinDatos, totalAcciones, inmediatas);
+
     contenedor.innerHTML = html;
     activarBotonImprimir(contenedor, 'Plan de Accion - ' + datos.nombreInst);
 
@@ -1262,6 +1785,198 @@ async function renderPlanAccion() {
             btn.setAttribute('aria-expanded', abierto ? 'true' : 'false');
         });
     });
+}
+
+// Versión formal del Plan de Acción, visible únicamente al imprimir/PDF.
+function documentoImpresionPlan(datos, fases, clase, sinDatos, totalAcciones, inmediatas) {
+    var fecha = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+    var indice = sinDatos ? 'Sin datos' : datos.scorePromedio.toFixed(1) + ' / 10';
+    var zonasIntervenir = datos.zonas.filter(function(z) { return z.score < 8; }).length;
+
+    var costos = { Bajo: 0, Medio: 0, Alto: 0 };
+    fases.forEach(function(f) { f.pasos.forEach(function(p) { if (costos[p.costo] != null) costos[p.costo]++; }); });
+
+    var resumen = sinDatos
+        ? 'Aún no hay zonas diagnosticadas, por lo que este plan parte del levantamiento inicial de información. Se definen ' +
+          totalAcciones + ' acciones organizadas en las tres fases de la gestión del riesgo (Ley 1523 de 2012).'
+        : 'Con un índice de seguridad institucional de ' + datos.scorePromedio.toFixed(1) + '/10 (' + clase.label + ') y ' +
+          datos.zonasEvaluadas + ' de ' + TOTAL_ZONAS_INSTITUCION + ' zonas diagnosticadas, el plan define ' + totalAcciones +
+          ' acciones organizadas en las tres fases de la gestión del riesgo (Ley 1523 de 2012), de las cuales ' + inmediatas +
+          ' son de ejecución inmediata y ' + zonasIntervenir + ' corresponden a zonas que requieren intervención.';
+
+    var sec = 0;
+    function titulo(texto) { sec++; return '<h5 class="doc-titulo-sec">' + sec + '. ' + texto + '</h5>'; }
+
+    var html = '' +
+    '<div class="doc-print" aria-hidden="true">' +
+        '<header class="doc-cab">' +
+            '<div class="doc-cab-marca">' +
+                '<img class="doc-cab-logo-img" src="../img/logo-klasplus.png" alt="Klasplus">' +
+                '<span class="doc-cab-sub">Sistema de gestión de seguridad escolar</span>' +
+            '</div>' +
+            '<div class="doc-cab-tipo">' +
+                '<span>Documento de gestión</span>' +
+                '<strong>PLAN DE ACCIÓN</strong>' +
+            '</div>' +
+        '</header>' +
+
+        '<table class="doc-ficha"><tbody>' +
+            '<tr><th>Institución educativa</th><td colspan="3">' + escapeHTML(datos.nombreInst) + '</td></tr>' +
+            '<tr><th>Fecha de emisión</th><td>' + fecha + '</td><th>Marco normativo</th><td>Ley 1523 de 2012 · PEGIR · NTC 4595</td></tr>' +
+            '<tr><th>Índice de seguridad</th><td class="doc-num doc-destacado">' + indice + '</td><th>Clasificación</th><td class="doc-destacado">' + escapeHTML(clase.label) + '</td></tr>' +
+        '</tbody></table>' +
+
+        titulo('Resumen ejecutivo') +
+        '<p class="doc-parrafo">' + escapeHTML(resumen) + '</p>' +
+        '<table class="doc-tabla doc-kpis"><tbody><tr>' +
+            '<td><strong>' + totalAcciones + '</strong><span>Acciones totales</span></td>' +
+            '<td><strong style="color:#C0392B;">' + inmediatas + '</strong><span>Inmediatas</span></td>' +
+            '<td><strong style="color:#FF6B35;">' + zonasIntervenir + '</strong><span>Zonas a intervenir</span></td>' +
+            '<td><strong>' + costos.Bajo + ' / ' + costos.Medio + ' / ' + costos.Alto + '</strong><span>Costo bajo / medio / alto</span></td>' +
+        '</tr></tbody></table>';
+
+    // Zonas prioritarias: las tres con mayor nivel de riesgo
+    if (!sinDatos) {
+        var top = datos.zonas.map(function(z) { return { z: z, ev: evaluarRiesgoZona(z) }; })
+            .sort(function(a, b) { return b.ev.valor - a.ev.valor || a.z.score - b.z.score; })
+            .slice(0, 3);
+        html += '<div class="doc-top">' +
+            '<p class="doc-top-titulo">Zonas prioritarias de intervención</p>' +
+            '<div class="doc-top-grid">' +
+            top.map(function(t, i) {
+                return '<div class="doc-top-item" style="border-color:' + t.ev.nivel.color + ';">' +
+                    '<span class="doc-top-num" style="background:' + t.ev.nivel.color + ';">' + (i + 1) + '</span>' +
+                    '<div><strong>' + escapeHTML(t.z.nombre) + '</strong>' +
+                    '<span>Riesgo ' + t.ev.nivel.label.toLowerCase() + ' (' + t.ev.valor + ') · ' + t.z.score.toFixed(1) + '/10</span>' +
+                    '<span>' + escapeHTML(t.ev.perfil.responsable) + '</span></div>' +
+                '</div>';
+            }).join('') +
+            '</div></div>';
+    }
+
+    if (!sinDatos) {
+        // Tabla de valoración por zona
+        var filas = datos.zonas.map(function(z, i) {
+            var ev = evaluarRiesgoZona(z);
+            var c = clasificarZona(z.score);
+            return '<tr>' +
+                '<td class="doc-c">' + (i + 1) + '</td>' +
+                '<td>' + escapeHTML(z.nombre) + '</td>' +
+                '<td class="doc-c doc-num">' + z.score.toFixed(1) + '</td>' +
+                '<td>' + c.label + '</td>' +
+                '<td class="doc-c">' + ev.prob + ' · ' + ETIQUETAS_PROB[ev.prob] + '</td>' +
+                '<td class="doc-c">' + ev.impacto + ' · ' + ETIQUETAS_IMPACTO[ev.impacto] + '</td>' +
+                '<td class="doc-c doc-nivel" style="background:' + ev.nivel.color + ';">' + ev.nivel.label + ' (' + ev.valor + ')</td>' +
+            '</tr>';
+        }).join('');
+
+        html += '' +
+            '<div class="doc-bloque">' +
+                titulo('Mapa de calor de la institución') +
+                '<div class="doc-calor">' + svgMapaCalor(datos, 'Doc') + leyendaCalor() + '</div>' +
+                '<p class="doc-nota-tabla">Maqueta 3D de la institución: cada zona está ubicada según su posición en la imagen satelital del mapa de peligro. La altura y el color de cada volumen, y la mancha de calor sobre el terreno, crecen a medida que baja la puntuación de seguridad de la zona. Los números corresponden a la tabla de valoración.</p>' +
+            '</div>' +
+            '<div class="doc-bloque">' +
+                titulo('Matriz de riesgos (probabilidad × impacto)') +
+                '<div class="doc-matriz">' + matrizRiesgosHTML(datos) + '</div>' +
+            '</div>' +
+            titulo('Valoración del riesgo por zona') +
+            '<table class="doc-tabla"><thead><tr>' +
+                '<th class="doc-c">N°</th><th>Zona</th><th class="doc-c">Puntuación</th><th>Clasificación</th>' +
+                '<th class="doc-c">Probabilidad</th><th class="doc-c">Impacto</th><th class="doc-c">Nivel de riesgo</th>' +
+            '</tr></thead><tbody>' + filas + '</tbody></table>' +
+            '<p class="doc-nota-tabla">La probabilidad se infiere de la puntuación de seguridad registrada; el impacto, del tipo de zona y su exposición.</p>';
+    }
+
+    // Plan detallado por fase
+    html += titulo('Plan de acción detallado');
+    fases.forEach(function(fase) {
+        html += '' +
+            '<div class="doc-fase">' +
+                '<p class="doc-fase-titulo">Fase ' + fase.numero + ' · ' + fase.nombre + ' <span>' + fase.marco + '</span></p>' +
+                '<p class="doc-fase-obj">Objetivo: ' + fase.objetivo + '</p>' +
+            '</div>' +
+            '<table class="doc-tabla doc-tabla-plan"><thead><tr>' +
+                '<th class="doc-c">N°</th><th>Acción y medidas</th><th class="doc-c">Prioridad</th>' +
+                '<th>Responsable</th><th>Recursos</th><th class="doc-c">Fecha límite</th><th class="doc-c">Hecho</th>' +
+            '</tr></thead><tbody>';
+
+        fase.pasos.forEach(function(p, idx) {
+            var pr = PRIORIDADES[p.prioridad] || PRIORIDADES.media;
+            html += '<tr>' +
+                '<td class="doc-c doc-num">' + fase.numero + '.' + (idx + 1) + '</td>' +
+                '<td><strong>' + escapeHTML(p.titulo) + '</strong>' +
+                    (p.etiquetaZona ? '<span class="doc-zona-tag">' + escapeHTML(p.etiquetaZona) + '</span>' : '') +
+                    '<ul class="doc-medidas">' + p.medidas.map(function(m) { return '<li>' + escapeHTML(m) + '</li>'; }).join('') + '</ul>' +
+                '</td>' +
+                '<td class="doc-c"><span class="doc-prio" style="border-color:' + pr.color + ';color:' + pr.color + ';">' + pr.label + '</span></td>' +
+                '<td>' + escapeHTML(p.responsable) + '</td>' +
+                '<td>' + escapeHTML((p.recursos || []).join(', ')) + '<span class="doc-costo">Costo: ' + escapeHTML(p.costo) + '</span></td>' +
+                '<td class="doc-c doc-num">' + fechaLimite(p.prioridad) + '</td>' +
+                '<td class="doc-c"><span class="doc-check"></span></td>' +
+            '</tr>';
+        });
+        html += '</tbody></table>';
+    });
+
+    // Cronograma tipo Gantt según el plazo de cada prioridad
+    var columnas = ['Sem. 1', 'Sem. 2-4', 'Mes 2', 'Mes 3', 'Continuo'];
+    var tramos = { critica: [0, 0], alta: [0, 1], media: [0, 3], preventiva: [4, 4] };
+    var filasGantt = '';
+    fases.forEach(function(fase) {
+        fase.pasos.forEach(function(p, idx) {
+            var pr = PRIORIDADES[p.prioridad] || PRIORIDADES.media;
+            var t = tramos[p.prioridad] || tramos.media;
+            filasGantt += '<tr><td class="doc-c doc-num">' + fase.numero + '.' + (idx + 1) + '</td><td>' + escapeHTML(p.titulo) + '</td>';
+            for (var c = 0; c < columnas.length; c++) {
+                var activo = c >= t[0] && c <= t[1];
+                filasGantt += '<td class="doc-gantt-celda">' + (activo ? '<span style="background:' + pr.color + ';"></span>' : '') + '</td>';
+            }
+            filasGantt += '</tr>';
+        });
+    });
+    html += titulo('Cronograma de ejecución') +
+        '<table class="doc-tabla doc-gantt"><thead><tr><th class="doc-c">N°</th><th>Acción</th>' +
+        columnas.map(function(c) { return '<th class="doc-c">' + c + '</th>'; }).join('') +
+        '</tr></thead><tbody>' + filasGantt + '</tbody></table>' +
+        '<p class="doc-nota-tabla">Barras coloreadas según prioridad: inmediata, alta, media o preventiva (continua).</p>';
+
+    // Consolidado de recursos
+    var recursos = consolidarRecursos(fases);
+    html += titulo('Consolidado de recursos requeridos') +
+        '<table class="doc-tabla"><thead><tr>' +
+            '<th class="doc-c">N°</th><th>Recurso</th><th>Acciones que lo requieren</th><th class="doc-c">Disponible</th><th class="doc-c">Gestionar</th>' +
+        '</tr></thead><tbody>' +
+        recursos.map(function(r, i) {
+            return '<tr><td class="doc-c">' + (i + 1) + '</td><td>' + escapeHTML(r.recurso) + '</td><td class="doc-num">' + r.acciones.join(', ') + '</td>' +
+                '<td class="doc-c"><span class="doc-check"></span></td><td class="doc-c"><span class="doc-check"></span></td></tr>';
+        }).join('') +
+        '</tbody></table>';
+
+    // Seguimiento
+    var filasSeg = '';
+    for (var s = 0; s < 5; s++) filasSeg += '<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>';
+    html += '<div class="doc-bloque">' +
+        titulo('Registro de seguimiento') +
+        '<table class="doc-tabla doc-tabla-seg"><thead><tr>' +
+            '<th>Fecha</th><th class="doc-c">Acción N°</th><th class="doc-c">% avance</th><th>Observaciones</th><th>Firma</th>' +
+        '</tr></thead><tbody>' + filasSeg + '</tbody></table>' +
+        '</div>' +
+
+        '<div class="doc-firmas">' +
+            '<div class="doc-firma"><span class="doc-firma-linea"></span><p>Responsable de la brigada escolar</p></div>' +
+            '<div class="doc-firma"><span class="doc-firma-linea"></span><p>Rector / Coordinador</p></div>' +
+            '<div class="doc-firma"><span class="doc-firma-linea"></span><p>Comité de gestión del riesgo</p></div>' +
+        '</div>' +
+
+        '<footer class="doc-pie">' +
+            'Documento generado automáticamente por Klasplus a partir de la evidencia registrada por la brigada escolar. ' +
+            'Las fechas límite se calculan desde la fecha de emisión según la prioridad de cada acción. ' +
+            'Constituye un instrumento de priorización y no reemplaza la inspección técnica profesional ni el concepto de las autoridades competentes.' +
+        '</footer>' +
+    '</div>';
+
+    return html;
 }
 
 // Botón de cerrar sesión

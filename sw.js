@@ -8,7 +8,7 @@
      OpenRouter, tiles de mapas, etc.): siempre a la red, sin cache.
    ============================================================ */
 
-const VERSION = 'klasplus-v2';
+const VERSION = 'klasplus-v6';
 const SHELL_CACHE = `${VERSION}-shell`;
 const ASSETS_CACHE = `${VERSION}-assets`;
 const PAGES_CACHE = `${VERSION}-pages`;
