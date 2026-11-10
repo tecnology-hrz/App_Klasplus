@@ -1051,28 +1051,23 @@ function fechaLimite(prioridad) {
 }
 
 // ---------- Mapa de calor 3D (maqueta de la institución) ----------
-// Las zonas se ubican con las mismas coordenadas de la imagen satelital
-// del mapa de peligro (mapa-peligro.html), convertidas a metros respecto
-// al centro de la institución. Norte arriba, como en el mapa.
-// Cada zona es un volumen: cuanto más baja la puntuación, más alto y más
-// rojo el bloque, y mayor la mancha de calor sobre el terreno.
-// Si cambian las coordenadas en mapa-peligro.html, actualizarlas aquí.
-var MAPA_ESCUELA = { lat: 3.4518, lng: -76.5688 };
-var ZONAS_MAPA = [
-    { slug: 'baños',       nombre: 'Baños',       dLat:  0.00015, dLng: -0.00012, w: 7,  d: 6,  tipo: 'edif',    claves: ['baño', 'bano', 'sanitario'] },
-    { slug: 'escaleras',   nombre: 'Escaleras',   dLat:  0.00008, dLng:  0.00015, w: 5,  d: 5,  tipo: 'torre',   claves: ['escalera'] },
-    { slug: 'patio',       nombre: 'Patio',       dLat: -0.00012, dLng:  0.00005, w: 14, d: 10, tipo: 'abierto', claves: ['patio'] },
-    { slug: 'laboratorio', nombre: 'Laboratorio', dLat:  0.00018, dLng:  0.00008, w: 10, d: 7,  tipo: 'edif',    claves: ['laboratorio', 'lab'] },
-    { slug: 'cafeteria',   nombre: 'Cafetería',   dLat: -0.00008, dLng: -0.00018, w: 10, d: 7,  tipo: 'edif',    claves: ['cafeter', 'comedor', 'tienda'] },
-    { slug: 'pasillos',    nombre: 'Pasillos',    dLat:  0.00005, dLng: -0.00005, w: 12, d: 4,  tipo: 'bajo',    claves: ['pasillo', 'corredor'] },
-    { slug: 'entrada',     nombre: 'Entrada',     dLat: -0.00020, dLng:  0.00000, w: 8,  d: 4,  tipo: 'bajo',    claves: ['entrada', 'acceso', 'porter'] },
-    { slug: 'canchas',     nombre: 'Canchas',     dLat: -0.00015, dLng:  0.00018, w: 12, d: 10, tipo: 'cancha',  claves: ['cancha', 'deportiv'] },
-    { slug: 'salones',     nombre: 'Salones',     dLat:  0.00010, dLng: -0.00020, w: 9,  d: 12, tipo: 'edif',    claves: ['salon', 'salón', 'aula'] }
-];
+// Maqueta calcada de la imagen satelital del mapa de peligro: el terreno
+// ES la foto satelital (mismos tiles de Google) proyectada en 3D, y encima
+// se levantan las alas reales del edificio (plano en escuela-plano.js).
+// Cada zona se resalta sobre su ala: cuanto más baja la puntuación, más
+// alto y más rojo el volumen, y mayor la mancha de calor sobre el terreno.
+var CLAVES_ZONA = {
+    'baños': ['baño', 'bano', 'sanitario'], 'escaleras': ['escalera'], 'patio': ['patio'],
+    'laboratorio': ['laboratorio', 'lab'], 'cafeteria': ['cafeter', 'comedor', 'tienda'],
+    'pasillos': ['pasillo', 'corredor'], 'entrada': ['entrada', 'acceso', 'porter'],
+    'canchas': ['cancha', 'deportiv'], 'salones': ['salon', 'salón', 'aula']
+};
 
 // Proyección axonométrica: giro PHI del plano, compresión vertical K y
-// escala S (px por metro). Unidades de entrada en metros: x = este, y = sur.
-var ISO = { S: 3.9, K: 0.55, OX: 165, OY: 150, PHI: 20 * Math.PI / 180 };
+// escala S (px por metro). Entrada en metros: x = este, y = sur, z = altura.
+var ISO = { S: 3.3, K: 0.55, OX: 165, OY: 150, PHI: 20 * Math.PI / 180 };
+// Centro de la vista en el plano (m): el edificio está algo al sur del pin.
+var VISTA = { x: 0.5, n: -3 };
 
 function isoPt(x, y, z) {
     var c = Math.cos(ISO.PHI), s = Math.sin(ISO.PHI);
@@ -1082,6 +1077,11 @@ function isoPt(x, y, z) {
 
 function profundidad(x, y) {
     return x * Math.sin(ISO.PHI) + y * Math.cos(ISO.PHI);
+}
+
+// Rectángulo del plano (x/n en metros) -> caja de la maqueta {x,y,w,d}
+function planoACaja(r) {
+    return { x: r.x0 - VISTA.x, y: -(r.n1 - VISTA.n), w: r.x1 - r.x0, d: r.n1 - r.n0 };
 }
 
 function isoPoly(puntos, fill, extra) {
@@ -1101,153 +1101,243 @@ function tono(hex, f) {
     return '#' + c.map(function(v) { return ('0' + v.toString(16)).slice(-2); }).join('');
 }
 
-function zonaEnPlano(slot, zonas) {
+function zonaEnPlano(slug, zonas) {
+    var claves = CLAVES_ZONA[slug] || [];
     for (var i = 0; i < zonas.length; i++) {
-        if (zonas[i].slug && zonas[i].slug === slot.slug) return { zona: zonas[i], indice: i };
+        if (zonas[i].slug && zonas[i].slug === slug) return { zona: zonas[i], indice: i };
     }
     for (var k = 0; k < zonas.length; k++) {
         var n = String(zonas[k].nombre || '').toLowerCase();
-        for (var c = 0; c < slot.claves.length; c++) {
-            if (n.indexOf(slot.claves[c]) !== -1) return { zona: zonas[k], indice: k };
+        for (var c = 0; c < claves.length; c++) {
+            if (n.indexOf(claves[c]) !== -1) return { zona: zonas[k], indice: k };
         }
     }
     return null;
 }
 
-// Prisma con techo, fachadas sur y este visibles, y ventanas.
-function isoBloque(s, h, color, conVentanas) {
+// Caja entre z0 y z1 con fachadas sur y este visibles (y ventanas opcionales).
+function isoCaja(s, z0, z1, color, conVentanas) {
     var x = s.x, y = s.y, w = s.w, d = s.d;
     var borde = ' stroke="' + tono(color, -0.45) + '" stroke-width="0.6" stroke-linejoin="round"';
     var out = '';
-    out += isoPoly([[x, y + d, 0], [x + w, y + d, 0], [x + w, y + d, h], [x, y + d, h]], tono(color, -0.15), borde);
-    out += isoPoly([[x + w, y, 0], [x + w, y + d, 0], [x + w, y + d, h], [x + w, y, h]], tono(color, -0.35), borde);
-
-    if (conVentanas && h >= 3.5) {
-        var pisos = Math.max(1, Math.floor((h - 0.8) / 3));
+    out += isoPoly([[x, y + d, z0], [x + w, y + d, z0], [x + w, y + d, z1], [x, y + d, z1]], tono(color, -0.12), borde);
+    out += isoPoly([[x + w, y, z0], [x + w, y + d, z0], [x + w, y + d, z1], [x + w, y, z1]], tono(color, -0.3), borde);
+    if (conVentanas && z1 - z0 >= 3.5) {
+        var pisos = Math.max(1, Math.floor((z1 - z0 - 0.8) / 3));
         for (var p = 0; p < pisos; p++) {
-            var z0 = 1.1 + p * 3;
-            for (var u = 1; u + 1.1 <= w - 0.6; u += 2.2) {
-                out += isoPoly([[x + u, y + d, z0], [x + u + 1.1, y + d, z0], [x + u + 1.1, y + d, z0 + 1.2], [x + u, y + d, z0 + 1.2]], '#FFFFFF', ' fill-opacity="0.6"');
+            var zv = z0 + 1.1 + p * 3;
+            for (var u = 1; u + 1.1 <= w - 0.6; u += 2.4) {
+                out += isoPoly([[x + u, y + d, zv], [x + u + 1.2, y + d, zv], [x + u + 1.2, y + d, zv + 1.3], [x + u, y + d, zv + 1.3]], '#5B7FA6', ' fill-opacity="0.55"');
             }
-            for (var v = 1; v + 1.1 <= d - 0.6; v += 2.2) {
-                out += isoPoly([[x + w, y + v, z0], [x + w, y + v + 1.1, z0], [x + w, y + v + 1.1, z0 + 1.2], [x + w, y + v, z0 + 1.2]], '#FFFFFF', ' fill-opacity="0.45"');
+            for (var v = 1; v + 1.1 <= d - 0.6; v += 2.4) {
+                out += isoPoly([[x + w, y + v, zv], [x + w, y + v + 1.2, zv], [x + w, y + v + 1.2, zv + 1.3], [x + w, y + v, zv + 1.3]], '#4A6B8F', ' fill-opacity="0.5"');
             }
         }
     }
-    out += isoPoly([[x, y, h], [x + w, y, h], [x + w, y + d, h], [x, y + d, h]], tono(color, 0.12), borde);
-    if (w > 3 && d > 3) {
-        out += isoPoly([[x + 0.7, y + 0.7, h], [x + w - 0.7, y + 0.7, h], [x + w - 0.7, y + d - 0.7, h], [x + 0.7, y + d - 0.7, h]], tono(color, 0.3), ' fill-opacity="0.7"');
-    }
+    out += isoPoly([[x, y, z1], [x + w, y, z1], [x + w, y + d, z1], [x, y + d, z1]], tono(color, 0.1), borde);
     return out;
 }
 
-// Superficie abierta (patio / cancha) con demarcaciones.
-function isoSuperficie(s, h, color, esCancha) {
+function isoLinea(a, b, z, attrs) {
+    var p = isoPt(a[0], a[1], z), q = isoPt(b[0], b[1], z);
+    return '<line x1="' + p[0].toFixed(1) + '" y1="' + p[1].toFixed(1) + '" x2="' + q[0].toFixed(1) + '" y2="' + q[1].toFixed(1) + '"' + attrs + '/>';
+}
+
+// Superficie abierta (patio / cancha) pintada sobre el suelo.
+function isoSuperficie(s, z, color, evaluada, esCancha) {
     var x = s.x, y = s.y, w = s.w, d = s.d;
-    var out = isoBloque(s, h, color, false);
-    var linea = ' fill="none" stroke="#FFFFFF" stroke-width="0.9" stroke-opacity="0.85"';
-    function seg(a, b) {
-        var p = isoPt(a[0], a[1], h), q = isoPt(b[0], b[1], h);
-        return '<line x1="' + p[0].toFixed(1) + '" y1="' + p[1].toFixed(1) + '" x2="' + q[0].toFixed(1) + '" y2="' + q[1].toFixed(1) + '"' + linea + '/>';
-    }
+    var out = isoPoly([[x, y, z], [x + w, y, z], [x + w, y + d, z], [x, y + d, z]], color,
+        ' fill-opacity="' + (evaluada ? 0.55 : 0.15) + '" stroke="' + (evaluada ? tono(color, -0.3) : '#FFFFFF') + '" stroke-width="1"' + (evaluada ? '' : ' stroke-dasharray="3 2"'));
+    var linea = ' stroke="#FFFFFF" stroke-width="0.8" stroke-opacity="0.85"';
     if (esCancha) {
-        out += seg([x + 1, y + 1], [x + w - 1, y + 1]) + seg([x + w - 1, y + 1], [x + w - 1, y + d - 1]) +
-               seg([x + w - 1, y + d - 1], [x + 1, y + d - 1]) + seg([x + 1, y + d - 1], [x + 1, y + 1]) +
-               seg([x + w / 2, y + 1], [x + w / 2, y + d - 1]);
-        var c = isoPt(x + w / 2, y + d / 2, h);
-        out += '<ellipse cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" rx="' + (1.8 * ISO.S).toFixed(1) + '" ry="' + (1.8 * ISO.S * ISO.K).toFixed(1) + '"' + linea + '/>';
-    } else {
-        for (var i = 1; i < 4; i++) out += seg([x + 0.8, y + (d * i) / 4], [x + w - 0.8, y + (d * i) / 4]);
+        out += isoLinea([x + 1, y + d / 2], [x + w - 1, y + d / 2], z, linea);
+        var c = isoPt(x + w / 2, y + d / 2, z);
+        out += '<ellipse cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" rx="' + (1.8 * ISO.S).toFixed(1) + '" ry="' + (1.8 * ISO.S * ISO.K).toFixed(1) + '" fill="none"' + linea + '/>';
     }
     return out;
 }
 
 function isoArbol(x, y) {
-    var b = isoPt(x, y, 0), t = isoPt(x, y, 3);
-    return '<ellipse cx="' + b[0].toFixed(1) + '" cy="' + b[1].toFixed(1) + '" rx="6" ry="3" fill="#0B2545" fill-opacity="0.15"/>' +
-        '<line x1="' + b[0].toFixed(1) + '" y1="' + b[1].toFixed(1) + '" x2="' + t[0].toFixed(1) + '" y2="' + t[1].toFixed(1) + '" stroke="#7A5537" stroke-width="1.6"/>' +
-        '<circle cx="' + t[0].toFixed(1) + '" cy="' + (t[1] - 3).toFixed(1) + '" r="6" fill="#3E9B5F"/>' +
-        '<circle cx="' + (t[0] - 1.8).toFixed(1) + '" cy="' + (t[1] - 5).toFixed(1) + '" r="3" fill="#6CC28A"/>';
+    var b = isoPt(x, y, 0), t = isoPt(x, y, 3.5);
+    return '<ellipse cx="' + (b[0] + 3).toFixed(1) + '" cy="' + b[1].toFixed(1) + '" rx="6" ry="2.6" fill="#000" fill-opacity="0.25"/>' +
+        '<line x1="' + b[0].toFixed(1) + '" y1="' + b[1].toFixed(1) + '" x2="' + t[0].toFixed(1) + '" y2="' + t[1].toFixed(1) + '" stroke="#5A3E28" stroke-width="1.6"/>' +
+        '<circle cx="' + t[0].toFixed(1) + '" cy="' + (t[1] - 3).toFixed(1) + '" r="6" fill="#2F7A47"/>' +
+        '<circle cx="' + (t[0] - 1.8).toFixed(1) + '" cy="' + (t[1] - 5).toFixed(1) + '" r="3" fill="#5BAF74"/>';
+}
+
+// Terreno esquemático (estilo maqueta), calcado del mapa satelital:
+// prado, cerco verde, vías curvas, andén alrededor del edificio, patio
+// y arboledas en el mismo lugar que en la foto. Sin imágenes externas.
+// Todo se dibuja en metros dentro de un grupo con la matriz afín
+// equivalente a isoPt(x, y, 0).
+function sueloEsquema(R, idSufijo) {
+    var c = Math.cos(ISO.PHI), s = Math.sin(ISO.PHI);
+    var m = [ISO.S * c, ISO.K * ISO.S * s, -ISO.S * s, ISO.K * ISO.S * c, ISO.OX, ISO.OY].map(function(v) { return v.toFixed(4); }).join(' ');
+    // Plano (x este, n norte) -> coordenadas de la maqueta (x, y sur)
+    function P(x, n) { return (x - VISTA.x).toFixed(2) + ',' + (-(n - VISTA.n)).toFixed(2); }
+    function ruta(pts) { return 'M' + pts.map(function(p) { return P(p[0], p[1]); }).join(' L'); }
+    function curva(pts) {
+        // Curva suave (Catmull-Rom -> Bézier) que pasa por los puntos
+        var d = 'M' + P(pts[0][0], pts[0][1]);
+        for (var i = 0; i < pts.length - 1; i++) {
+            var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+            var c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+            var c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+            d += ' C' + P(c1[0], c1[1]) + ' ' + P(c2[0], c2[1]) + ' ' + P(p2[0], p2[1]);
+        }
+        return d;
+    }
+    function rect(r, fill, extra) {
+        return '<path d="' + ruta([[r.x0, r.n0], [r.x1, r.n0], [r.x1, r.n1], [r.x0, r.n1]]) + ' Z" fill="' + fill + '"' + (extra || '') + '/>';
+    }
+
+    // Vías (Avenida 4 Oeste al occidente/sur y la vía del oriente)
+    var viaOeste = [[-31.5, 40], [-31.5, 10], [-31, -12], [-28, -25], [-20, -34], [-6, -40]];
+    var viaEste = [[36, 40], [32, 18], [30, 0], [28, -16], [24, -30], [19, -42]];
+    // Cerco verde (seto) que rodea el predio, como se ve en la foto
+    var seto = [[-27, 33], [30, 33], [30, 12], [27, -14], [22, -27], [10, -33], [-6, -34], [-20, -29], [-27, -20], [-27, 33]];
+
+    var clip = 'sueloClip' + idSufijo;
+    var out = '<g transform="matrix(' + m + ')">' +
+        '<clipPath id="' + clip + '" clipPathUnits="userSpaceOnUse"><rect x="' + (-R) + '" y="' + (-R) + '" width="' + (2 * R) + '" height="' + (2 * R) + '"/></clipPath>' +
+        '<rect x="' + (-R) + '" y="' + (-R) + '" width="' + (2 * R) + '" height="' + (2 * R) + '" fill="#DCE7D3"/>' +
+        '<g clip-path="url(#' + clip + ')">' +
+            // Predio con césped
+            '<path d="' + curva(seto) + ' Z" fill="#C8DDB9" stroke="#8DBB78" stroke-width="1.6"/>' +
+            // Arboledas (manchas de vegetación) norte y sur
+            '<path d="' + curva([[-25, 14], [-25, 31], [0, 32], [28, 31], [29, 15], [10, 14], [-25, 14]]) + ' Z" fill="#A9CC95"/>' +
+            '<path d="' + curva([[-24, -21], [-18, -28], [-5, -32], [9, -31], [20, -24], [14, -21], [-24, -21]]) + ' Z" fill="#A9CC95"/>' +
+            // Vías con bordillo y línea central
+            '<path d="' + curva(viaOeste) + '" fill="none" stroke="#AEB6C0" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '<path d="' + curva(viaOeste) + '" fill="none" stroke="#C9CFD6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '<path d="' + curva(viaOeste) + '" fill="none" stroke="#FFFFFF" stroke-width="0.35" stroke-dasharray="2 2"/>' +
+            '<path d="' + curva(viaEste) + '" fill="none" stroke="#AEB6C0" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '<path d="' + curva(viaEste) + '" fill="none" stroke="#C9CFD6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '<path d="' + curva(viaEste) + '" fill="none" stroke="#FFFFFF" stroke-width="0.35" stroke-dasharray="2 2"/>' +
+            // Andén alrededor del edificio y patio central pavimentado
+            rect({ x0: -27.5, x1: 28.5, n0: -20.5, n1: 14 }, '#E7EAEE', ' stroke="#C6CCD4" stroke-width="0.3"') +
+            rect(ESCUELA_PLANO.PATIO, '#F4F5F7', ' stroke="#C6CCD4" stroke-width="0.3"') +
+            '<path d="' + ruta([[-2.5, -12], [-2.5, 2.5]]) + '" stroke="#D3D8DF" stroke-width="0.4"/>' +
+        '</g>' +
+        '<rect x="' + (-R) + '" y="' + (-R) + '" width="' + (2 * R) + '" height="' + (2 * R) + '" fill="none" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="0.3"/>' +
+    '</g>';
+    return out;
 }
 
 function svgMapaCalor(datos, idSufijo) {
+    var P = ESCUELA_PLANO;
     var filtro = 'calorBlur' + idSufijo;
-    var R = 32; // medio lado del terreno, en metros
-    var mLat = 111320, mLng = 111320 * Math.cos(MAPA_ESCUELA.lat * Math.PI / 180);
+    var R = 36; // medio lado del terreno, en metros
 
-    // Terreno: losa con espesor y cuadrícula cada 4 m
+    // Losa con espesor + terreno esquemático encima
     var suelo = '' +
-        isoPoly([[-R, R, 0], [R, R, 0], [R, R, -2], [-R, R, -2]], '#B9C4D3') +
-        isoPoly([[R, -R, 0], [R, R, 0], [R, R, -2], [R, -R, -2]], '#9AA7B8') +
-        isoPoly([[-R, -R, 0], [R, -R, 0], [R, R, 0], [-R, R, 0]], '#EEF2F7', ' stroke="#C3CCDA" stroke-width="0.8"');
-    var grid = '';
-    for (var g = -R + 4; g < R; g += 4) {
-        var a = isoPt(g, -R, 0), b = isoPt(g, R, 0), c1 = isoPt(-R, g, 0), c2 = isoPt(R, g, 0);
-        grid += '<line x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) + '" x2="' + b[0].toFixed(1) + '" y2="' + b[1].toFixed(1) + '"/>' +
-                '<line x1="' + c1[0].toFixed(1) + '" y1="' + c1[1].toFixed(1) + '" x2="' + c2[0].toFixed(1) + '" y2="' + c2[1].toFixed(1) + '"/>';
-    }
-    suelo += '<g stroke="#DCE3EC" stroke-width="0.5">' + grid + '</g>';
+        isoPoly([[-R, R, 0], [R, R, 0], [R, R, -2.5], [-R, R, -2.5]], '#B9C4D3') +
+        isoPoly([[R, -R, 0], [R, R, 0], [R, R, -2.5], [R, -R, -2.5]], '#9AA7B8') +
+        sueloEsquema(R, idSufijo);
 
-    // Perímetro de 30 m de la institución (el mismo círculo del mapa)
-    var centro = isoPt(0, 0, 0);
+    // Perímetro de 30 m alrededor del pin (el mismo círculo del mapa)
+    var centro = isoPt(-VISTA.x, VISTA.n, 0);
     suelo += '<ellipse cx="' + centro[0].toFixed(1) + '" cy="' + centro[1].toFixed(1) + '" rx="' + (30 * ISO.S).toFixed(1) + '" ry="' + (30 * ISO.S * ISO.K).toFixed(1) +
-        '" fill="#FF5722" fill-opacity="0.05" stroke="#FF5722" stroke-width="1.2" stroke-dasharray="5 4"/>';
+        '" fill="none" stroke="#FF5722" stroke-width="1.3" stroke-dasharray="5 4"/>';
 
-    var manchas = '';
-    var bloques = '';
-    var etiquetas = '';
-    var rotulos = [];
-
-    // Posición real (m) de cada zona a partir de su lat/lng.
-    var zonasPos = ZONAS_MAPA.map(function(z) {
-        var cx = z.dLng * mLng, cy = -z.dLat * mLat;
-        return { slug: z.slug, nombre: z.nombre, claves: z.claves, tipo: z.tipo,
-                 w: z.w, d: z.d, x: cx - z.w / 2, y: cy - z.d / 2, cx: cx, cy: cy };
+    // Evaluación de cada zona
+    var info = {};
+    Object.keys(P.ZONAS).forEach(function(slug) {
+        var z = P.ZONAS[slug];
+        var m = zonaEnPlano(slug, datos.zonas);
+        var evaluada = !!m;
+        info[slug] = {
+            slug: slug, def: z, m: m, evaluada: evaluada,
+            intensidad: evaluada ? (10 - m.zona.score) / 10 : 0,
+            color: evaluada ? clasificarZona(m.zona.score).color : '#D5DCE5',
+            caja: planoACaja(z)
+        };
     });
 
-    // Se pinta de atrás hacia adelante para que los volúmenes se tapen bien.
-    zonasPos.sort(function(p, q) { return profundidad(p.cx, p.cy) - profundidad(q.cx, q.cy); });
+    // Manchas de calor sobre el terreno
+    var manchas = '';
+    Object.keys(info).forEach(function(slug) {
+        var it = info[slug];
+        if (!it.evaluada) return;
+        var gc = isoPt(it.caja.x + it.caja.w / 2, it.caja.y + it.caja.d / 2, 0);
+        var r = 6 + it.intensidad * 9;
+        manchas += '<ellipse cx="' + gc[0].toFixed(1) + '" cy="' + gc[1].toFixed(1) + '" rx="' + (r * ISO.S).toFixed(1) + '" ry="' + (r * ISO.S * ISO.K).toFixed(1) +
+            '" fill="' + it.color + '" fill-opacity="' + (0.45 + it.intensidad * 0.5).toFixed(2) + '"/>';
+    });
 
-    zonasPos.forEach(function(s) {
-        var m = zonaEnPlano(s, datos.zonas);
-        var evaluada = !!m;
-        var intensidad = evaluada ? (10 - m.zona.score) / 10 : 0;
-        var color = evaluada ? clasificarZona(m.zona.score).color : '#D5DCE5';
-        var abierta = s.tipo === 'abierto' || s.tipo === 'cancha';
+    // Zonas abiertas (patio / canchas) van en el suelo, antes de los edificios
+    var abiertas = '';
+    Object.keys(info).forEach(function(k) {
+        var it = info[k];
+        if (it.def.ala) return;
+        var zs = 0.15 + it.intensidad * 0.6;
+        abiertas += isoSuperficie(it.caja, zs, it.evaluada ? it.color : '#FFFFFF', it.evaluada, it.def.tipo === 'cancha');
+        it.top = isoPt(it.caja.x + it.caja.w / 2, it.caja.y + it.caja.d / 2, zs);
+    });
 
-        var factor = s.tipo === 'torre' ? 1.3 : s.tipo === 'bajo' ? 0.55 : 1;
-        var h = abierta ? 0.4 + intensidad * 1.2 : (evaluada ? 3 + intensidad * 11 : 3) * factor;
+    // Volúmenes: alas reales + zonas sobre ellas, de atrás hacia adelante
+    var piezas = [];
+    P.ALAS.forEach(function(ala) {
+        var caja = planoACaja(ala);
+        var svg = isoCaja(caja, 0, ala.h, '#C3C9D1', true);
+        Object.keys(info).filter(function(k) { return info[k].def.ala === ala.id; })
+            .sort(function(a, b) {
+                var A = info[a].caja, B = info[b].caja;
+                return profundidad(A.x + A.w / 2, A.y + A.d / 2) - profundidad(B.x + B.w / 2, B.y + B.d / 2);
+            })
+            .forEach(function(k) {
+                var it = info[k];
+                var c = it.caja;
+                var s = { x: c.x + 0.4, y: c.y + 0.4, w: c.w - 0.8, d: c.d - 0.8 };
+                var factor = it.def.tipo === 'torre' ? 1.4 : it.def.tipo === 'bajo' ? 0.5 : 1;
+                var extra = it.evaluada ? (1.2 + it.intensidad * 9) * factor : 0;
+                if (it.evaluada) {
+                    svg += isoCaja(s, ala.h, ala.h + extra, it.color, extra >= 3.5);
+                } else {
+                    var zt = ala.h + 0.05;
+                    svg += isoPoly([[s.x, s.y, zt], [s.x + s.w, s.y, zt], [s.x + s.w, s.y + s.d, zt], [s.x, s.y + s.d, zt]],
+                        '#CBD3DD', ' stroke="#8C9AAD" stroke-width="0.8" stroke-dasharray="2.5 2"');
+                }
+                it.top = isoPt(c.x + c.w / 2, c.y + c.d / 2, ala.h + extra);
+            });
+        piezas.push({ prof: profundidad(caja.x + caja.w / 2, caja.y + caja.d / 2), svg: svg });
+    });
 
-        if (evaluada) {
-            var gc = isoPt(s.cx, s.cy, 0);
-            var r = 6 + intensidad * 9;
-            manchas += '<ellipse cx="' + gc[0].toFixed(1) + '" cy="' + gc[1].toFixed(1) + '" rx="' + (r * ISO.S).toFixed(1) + '" ry="' + (r * ISO.S * ISO.K).toFixed(1) +
-                '" fill="' + color + '" fill-opacity="' + (0.4 + intensidad * 0.5).toFixed(2) + '"/>';
-        }
+    // Árboles en las arboledas que se ven en la foto (norte y sur)
+    [[-22, 28], [-12, 30], [0, 28], [12, 29], [24, 27], [-17, 19], [-4, 20], [9, 19], [22, 18], [-21, -24], [-11, -28], [0, -29], [11, -26], [-29.5, 6], [-29.5, -8]].forEach(function(t) {
+        var c = planoACaja({ x0: t[0], x1: t[0], n0: t[1], n1: t[1] });
+        piezas.push({ prof: profundidad(c.x, c.y), svg: isoArbol(c.x, c.y) });
+    });
 
-        bloques += abierta
-            ? isoSuperficie(s, h, evaluada ? color : '#C9D2DD', s.tipo === 'cancha')
-            : isoBloque(s, h, color, true);
+    piezas.sort(function(a, b) { return a.prof - b.prof; });
+    var bloques = piezas.map(function(p) { return p.svg; }).join('');
 
-        var top = isoPt(s.cx, s.cy, h);
-        var titulo = (evaluada ? (m.indice + 1) + '. ' : '') + s.nombre;
-        rotulos.push({
-            top: top, ly: top[1] - 16, ancho: Math.max(titulo.length * 4.4 + 14, 58),
-            titulo: titulo, evaluada: evaluada, color: color, m: m
+    var rotulos = [];
+    Object.keys(info).forEach(function(k) {
+        var it = info[k];
+        var titulo = (it.evaluada ? (it.m.indice + 1) + '. ' : '') + it.def.nombre;
+        // Zonas evaluadas: rótulo grande con puntaje. Sin evaluar: píldora compacta.
+        rotulos.push(it.evaluada ? {
+            top: it.top, ly: it.top[1] - 16, alto: 18, ancho: Math.max(titulo.length * 4.4 + 14, 58),
+            titulo: titulo, evaluada: true, color: it.color, m: it.m
+        } : {
+            top: it.top, ly: it.top[1] - 9, alto: 11, ancho: titulo.length * 3.3 + 10,
+            titulo: titulo, evaluada: false, color: it.color, m: null
         });
     });
 
-    // Etiquetas sin superposición: se busca el hueco libre más cercano.
-    rotulos.sort(function(a, b) { return b.top[1] - a.top[1]; });
+    // Etiquetas sin superposición: primero las evaluadas, luego el resto,
+    // cada una en el hueco libre más cercano.
+    rotulos.sort(function(a, b) { return (b.evaluada - a.evaluada) || (b.top[1] - a.top[1]); });
     var colocados = [];
     rotulos.forEach(function(r) {
         var base = Math.max(r.ly, 40);
         var elegido = base;
-        for (var k = 0; k < 24; k++) {
-            var ly = base + Math.ceil(k / 2) * 4 * (k % 2 ? -1 : 1);
-            if (ly < 40) continue;
+        for (var k = 0; k < 40; k++) {
+            var ly = base + Math.ceil(k / 2) * 3 * (k % 2 ? -1 : 1);
+            if (ly < 40 || ly > 250) continue;
             var choca = colocados.some(function(o) {
-                return Math.abs(o.top[0] - r.top[0]) < (o.ancho + r.ancho) / 2 + 2 && Math.abs(o.ly - ly) < 20;
+                return Math.abs(o.top[0] - r.top[0]) < (o.ancho + r.ancho) / 2 + 2 && Math.abs(o.ly - ly) < (o.alto + r.alto) / 2 + 2;
             });
             if (!choca) { elegido = ly; break; }
         }
@@ -1255,31 +1345,39 @@ function svgMapaCalor(datos, idSufijo) {
         colocados.push(r);
     });
 
+    var etiquetas = '';
     rotulos.forEach(function(r) {
         var top = r.top, ly = r.ly, ancho = r.ancho, titulo = r.titulo;
         var evaluada = r.evaluada, color = r.color, m = r.m;
-        var guia = evaluada ? tono(color, -0.3) : '#AEB8C6';
+        if (!evaluada) {
+            etiquetas += '' +
+                '<circle cx="' + top[0].toFixed(1) + '" cy="' + top[1].toFixed(1) + '" r="1.4" fill="#FFFFFF" stroke="#5A6A80" stroke-width="0.5"/>' +
+                (Math.abs(ly - top[1]) > 7 ? '<line x1="' + top[0].toFixed(1) + '" y1="' + top[1].toFixed(1) + '" x2="' + top[0].toFixed(1) + '" y2="' + (ly + (ly < top[1] ? 5.5 : -5.5)).toFixed(1) + '" stroke="#FFFFFF" stroke-width="0.7"/>' : '') +
+                '<g transform="translate(' + top[0].toFixed(1) + ',' + ly.toFixed(1) + ')">' +
+                    '<rect x="' + (-ancho / 2).toFixed(1) + '" y="-5.5" width="' + ancho.toFixed(1) + '" height="11" rx="5.5" fill="#0B2545" fill-opacity="0.72" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="0.6" stroke-dasharray="2 1.5"/>' +
+                    '<text y="2" text-anchor="middle" font-size="5.6" font-weight="700" fill="#FFFFFF">' + escapeHTML(titulo) + '</text>' +
+                '</g>';
+            return;
+        }
+        var guia = tono(color, -0.3);
         etiquetas += '' +
-            '<line x1="' + top[0].toFixed(1) + '" y1="' + top[1].toFixed(1) + '" x2="' + top[0].toFixed(1) + '" y2="' + (ly + (ly < top[1] ? 9 : -9)).toFixed(1) + '" stroke="' + guia + '" stroke-width="0.8"/>' +
-            '<circle cx="' + top[0].toFixed(1) + '" cy="' + top[1].toFixed(1) + '" r="1.6" fill="' + guia + '"/>' +
+            '<line x1="' + top[0].toFixed(1) + '" y1="' + top[1].toFixed(1) + '" x2="' + top[0].toFixed(1) + '" y2="' + (ly + (ly < top[1] ? 9 : -9)).toFixed(1) + '" stroke="' + guia + '" stroke-width="0.9"/>' +
+            '<circle cx="' + top[0].toFixed(1) + '" cy="' + top[1].toFixed(1) + '" r="1.7" fill="' + guia + '"/>' +
             '<g transform="translate(' + top[0].toFixed(1) + ',' + ly.toFixed(1) + ')">' +
-                '<rect x="' + (-ancho / 2).toFixed(1) + '" y="-9" width="' + ancho.toFixed(1) + '" height="18" rx="9" fill="#FFFFFF" stroke="' + (evaluada ? color : '#AEB8C6') + '" stroke-width="1.1"' + (evaluada ? '' : ' stroke-dasharray="2.5 2"') + '/>' +
-                '<text y="-1.2" text-anchor="middle" font-size="6.6" font-weight="800" fill="' + (evaluada ? '#0B2545' : '#7C8899') + '">' + escapeHTML(titulo) + '</text>' +
-                '<text y="6" text-anchor="middle" font-size="5.8" font-weight="800" fill="' + (evaluada ? tono(color, -0.15) : '#8C9AAD') + '">' +
+                '<rect x="' + (-ancho / 2).toFixed(1) + '" y="-9" width="' + ancho.toFixed(1) + '" height="18" rx="9" fill="#FFFFFF" fill-opacity="0.96" stroke="' + (evaluada ? color : '#AEB8C6') + '" stroke-width="1.1"' + (evaluada ? '' : ' stroke-dasharray="2.5 2"') + '/>' +
+                '<text y="-1.2" text-anchor="middle" font-size="6.6" font-weight="800" fill="' + (evaluada ? '#0B2545' : '#5A6A80') + '">' + escapeHTML(titulo) + '</text>' +
+                '<text y="6" text-anchor="middle" font-size="5.8" font-weight="800" fill="' + (evaluada ? tono(color, -0.15) : '#7C8899') + '">' +
                     (evaluada ? m.zona.score.toFixed(1) + '/10 · ' + clasificarZona(m.zona.score).label : 'Sin evaluar') +
                 '</text>' +
             '</g>';
     });
 
-    var arboles = isoArbol(-29, 29) + isoArbol(-29, -29) + isoArbol(29, -29) + isoArbol(29, 29) +
-                  isoArbol(-10, 29) + isoArbol(12, 29) + isoArbol(-29, 0) + isoArbol(29, 2);
-
-    // Pin de la institución en el centro (como en el mapa)
-    var pb = isoPt(0, 0, 0), pt = isoPt(0, 0, 7);
+    // Pin de la institución (mismo punto del mapa)
+    var pb = isoPt(-VISTA.x, VISTA.n, 0), pt = isoPt(-VISTA.x, VISTA.n, 7);
     var pin = '' +
-        '<line x1="' + pb[0].toFixed(1) + '" y1="' + pb[1].toFixed(1) + '" x2="' + pt[0].toFixed(1) + '" y2="' + pt[1].toFixed(1) + '" stroke="#0B2545" stroke-width="1.4"/>' +
+        '<line x1="' + pb[0].toFixed(1) + '" y1="' + pb[1].toFixed(1) + '" x2="' + pt[0].toFixed(1) + '" y2="' + pt[1].toFixed(1) + '" stroke="#FFFFFF" stroke-width="1.4"/>' +
         '<g transform="translate(' + pt[0].toFixed(1) + ',' + (pt[1] - 6).toFixed(1) + ')">' +
-            '<circle r="6.5" fill="#0047B3" stroke="#FFFFFF" stroke-width="1.4"/>' +
+            '<circle r="6.5" fill="#00C853" stroke="#FFFFFF" stroke-width="1.4"/>' +
             '<path d="M0,-3.6 L3,-2.4 L3,0 C3,1.8 1.5,3 0,3.6 C-1.5,3 -3,1.8 -3,0 L-3,-2.4 Z" fill="#FFFFFF"/>' +
         '</g>';
 
@@ -1296,7 +1394,7 @@ function svgMapaCalor(datos, idSufijo) {
             '</g>' +
         '</g>';
 
-    var nota = '<text x="12" y="18" font-size="6.5" font-weight="800" fill="#0B2545" letter-spacing="0.5">MAQUETA 3D · UBICACIÓN SEGÚN IMAGEN SATELITAL</text>' +
+    var nota = '<text x="12" y="18" font-size="6.5" font-weight="800" fill="#0B2545" letter-spacing="0.5">MAQUETA 3D · ESQUEMA CALCADO DEL MAPA SATELITAL</text>' +
         '<text x="12" y="27" font-size="5.8" fill="#5A6A80">Altura y color del volumen = nivel de riesgo · Perímetro de 30 m</text>';
 
     return '' +
@@ -1309,7 +1407,7 @@ function svgMapaCalor(datos, idSufijo) {
             nota + brujula +
             suelo +
             '<g filter="url(#' + filtro + ')">' + manchas + '</g>' +
-            arboles +
+            abiertas +
             bloques +
             pin +
             etiquetas +

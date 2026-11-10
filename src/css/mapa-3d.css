@@ -1,0 +1,272 @@
+/* =============================================
+   MAPA 3D (MapLibre) - complementa mapa-peligro.css
+   ============================================= */
+
+#map {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding-top: 0;
+    background: #0b1a33;
+}
+
+/* Controles nativos de MapLibre (zoom + brújula 3D) debajo del header */
+.maplibregl-ctrl-top-right {
+    top: 78px;
+    right: 4px;
+}
+.maplibregl-ctrl-group {
+    background: rgba(12, 12, 12, 0.85) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+.maplibregl-ctrl-group button + button { border-top: 1px solid rgba(255,255,255,0.1) !important; }
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: invert(1); }
+.maplibregl-ctrl-attrib { font-size: 9px; opacity: 0.6; }
+.maplibregl-ctrl-bottom-right, .maplibregl-ctrl-bottom-left { z-index: 1; }
+
+/* Botones propios: 2D/3D, orbitar, centrar */
+.map3d-controls {
+    position: fixed;
+    top: 186px;
+    right: 14px;
+    z-index: 998;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.map3d-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(12, 12, 12, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    transition: background .2s, transform .15s;
+}
+.map3d-btn:active { transform: scale(0.94); }
+.map3d-btn.active { background: #1565C0; border-color: #4d8fff; }
+
+/* Pin de la institución con su etiqueta */
+.pin-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+.pin-wrap .map-pin { margin-bottom: 6px; }
+.pin-label-3d { position: relative; }
+
+/* Pines de zona: flotan con sombra para dar profundidad */
+.zona-pin-3d {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+    color: #111;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.55), 0 0 0 4px rgba(255,255,255,0.15);
+    transition: transform .15s;
+}
+.zona-pin-3d:hover { transform: scale(1.15); }
+
+/* Miniaturas clicables */
+.zona-foto-thumb { cursor: zoom-in; transition: transform .15s, border-color .15s; }
+.zona-foto-thumb:hover { transform: scale(1.04); border-color: #00BCD4; }
+.zona-fotos-hint {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.5);
+}
+
+/* =============================================
+   VISOR DE FOTO EN GRANDE
+   ============================================= */
+.foto-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(0,0,0,0.96);
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    animation: visorIn .2s ease-out;
+}
+@keyframes visorIn { from { opacity: 0; } to { opacity: 1; } }
+
+.foto-viewer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    gap: 12px;
+}
+.foto-viewer-title { font-size: 14px; font-weight: 700; opacity: .9; }
+.foto-viewer-close {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.foto-viewer-stage {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    touch-action: none;
+    padding: 0 8px;
+}
+.foto-viewer-frame {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    max-height: 100%;
+    transform-origin: center center;
+    transition: transform .08s linear;
+    line-height: 0;
+}
+.foto-viewer-frame img {
+    display: block;
+    max-width: 100%;
+    max-height: calc(100vh - 220px);
+    object-fit: contain;
+    border-radius: 10px;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* Círculos de detección IA (SVG encima de la imagen) */
+.foto-viewer-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+.det-circulo {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+    stroke-width: 3px;
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    filter: drop-shadow(0 0 4px rgba(0,0,0,0.8));
+    animation: dibujarCirculo .9s ease-out forwards, latido 1.8s ease-in-out .9s infinite;
+}
+@keyframes dibujarCirculo { to { stroke-dashoffset: 0; } }
+@keyframes latido { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+
+.foto-viewer-tags { position: absolute; inset: 0; pointer-events: none; line-height: 1.2; }
+.det-tag {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    color: #111;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 8px;
+    white-space: nowrap;
+    max-width: 60vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.det-tag b { margin-right: 2px; }
+
+/* Efecto de escaneo mientras la IA analiza */
+.foto-viewer-frame.escaneando::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 3px;
+    top: 0;
+    background: linear-gradient(90deg, transparent, #00E5FF, transparent);
+    box-shadow: 0 0 18px 6px rgba(0,229,255,0.5);
+    animation: escaneo 1.6s ease-in-out infinite;
+}
+@keyframes escaneo { 0% { top: 0; } 50% { top: calc(100% - 3px); } 100% { top: 0; } }
+
+.foto-viewer-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.14);
+    color: #fff;
+    cursor: pointer;
+    font-size: 15px;
+}
+.foto-viewer-nav.prev { left: 10px; }
+.foto-viewer-nav.next { right: 10px; }
+
+.foto-viewer-bottom {
+    padding: 12px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 34vh;
+    overflow-y: auto;
+}
+.foto-ia-btn {
+    align-self: center;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 22px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #6C63FF, #00BCD4);
+    box-shadow: 0 6px 20px rgba(108,99,255,0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.foto-ia-btn:disabled { opacity: .7; cursor: wait; }
+
+.foto-ia-result { font-size: 13px; }
+.det-resumen { color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; }
+.det-lista { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.det-lista li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+.det-lista em { margin-left: auto; font-style: normal; font-size: 11px; opacity: .65; text-transform: capitalize; }
+.det-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    color: #111;
+    font-weight: 800;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.det-ok { color: #4CAF50; text-align: center; }
+.det-error { color: #FF8A80; text-align: center; }
+
+@media (max-width: 480px) {
+    .foto-viewer-frame img { max-height: calc(100vh - 250px); }
+}

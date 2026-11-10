@@ -8,7 +8,7 @@
      OpenRouter, tiles de mapas, etc.): siempre a la red, sin cache.
    ============================================================ */
 
-const VERSION = 'klasplus-v6';
+const VERSION = 'klasplus-v9';
 const SHELL_CACHE = `${VERSION}-shell`;
 const ASSETS_CACHE = `${VERSION}-assets`;
 const PAGES_CACHE = `${VERSION}-pages`;
@@ -43,7 +43,8 @@ const NO_CACHE_HOSTS = [
   'api.mistral.ai',
   'openrouter.ai',
   'nominatim.openstreetmap.org',
-  'tile.openstreetmap.org'
+  'tile.openstreetmap.org',
+  'tiles.openfreemap.org'
 ];
 
 self.addEventListener('install', (event) => {

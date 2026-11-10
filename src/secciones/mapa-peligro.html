@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Klasplus - Zonas de Peligro</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"/>
     <link rel="stylesheet" href="../css/mapa-peligro.css">
+    <link rel="stylesheet" href="../css/mapa-3d.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- PWA -->
     <link rel="manifest" href="../../manifest.json">
@@ -33,8 +34,15 @@
         </button>
     </header>
 
-    <!-- Mapa -->
+    <!-- Mapa 3D -->
     <div id="map"></div>
+
+    <!-- Controles de vista 3D -->
+    <div class="map3d-controls">
+        <button class="map3d-btn active" id="btnModo3D" title="Cambiar 2D / 3D">3D</button>
+        <button class="map3d-btn" id="btnOrbitar" title="Girar alrededor de la institución"><i class="fa-solid fa-rotate"></i></button>
+        <button class="map3d-btn" id="btnCentrar" title="Volver a la institución"><i class="fa-solid fa-crosshairs"></i></button>
+    </div>
 
     <!-- Panel de zonas internas de la institución -->
     <div class="zonas-panel" id="zonasPanel">
@@ -68,7 +76,7 @@
             <div class="heat-labels">
                 <span>Peligroso</span><span>Seguro</span>
             </div>
-            <span class="heat-desc">Nivel de peligro por zona</span>
+            <span class="heat-desc">Nivel de peligro por zona (columnas más altas = más peligro)</span>
         </div>
     </div>
 
@@ -86,6 +94,27 @@
         </div>
     </div>
 
+    <!-- Visor de foto en grande + detección IA -->
+    <div class="foto-viewer" id="fotoViewer" style="display:none;">
+        <div class="foto-viewer-top">
+            <span class="foto-viewer-title" id="fotoViewerTitle"></span>
+            <button class="foto-viewer-close" id="fotoViewerClose" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="foto-viewer-stage" id="fotoViewerStage">
+            <div class="foto-viewer-frame" id="fotoViewerFrame">
+                <img id="fotoViewerImg" alt="Foto de la zona">
+                <svg class="foto-viewer-overlay" id="fotoViewerOverlay" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+                <div class="foto-viewer-tags" id="fotoViewerTags"></div>
+            </div>
+            <button class="foto-viewer-nav prev" id="fotoPrev" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="foto-viewer-nav next" id="fotoNext" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="foto-viewer-bottom">
+            <button class="foto-ia-btn" id="fotoIaBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> Detectar zonas con IA</button>
+            <div class="foto-ia-result" id="fotoIaResult"></div>
+        </div>
+    </div>
+
     <!-- Info card al tocar marcador de institución -->
     <div class="info-card" id="infoCard">
         <div class="info-card-header">
@@ -97,28 +126,26 @@
         <div class="info-stats" id="infoStats"></div>
     </div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <!-- MapLibre GL (mapa 3D) -->
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <!-- Helper de visión (OpenRouter) usado por la detección IA -->
+    <script src="../js/escuela-plano.js"></script>
+    <script src="../js/openrouter-config.js"></script>
     <script type="module">
-        import { db, collection, query, where, getDocs, doc, getDoc } from '../js/firebase-config.js';
+        import { db, collection, query, where, getDocs } from '../js/firebase-config.js';
 
         // Coordenadas de la institución protegida
         const ESCUELA_LAT = 3.4518;
         const ESCUELA_LNG = -76.5688;
 
-        // Posiciones relativas de zonas dentro de la institución
-        const ZONAS_POSICIONES = {
-            'baños':       { lat: ESCUELA_LAT + 0.00015, lng: ESCUELA_LNG - 0.00012, icon: 'fa-restroom', defaultScore: 3.5 },
-            'escaleras':   { lat: ESCUELA_LAT + 0.00008, lng: ESCUELA_LNG + 0.00015, icon: 'fa-stairs', defaultScore: 4.2 },
-            'patio':       { lat: ESCUELA_LAT - 0.00012, lng: ESCUELA_LNG + 0.00005, icon: 'fa-tree', defaultScore: 8.5 },
-            'laboratorio': { lat: ESCUELA_LAT + 0.00018, lng: ESCUELA_LNG + 0.00008, icon: 'fa-flask', defaultScore: 2.5 },
-            'cafeteria':   { lat: ESCUELA_LAT - 0.00008, lng: ESCUELA_LNG - 0.00018, icon: 'fa-utensils', defaultScore: 6.0 },
-            'pasillos':    { lat: ESCUELA_LAT + 0.00005, lng: ESCUELA_LNG - 0.00005, icon: 'fa-road', defaultScore: 7.2 },
-            'entrada':     { lat: ESCUELA_LAT - 0.00020, lng: ESCUELA_LNG + 0.00000, icon: 'fa-door-open', defaultScore: 9.0 },
-            'canchas':     { lat: ESCUELA_LAT - 0.00015, lng: ESCUELA_LNG + 0.00018, icon: 'fa-futbol', defaultScore: 5.5 },
-            'salones':     { lat: ESCUELA_LAT + 0.00010, lng: ESCUELA_LNG - 0.00020, icon: 'fa-chalkboard', defaultScore: 7.0 }
-        };
+        // Zonas ubicadas sobre el plano real de la escuela (calcado del
+        // satélite, ver escuela-plano.js): el mismo plano de la maqueta 3D.
+        const PLANO = window.ESCUELA_PLANO;
+        const ZONAS_POSICIONES = {};
+        Object.keys(PLANO.ZONAS).forEach(function(slug) {
+            var z = PLANO.ZONAS[slug], c = PLANO.centro(z), ll = PLANO.aLngLat(c.x, c.n);
+            ZONAS_POSICIONES[slug] = { lat: ll[1], lng: ll[0], icon: z.icon, defaultScore: z.defaultScore, def: z };
+        });
 
         const ZONAS_NOMBRES = {
             'baños': 'Baños', 'escaleras': 'Escaleras', 'patio': 'Patio Principal',
@@ -143,56 +170,127 @@
             return 'Crítico';
         }
 
-        // Inicializar mapa
-        const map = L.map('map', {
-            center: [ESCUELA_LAT, ESCUELA_LNG],
-            zoom: 19,
-            zoomControl: false,
-            maxZoom: 21
+        function escapeHTML(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+
+        // Polígono circular aproximado (radio en metros) para extrusiones 3D
+        function circuloGeo(lng, lat, radioM, pasos) {
+            pasos = pasos || 40;
+            var coords = [];
+            var dLat = radioM / 111320;
+            var dLng = radioM / (111320 * Math.cos(lat * Math.PI / 180));
+            for (var i = 0; i <= pasos; i++) {
+                var a = (i / pasos) * Math.PI * 2;
+                coords.push([lng + dLng * Math.cos(a), lat + dLat * Math.sin(a)]);
+            }
+            return coords;
+        }
+
+        // ================= MAPA 3D =================
+        const VISTA_3D = { center: [ESCUELA_LNG, ESCUELA_LAT - 0.00003], zoom: 19.2, pitch: 60, bearing: -20 };
+
+        const map = new maplibregl.Map({
+            container: 'map',
+            center: [ESCUELA_LNG, ESCUELA_LAT - 0.002],
+            zoom: 16,
+            pitch: 0,
+            bearing: 0,
+            maxZoom: 21,
+            maxPitch: 80,
+            attributionControl: { compact: true },
+            style: {
+                version: 8,
+                glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+                sky: {
+                    'sky-color': '#0b1a33',
+                    'horizon-color': '#3a5a8c',
+                    'fog-color': '#1b2b45',
+                    'sky-horizon-blend': 0.6,
+                    'horizon-fog-blend': 0.6,
+                    'fog-ground-blend': 0.85
+                },
+                sources: {
+                    // Mismo satélite que el mapa anterior
+                    satelite: {
+                        type: 'raster',
+                        tiles: ['0', '1', '2', '3'].map(function(s) {
+                            return 'https://mt' + s + '.google.com/vt/lyrs=s&x={x}&y={y}&z={z}';
+                        }),
+                        tileSize: 256,
+                        maxzoom: 20,
+                        attribution: '&copy; Google Maps'
+                    },
+                    // Nombres de calles de Google (las de CartoDB ahora piden API key
+                    // y salían con la marca "API KEY REQUIRED")
+                    etiquetas: {
+                        type: 'raster',
+                        tiles: ['0', '1', '2', '3'].map(function(s) {
+                            return 'https://mt' + s + '.google.com/vt/lyrs=h&x={x}&y={y}&z={z}';
+                        }),
+                        tileSize: 256,
+                        maxzoom: 20,
+                        attribution: '&copy; Google Maps'
+                    },
+                    // Edificios reales (OpenStreetMap) para levantar en 3D
+                    edificios: {
+                        type: 'vector',
+                        url: 'https://tiles.openfreemap.org/planet',
+                        attribution: '&copy; OpenFreeMap &copy; OpenStreetMap'
+                    }
+                },
+                layers: [
+                    { id: 'satelite', type: 'raster', source: 'satelite' },
+                    {
+                        id: 'edificios-3d',
+                        type: 'fill-extrusion',
+                        source: 'edificios',
+                        'source-layer': 'building',
+                        minzoom: 14,
+                        paint: {
+                            'fill-extrusion-color': [
+                                'interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 6],
+                                0, '#cfd8e3', 20, '#b0bfd1', 60, '#8fa3bd'
+                            ],
+                            'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 6],
+                            'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+                            'fill-extrusion-opacity': 0.55,
+                            'fill-extrusion-vertical-gradient': true
+                        }
+                    },
+                    { id: 'etiquetas', type: 'raster', source: 'etiquetas', paint: { 'raster-opacity': 0.85 } }
+                ]
+            }
         });
 
-        L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-            attribution: '&copy; Google Maps',
-            subdomains: ['0','1','2','3'],
-            maxZoom: 21,
-            maxNativeZoom: 20
-        }).addTo(map);
-
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; CartoDB',
-            subdomains: 'abcd',
-            maxZoom: 21,
-            opacity: 0.85
-        }).addTo(map);
-
-        L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-        // Círculo de la institución
-        L.circle([ESCUELA_LAT, ESCUELA_LNG], {
-            radius: 30,
-            color: '#FF5722',
-            fillColor: '#FF5722',
-            fillOpacity: 0.08,
-            weight: 1.5,
-            dashArray: '5 4',
-            interactive: false
-        }).addTo(map);
+        map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
 
         // Pin principal de la institución
-        const mainIcon = L.divIcon({
-            html: '<div class="map-pin pin-protected"><i class="fa-solid fa-shield-halved"></i></div>',
-            className: '',
-            iconSize: [40, 40],
-            iconAnchor: [20, 40]
-        });
-        L.marker([ESCUELA_LAT, ESCUELA_LNG], { icon: mainIcon }).addTo(map)
-            .bindTooltip('Escuela Ana Maria De Lloreda', { permanent: true, direction: 'top', offset: [0, -44], className: 'pin-label' });
+        (function() {
+            var el = document.createElement('div');
+            el.className = 'pin-wrap';
+            el.innerHTML = '<div class="pin-label pin-label-3d">Escuela Ana Maria De Lloreda</div>' +
+                           '<div class="map-pin pin-protected"><i class="fa-solid fa-shield-halved"></i></div>';
+            new maplibregl.Marker({ element: el, anchor: 'bottom' })
+                .setLngLat([ESCUELA_LNG, ESCUELA_LAT]).addTo(map);
+        })();
 
-        // Cargar zonas desde Firebase
+        // ================= DATOS =================
         const institucionId = localStorage.getItem('userInstitution') || 'default';
         let zonasData = {};
+        let mapaListo = false, datosListos = false;
 
+        function puntuacionDe(slug) {
+            var zona = zonasData[slug];
+            return zona && typeof zona.puntuacionPeligro === 'number' ? zona.puntuacionPeligro : ZONAS_POSICIONES[slug].defaultScore;
+        }
+
+        // Se dibuja de inmediato con valores por defecto y se actualiza
+        // cuando llegan los datos de Firebase (así el mapa nunca queda vacío).
         async function cargarZonas() {
+            renderZonasPanel();
             try {
                 const zonasRef = collection(db, 'zonas_institucion');
                 const q = query(zonasRef, where('institucionId', '==', institucionId));
@@ -203,75 +301,215 @@
                 });
             } catch(e) { console.error('Error cargando zonas:', e); }
 
-            renderZonasEnMapa();
+            datosListos = true;
             renderZonasPanel();
-            renderHeatmap();
+            if (mapaListo) renderZonasEnMapa();
         }
+
+        map.on('load', function() {
+            mapaListo = true;
+            // Animación de entrada: vuelo hacia la vista 3D
+            map.flyTo(Object.assign({}, VISTA_3D, { duration: 3200, essential: true }));
+            renderZonasEnMapa();
+        });
+
+        const marcadoresZona = {};
 
         function renderZonasEnMapa() {
-            Object.keys(ZONAS_POSICIONES).forEach(function(slug) {
-                const pos = ZONAS_POSICIONES[slug];
-                const zona = zonasData[slug];
-                const puntuacion = zona ? zona.puntuacionPeligro : pos.defaultScore;
-                const color = getColorPeligro(puntuacion);
-
-                // Círculo de calor por zona
-                L.circle([pos.lat, pos.lng], {
-                    radius: 8,
-                    color: color,
-                    fillColor: color,
-                    fillOpacity: 0.4,
-                    weight: 2,
-                    className: 'zona-heat-circle'
-                }).addTo(map);
-
-                // Marcador de zona
-                const iconHtml = '<div class="zona-pin" style="background:' + color + ';"><i class="fa-solid ' + pos.icon + '"></i></div>';
-                const icon = L.divIcon({
-                    html: iconHtml,
-                    className: '',
-                    iconSize: [28, 28],
-                    iconAnchor: [14, 14]
+            // Si ya existe el dibujo, solo se actualizan datos y colores
+            if (map.getSource('zonas-col')) {
+                var fc = construirZonasGeo();
+                map.getSource('zonas-col').setData(fc.columnas);
+                map.getSource('zonas-base').setData(fc.bases);
+                map.getSource('zonas-pt').setData(fc.puntos);
+                Object.keys(marcadoresZona).forEach(function(slug) {
+                    marcadoresZona[slug].style.background = getColorPeligro(puntuacionDe(slug));
                 });
-
-                L.marker([pos.lat, pos.lng], { icon: icon }).addTo(map)
-                    .on('click', function() { abrirZonaModal(slug); });
-            });
+                return;
+            }
+            dibujarZonasEnMapa();
         }
 
-        function renderHeatmap() {
-            var heatData = [];
+        function construirZonasGeo() {
+            var columnas = [], bases = [], puntos = [];
+            var altoAla = {};
+            PLANO.ALAS.forEach(function(a) { altoAla[a.id] = a.h; });
             Object.keys(ZONAS_POSICIONES).forEach(function(slug) {
                 var pos = ZONAS_POSICIONES[slug];
-                var zona = zonasData[slug];
-                var puntuacion = zona ? zona.puntuacionPeligro : pos.defaultScore;
-                var intensidad = (10 - puntuacion) / 10; // Invertido: menos puntuación = más calor
-                heatData.push([pos.lat, pos.lng, intensidad]);
+                var def = pos.def;
+                var p = puntuacionDe(slug);
+                var color = getColorPeligro(p);
+                var intensidad = (10 - p) / 10;
+                var factor = def.tipo === 'torre' ? 1.4 : def.tipo === 'bajo' ? 0.5 : 1;
+                var base = def.ala ? altoAla[def.ala] : 0;
+                var altura = def.ala ? base + (1.2 + intensidad * 9) * factor : 0.3 + intensidad * 0.8;
+                var props = { slug: slug, color: color, base: base, altura: altura, intensidad: intensidad };
+                var r = { x0: def.x0 + 0.4, x1: def.x1 - 0.4, n0: def.n0 + 0.4, n1: def.n1 - 0.4 };
+                columnas.push({ type: 'Feature', properties: props, geometry: { type: 'Polygon', coordinates: [PLANO.anilloGeo(r)] } });
+                bases.push({ type: 'Feature', properties: props, geometry: { type: 'Polygon', coordinates: [PLANO.anilloGeo(def)] } });
+                puntos.push({ type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [pos.lng, pos.lat] } });
             });
-
-            L.heatLayer(heatData, {
-                radius: 25,
-                blur: 20,
-                maxZoom: 21,
-                max: 1.0,
-                gradient: { 0.2: '#4CAF50', 0.4: '#FFEB3B', 0.6: '#FF9800', 0.8: '#FF5722', 1.0: '#D32F2F' }
-            }).addTo(map);
+            var FC = function(f) { return { type: 'FeatureCollection', features: f }; };
+            return { columnas: FC(columnas), bases: FC(bases), puntos: FC(puntos) };
         }
 
+        function dibujarZonasEnMapa() {
+            var columnas = [], bases = [], puntos = [];
+            var altoAla = {};
+            PLANO.ALAS.forEach(function(a) { altoAla[a.id] = a.h; });
+            Object.keys(ZONAS_POSICIONES).forEach(function(slug) {
+                var pos = ZONAS_POSICIONES[slug];
+                var def = pos.def;
+                var p = puntuacionDe(slug);
+                var color = getColorPeligro(p);
+                var intensidad = (10 - p) / 10;
+                // Igual que la maqueta: el volumen de la zona se levanta sobre su ala
+                var factor = def.tipo === 'torre' ? 1.4 : def.tipo === 'bajo' ? 0.5 : 1;
+                var base = def.ala ? altoAla[def.ala] : 0;
+                var altura = def.ala ? base + (1.2 + intensidad * 9) * factor : 0.3 + intensidad * 0.8;
+                var props = { slug: slug, color: color, base: base, altura: altura, intensidad: intensidad };
+                var r = { x0: def.x0 + 0.4, x1: def.x1 - 0.4, n0: def.n0 + 0.4, n1: def.n1 - 0.4 };
+                columnas.push({ type: 'Feature', properties: props, geometry: { type: 'Polygon', coordinates: [PLANO.anilloGeo(r)] } });
+                bases.push({ type: 'Feature', properties: props, geometry: { type: 'Polygon', coordinates: [PLANO.anilloGeo(def)] } });
+                puntos.push({ type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [pos.lng, pos.lat] } });
+
+                // Marcador con ícono sobre la zona
+                var el = document.createElement('div');
+                el.className = 'zona-pin zona-pin-3d';
+                el.style.background = color;
+                el.innerHTML = '<i class="fa-solid ' + pos.icon + '"></i>';
+                el.title = ZONAS_NOMBRES[slug];
+                marcadoresZona[slug] = el;
+                el.addEventListener('click', function(e) { e.stopPropagation(); abrirZonaModal(slug); });
+                new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([pos.lng, pos.lat]).addTo(map);
+            });
+
+            map.addSource('zonas-col', { type: 'geojson', data: { type: 'FeatureCollection', features: columnas } });
+            map.addSource('zonas-base', { type: 'geojson', data: { type: 'FeatureCollection', features: bases } });
+            map.addSource('zonas-pt', { type: 'geojson', data: { type: 'FeatureCollection', features: puntos } });
+            map.addSource('institucion', { type: 'geojson', data: {
+                type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: circuloGeo(ESCUELA_LNG, ESCUELA_LAT, 30, 64) }
+            } });
+
+            // Mapa de calor sobre el suelo
+            map.addLayer({
+                id: 'zonas-calor', type: 'heatmap', source: 'zonas-pt',
+                paint: {
+                    'heatmap-weight': ['get', 'intensidad'],
+                    'heatmap-intensity': 1,
+                    'heatmap-radius': ['interpolate', ['exponential', 2], ['zoom'], 16, 12, 19, 60, 21, 220],
+                    'heatmap-opacity': 0.55,
+                    'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'],
+                        0, 'rgba(0,0,0,0)', 0.2, '#4CAF50', 0.4, '#FFEB3B', 0.6, '#FF9800', 0.8, '#FF5722', 1, '#D32F2F']
+                }
+            }, 'edificios-3d');
+
+            // Perímetro de la institución
+            map.addLayer({
+                id: 'institucion-borde', type: 'line', source: 'institucion',
+                paint: { 'line-color': '#FF5722', 'line-width': 2, 'line-dasharray': [3, 2], 'line-opacity': 0.9 }
+            });
+
+            // Base luminosa de cada zona
+            map.addLayer({
+                id: 'zonas-base', type: 'fill', source: 'zonas-base',
+                paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.25, 'fill-outline-color': ['get', 'color'] }
+            });
+
+            // Edificio real de la escuela (alas calcadas del satélite)
+            map.addSource('escuela-alas', { type: 'geojson', data: { type: 'FeatureCollection', features: PLANO.ALAS.map(function(a) {
+                return { type: 'Feature', properties: { h: a.h }, geometry: { type: 'Polygon', coordinates: [PLANO.anilloGeo(a)] } };
+            }) } });
+            map.addLayer({
+                id: 'escuela-alas', type: 'fill-extrusion', source: 'escuela-alas',
+                paint: {
+                    'fill-extrusion-color': '#C3C9D1',
+                    'fill-extrusion-height': ['get', 'h'],
+                    'fill-extrusion-base': 0,
+                    'fill-extrusion-opacity': 0.92,
+                    'fill-extrusion-vertical-gradient': true
+                }
+            });
+
+            // Volúmenes de zona sobre su ala: más altos = más peligrosos
+            map.addLayer({
+                id: 'zonas-columnas', type: 'fill-extrusion', source: 'zonas-col',
+                paint: {
+                    'fill-extrusion-color': ['get', 'color'],
+                    'fill-extrusion-height': ['get', 'altura'],
+                    'fill-extrusion-base': ['get', 'base'],
+                    'fill-extrusion-opacity': 0.85,
+                    'fill-extrusion-vertical-gradient': true
+                }
+            });
+
+            ['zonas-columnas', 'zonas-base'].forEach(function(capa) {
+                map.on('click', capa, function(e) {
+                    if (e.features && e.features[0]) abrirZonaModal(e.features[0].properties.slug);
+                });
+                map.on('mouseenter', capa, function() { map.getCanvas().style.cursor = 'pointer'; });
+                map.on('mouseleave', capa, function() { map.getCanvas().style.cursor = ''; });
+            });
+        }
+
+        // ================= CONTROLES 3D =================
+        let modo3D = true;
+        let orbitando = false, orbitaRAF = null;
+
+        document.getElementById('btnModo3D').addEventListener('click', function() {
+            modo3D = !modo3D;
+            this.textContent = modo3D ? '3D' : '2D';
+            this.classList.toggle('active', modo3D);
+            map.easeTo({ pitch: modo3D ? VISTA_3D.pitch : 0, bearing: modo3D ? VISTA_3D.bearing : 0, duration: 900 });
+        });
+
+        function detenerOrbita() {
+            orbitando = false;
+            if (orbitaRAF) cancelAnimationFrame(orbitaRAF);
+            document.getElementById('btnOrbitar').classList.remove('active');
+        }
+        document.getElementById('btnOrbitar').addEventListener('click', function() {
+            if (orbitando) { detenerOrbita(); return; }
+            orbitando = true;
+            this.classList.add('active');
+            if (map.getPitch() < 30) map.easeTo({ pitch: VISTA_3D.pitch, duration: 600 });
+            var ultimo = performance.now();
+            (function girar(t) {
+                if (!orbitando) return;
+                var dt = t - ultimo; ultimo = t;
+                map.rotateTo((map.getBearing() + dt * 0.012) % 360, { duration: 0 });
+                orbitaRAF = requestAnimationFrame(girar);
+            })(ultimo);
+        });
+        map.on('mousedown', detenerOrbita);
+        map.on('touchstart', detenerOrbita);
+
+        document.getElementById('btnCentrar').addEventListener('click', function() {
+            detenerOrbita();
+            modo3D = true;
+            var b = document.getElementById('btnModo3D'); b.textContent = '3D'; b.classList.add('active');
+            map.flyTo(Object.assign({}, VISTA_3D, { duration: 1500 }));
+        });
+
+        // ================= PANEL Y MODAL =================
         function renderZonasPanel() {
             var grid = document.getElementById('zonasGrid');
             grid.innerHTML = '';
             Object.keys(ZONAS_POSICIONES).forEach(function(slug) {
                 var pos = ZONAS_POSICIONES[slug];
                 var zona = zonasData[slug];
-                var puntuacion = zona ? zona.puntuacionPeligro : pos.defaultScore;
+                var puntuacion = puntuacionDe(slug);
                 var color = getColorPeligro(puntuacion);
                 var label = getLabelPeligro(puntuacion);
-                var totalFotos = zona ? (zona.totalFotos || 0) : 0;
+                var totalFotos = zona ? (zona.totalFotos || (zona.fotos || []).length || 0) : 0;
 
                 var item = document.createElement('div');
                 item.className = 'zona-panel-item';
-                item.onclick = function() { abrirZonaModal(slug); };
+                item.onclick = function() {
+                    detenerOrbita();
+                    map.flyTo({ center: [pos.lng, pos.lat], zoom: 19.6, pitch: 60, duration: 1200 });
+                    abrirZonaModal(slug);
+                };
                 item.innerHTML = '<div class="zona-panel-icon" style="background:' + color + '20;color:' + color + ';"><i class="fa-solid ' + pos.icon + '"></i></div><div class="zona-panel-info"><span class="zona-panel-name">' + ZONAS_NOMBRES[slug] + '</span><span class="zona-panel-score" style="color:' + color + ';">' + puntuacion.toFixed(1) + '/10 - ' + label + '</span></div><div class="zona-panel-fotos-count">' + (totalFotos > 0 ? '<i class="fa-solid fa-camera"></i> ' + totalFotos : '') + '</div>';
                 grid.appendChild(item);
             });
@@ -279,8 +517,7 @@
 
         function abrirZonaModal(slug) {
             var zona = zonasData[slug];
-            var pos = ZONAS_POSICIONES[slug];
-            var puntuacion = zona ? zona.puntuacionPeligro : pos.defaultScore;
+            var puntuacion = puntuacionDe(slug);
             var color = getColorPeligro(puntuacion);
             var label = getLabelPeligro(puntuacion);
 
@@ -290,22 +527,22 @@
             header.style.borderColor = color;
             header.querySelector('i').style.color = color;
 
-            // Score
             document.getElementById('zonaModalScore').innerHTML = '<div class="zona-score-bar-wrap"><div class="zona-score-label"><span>Nivel de peligro</span><span style="color:' + color + ';font-weight:800;">' + puntuacion.toFixed(1) + '/10</span></div><div class="zona-score-bar"><div class="zona-score-fill" style="width:' + (puntuacion * 10) + '%;background:' + color + ';"></div></div><span class="zona-score-status" style="color:' + color + ';">' + label + '</span></div>';
 
-            // Fotos (hasta 3)
+            // Fotos (hasta 3) — al tocarlas se abren en grande
             var fotosContainer = document.getElementById('zonaModalFotos');
             fotosContainer.innerHTML = '';
             if (zona && zona.fotos && zona.fotos.length > 0) {
                 var fotosToShow = zona.fotos.slice(-3);
-                fotosContainer.innerHTML = '<h4><i class="fa-solid fa-camera"></i> Fotos reportadas (' + zona.fotos.length + ')</h4>';
+                fotosContainer.innerHTML = '<h4><i class="fa-solid fa-camera"></i> Fotos reportadas (' + zona.fotos.length + ') <small class="zona-fotos-hint">Toca una foto para verla en grande</small></h4>';
                 var fotosGrid = document.createElement('div');
                 fotosGrid.className = 'zona-fotos-grid';
-                fotosToShow.forEach(function(foto) {
+                fotosToShow.forEach(function(foto, i) {
                     var img = document.createElement('img');
                     img.src = foto.url;
                     img.alt = ZONAS_NOMBRES[slug];
                     img.className = 'zona-foto-thumb';
+                    img.addEventListener('click', function() { abrirVisor(fotosToShow, i, ZONAS_NOMBRES[slug]); });
                     fotosGrid.appendChild(img);
                 });
                 fotosContainer.appendChild(fotosGrid);
@@ -313,11 +550,10 @@
                 fotosContainer.innerHTML = '<div class="zona-sin-fotos"><i class="fa-solid fa-camera-retro"></i><span>Sin fotos reportadas aún</span></div>';
             }
 
-            // Recomendaciones
             var recoContainer = document.getElementById('zonaModalReco');
             if (zona && zona.recomendaciones && zona.recomendaciones.length > 0) {
                 var recoHTML = '<h4><i class="fa-solid fa-robot"></i> Recomendaciones IA</h4><ul>';
-                zona.recomendaciones.forEach(function(r) { recoHTML += '<li>' + r + '</li>'; });
+                zona.recomendaciones.forEach(function(r) { recoHTML += '<li>' + escapeHTML(r) + '</li>'; });
                 recoHTML += '</ul>';
                 recoContainer.innerHTML = recoHTML;
             } else {
@@ -327,7 +563,246 @@
             document.getElementById('zonaModal').style.display = 'flex';
         }
 
-        // Eventos UI
+        // ================= VISOR DE FOTOS + DETECCIÓN IA =================
+        const visor = {
+            fotos: [], idx: 0, nombre: '',
+            el: document.getElementById('fotoViewer'),
+            img: document.getElementById('fotoViewerImg'),
+            frame: document.getElementById('fotoViewerFrame'),
+            svg: document.getElementById('fotoViewerOverlay'),
+            tags: document.getElementById('fotoViewerTags'),
+            res: document.getElementById('fotoIaResult'),
+            btn: document.getElementById('fotoIaBtn'),
+            zoom: 1, tx: 0, ty: 0
+        };
+        const cacheDeteccion = {};
+        const COLORES_RIESGO = { alto: '#FF3B30', medio: '#FF9800', bajo: '#FFD60A' };
+
+        function claveFoto(url) {
+            // Hash corto para usar como llave (las fotos son base64 largas)
+            var h = 0, s = String(url);
+            for (var i = 0; i < s.length; i += Math.max(1, Math.floor(s.length / 4000))) h = (h * 31 + s.charCodeAt(i)) | 0;
+            return 'klas-ia-det-' + s.length + '-' + h;
+        }
+
+        function abrirVisor(fotos, idx, nombre) {
+            visor.fotos = fotos; visor.idx = idx; visor.nombre = nombre;
+            visor.el.style.display = 'flex';
+            mostrarFotoVisor();
+        }
+
+        function cerrarVisor() { visor.el.style.display = 'none'; }
+
+        function aplicarZoom() {
+            visor.frame.style.transform = 'translate(' + visor.tx + 'px,' + visor.ty + 'px) scale(' + visor.zoom + ')';
+        }
+        function resetZoom() { visor.zoom = 1; visor.tx = 0; visor.ty = 0; aplicarZoom(); }
+
+        function mostrarFotoVisor() {
+            var foto = visor.fotos[visor.idx];
+            visor.img.src = foto.url;
+            resetZoom();
+            var fecha = foto.fecha ? new Date(foto.fecha).toLocaleDateString('es-CO') : '';
+            document.getElementById('fotoViewerTitle').textContent = visor.nombre + ' · ' + (visor.idx + 1) + '/' + visor.fotos.length + (fecha ? ' · ' + fecha : '');
+            document.getElementById('fotoPrev').style.display = visor.fotos.length > 1 ? '' : 'none';
+            document.getElementById('fotoNext').style.display = visor.fotos.length > 1 ? '' : 'none';
+            limpiarDeteccion();
+
+            // Si ya se analizó antes, mostrar de inmediato
+            var clave = claveFoto(foto.url);
+            var previo = cacheDeteccion[clave];
+            if (!previo) { try { previo = JSON.parse(localStorage.getItem(clave) || 'null'); } catch(e) {} }
+            if (previo) { cacheDeteccion[clave] = previo; dibujarDeteccion(previo); }
+        }
+
+        function limpiarDeteccion() {
+            visor.svg.innerHTML = '';
+            visor.tags.innerHTML = '';
+            visor.res.innerHTML = '';
+            visor.btn.disabled = false;
+            visor.btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Detectar zonas con IA';
+        }
+
+        async function aBase64(url) {
+            if (/^data:/.test(url)) return url;
+            try {
+                const blob = await (await fetch(url)).blob();
+                return await new Promise(function(ok, fail) {
+                    var r = new FileReader(); r.onload = function() { ok(r.result); }; r.onerror = fail; r.readAsDataURL(blob);
+                });
+            } catch(e) { return url; } // sin CORS: el modelo intentará descargarla
+        }
+
+        function parsearDeteccion(texto) {
+            var m = String(texto).replace(/```json|```/gi, '').match(/\{[\s\S]*\}/);
+            if (!m) return null;
+            var json;
+            try { json = JSON.parse(m[0]); } catch(e) { return null; }
+            var lista = Array.isArray(json.zonas) ? json.zonas : [];
+            // Detectar escala (algunos modelos devuelven 0-1, 0-100 o 0-1000)
+            var maxV = 0;
+            lista.forEach(function(z) { ['x', 'y', 'ancho', 'alto'].forEach(function(k) { maxV = Math.max(maxV, Math.abs(Number(z[k]) || 0)); }); });
+            var escala = (maxV > 0 && maxV <= 1.01) ? 100 : (maxV > 100 ? 0.1 : 1);
+            var clamp = function(v, a, b) { return Math.min(b, Math.max(a, v)); };
+            return {
+                resumen: String(json.resumen || ''),
+                zonas: lista.map(function(z) {
+                    var riesgo = String(z.riesgo || 'medio').toLowerCase();
+                    if (!COLORES_RIESGO[riesgo]) riesgo = 'medio';
+                    return {
+                        etiqueta: String(z.etiqueta || 'Riesgo').slice(0, 60),
+                        riesgo: riesgo,
+                        x: clamp((Number(z.x) || 50 / escala) * escala, 0, 100),
+                        y: clamp((Number(z.y) || 50 / escala) * escala, 0, 100),
+                        w: clamp((Number(z.ancho) || 20 / escala) * escala, 6, 100),
+                        h: clamp((Number(z.alto) || 20 / escala) * escala, 6, 100)
+                    };
+                }).slice(0, 8)
+            };
+        }
+
+        function dibujarDeteccion(det) {
+            visor.svg.innerHTML = '';
+            visor.tags.innerHTML = '';
+            var ns = 'http://www.w3.org/2000/svg';
+            det.zonas.forEach(function(z, i) {
+                var color = COLORES_RIESGO[z.riesgo];
+                var e = document.createElementNS(ns, 'ellipse');
+                e.setAttribute('cx', z.x); e.setAttribute('cy', z.y);
+                e.setAttribute('rx', z.w / 2 + 2); e.setAttribute('ry', z.h / 2 + 2);
+                e.setAttribute('stroke', color);
+                e.setAttribute('class', 'det-circulo');
+                e.style.animationDelay = (i * 0.15) + 's';
+                visor.svg.appendChild(e);
+
+                var tag = document.createElement('div');
+                tag.className = 'det-tag';
+                tag.style.left = z.x + '%';
+                tag.style.top = Math.max(0, z.y - z.h / 2 - 2) + '%';
+                tag.style.background = color;
+                tag.innerHTML = '<b>' + (i + 1) + '</b> ' + escapeHTML(z.etiqueta);
+                visor.tags.appendChild(tag);
+            });
+
+            var html = '';
+            if (det.zonas.length === 0) {
+                html = '<div class="det-ok"><i class="fa-solid fa-circle-check"></i> La IA no detectó zonas de riesgo en esta foto.</div>';
+            } else {
+                html = '<ul class="det-lista">' + det.zonas.map(function(z, i) {
+                    return '<li><span class="det-num" style="background:' + COLORES_RIESGO[z.riesgo] + '">' + (i + 1) + '</span>' +
+                           escapeHTML(z.etiqueta) + ' <em>Riesgo ' + z.riesgo + '</em></li>';
+                }).join('') + '</ul>';
+            }
+            if (det.resumen) html = '<p class="det-resumen">' + escapeHTML(det.resumen) + '</p>' + html;
+            visor.res.innerHTML = html;
+            visor.btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Volver a analizar';
+        }
+
+        async function detectarConIA() {
+            if (typeof callOpenRouterWithFallback !== 'function') {
+                visor.res.innerHTML = '<div class="det-error">El servicio de IA no está disponible.</div>';
+                return;
+            }
+            var foto = visor.fotos[visor.idx];
+            var idxActual = visor.idx;
+            visor.btn.disabled = true;
+            visor.btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analizando con IA...';
+            visor.svg.innerHTML = ''; visor.tags.innerHTML = '';
+            visor.res.innerHTML = '';
+            visor.frame.classList.add('escaneando');
+            var exito = false;
+
+            try {
+                var imagen = await aBase64(foto.url);
+                var mensajes = [
+                    { role: 'system', content: 'Eres un detector visual de riesgos para estudiantes en instituciones educativas (zona: ' + visor.nombre + '). Localiza en la imagen cada zona u objeto peligroso (cables expuestos, pisos mojados, escalones rotos, vidrios, objetos cortantes, desorden, falta de señalización, superficies resbaladizas, etc). Responde SOLO con JSON válido, sin texto extra, con este formato exacto: {"resumen":"frase corta en español","zonas":[{"etiqueta":"nombre corto en español","riesgo":"alto|medio|bajo","x":0,"y":0,"ancho":0,"alto":0}]}. x e y son el CENTRO de la zona en porcentaje (0-100) del ancho y alto de la imagen, medido desde la esquina superior izquierda; ancho y alto son el tamaño de la zona en porcentaje (0-100). Máximo 6 zonas. Si no hay riesgos devuelve "zonas":[]' },
+                    { role: 'user', content: [
+                        { type: 'text', text: 'Detecta y ubica las zonas de riesgo en esta foto. Solo JSON.' },
+                        { type: 'image_url', image_url: { url: imagen } }
+                    ] }
+                ];
+                var respuesta = await callOpenRouterWithFallback(mensajes);
+                var det = parsearDeteccion(respuesta);
+                if (!det) throw new Error('Respuesta no válida de la IA');
+                var clave = claveFoto(foto.url);
+                cacheDeteccion[clave] = det;
+                try { localStorage.setItem(clave, JSON.stringify(det)); } catch(e) {}
+                exito = true;
+                if (visor.idx === idxActual && visor.el.style.display !== 'none') dibujarDeteccion(det);
+            } catch(e) {
+                console.error('Detección IA:', e);
+                visor.res.innerHTML = '<div class="det-error"><i class="fa-solid fa-triangle-exclamation"></i> No se pudo analizar la foto. Intenta de nuevo.</div>';
+            } finally {
+                visor.btn.disabled = false;
+                visor.frame.classList.remove('escaneando');
+                if (!exito) visor.btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Detectar zonas con IA';
+            }
+        }
+
+        visor.btn.addEventListener('click', detectarConIA);
+        document.getElementById('fotoViewerClose').addEventListener('click', cerrarVisor);
+        document.getElementById('fotoPrev').addEventListener('click', function() {
+            visor.idx = (visor.idx - 1 + visor.fotos.length) % visor.fotos.length; mostrarFotoVisor();
+        });
+        document.getElementById('fotoNext').addEventListener('click', function() {
+            visor.idx = (visor.idx + 1) % visor.fotos.length; mostrarFotoVisor();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (visor.el.style.display === 'none') return;
+            if (e.key === 'Escape') cerrarVisor();
+            if (e.key === 'ArrowLeft') document.getElementById('fotoPrev').click();
+            if (e.key === 'ArrowRight') document.getElementById('fotoNext').click();
+        });
+
+        // Zoom: doble toque / doble clic, rueda del mouse, pellizco y arrastre
+        (function() {
+            var stage = document.getElementById('fotoViewerStage');
+            var puntos = {}, distIni = 0, zoomIni = 1, arrastre = null, ultimoTap = 0;
+            function alternarZoom() { if (visor.zoom > 1) resetZoom(); else { visor.zoom = 2.5; aplicarZoom(); } }
+            stage.addEventListener('dblclick', alternarZoom);
+            stage.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                visor.zoom = Math.min(5, Math.max(1, visor.zoom * (e.deltaY < 0 ? 1.15 : 0.87)));
+                if (visor.zoom === 1) { visor.tx = 0; visor.ty = 0; }
+                aplicarZoom();
+            }, { passive: false });
+            stage.addEventListener('pointerdown', function(e) {
+                if (e.target.closest('button')) return;
+                puntos[e.pointerId] = { x: e.clientX, y: e.clientY };
+                var ids = Object.keys(puntos);
+                if (ids.length === 2) {
+                    var a = puntos[ids[0]], b = puntos[ids[1]];
+                    distIni = Math.hypot(a.x - b.x, a.y - b.y); zoomIni = visor.zoom;
+                } else if (ids.length === 1) {
+                    var ahora = Date.now();
+                    if (e.pointerType === 'touch' && ahora - ultimoTap < 300) alternarZoom();
+                    ultimoTap = ahora;
+                    arrastre = { x: e.clientX - visor.tx, y: e.clientY - visor.ty };
+                }
+            });
+            stage.addEventListener('pointermove', function(e) {
+                if (!puntos[e.pointerId]) return;
+                puntos[e.pointerId] = { x: e.clientX, y: e.clientY };
+                var ids = Object.keys(puntos);
+                if (ids.length === 2 && distIni) {
+                    var a = puntos[ids[0]], b = puntos[ids[1]];
+                    visor.zoom = Math.min(5, Math.max(1, zoomIni * Math.hypot(a.x - b.x, a.y - b.y) / distIni));
+                    aplicarZoom();
+                } else if (ids.length === 1 && arrastre && visor.zoom > 1) {
+                    visor.tx = e.clientX - arrastre.x; visor.ty = e.clientY - arrastre.y; aplicarZoom();
+                }
+            });
+            function soltar(e) {
+                delete puntos[e.pointerId];
+                if (Object.keys(puntos).length < 2) distIni = 0;
+                if (Object.keys(puntos).length === 0) arrastre = null;
+                if (visor.zoom === 1) { visor.tx = 0; visor.ty = 0; aplicarZoom(); }
+            }
+            stage.addEventListener('pointerup', soltar);
+            stage.addEventListener('pointercancel', soltar);
+        })();
+
+        // ================= EVENTOS UI =================
         document.getElementById('zonaModalClose').addEventListener('click', function() {
             document.getElementById('zonaModal').style.display = 'none';
         });
